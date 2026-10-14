@@ -395,82 +395,12 @@ html.scroll-locked {
   100% { transform: translate(0, 0); }
 }
 
-/* ───────────────────────── Cursor ───────────────────────── */
-html.has-cursor,
-html.has-cursor a,
-html.has-cursor button,
-html.has-cursor [data-cursor] {
-  cursor: none;
+/* ───────────────────────── Custom Cursor ───────────────────────── */
+html, body {
+  cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20d%3D%22M3%203L27%2012L16%2016L12%2027Z%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.6%22%20stroke-linejoin%3D%22round%22%20fill%3D%22%23111111%22%2F%3E%3C%2Fsvg%3E") 3 3, auto;
 }
-.cursor {
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 100;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-html.cursor-on .cursor {
-  opacity: 1;
-}
-.cursor-dot {
-  width: 6px;
-  height: 6px;
-  margin: -3px 0 0 -3px;
-  border-radius: 999px;
-  background: var(--color-bone);
-  mix-blend-mode: difference;
-}
-.cursor-ring {
-  width: 44px;
-  height: 44px;
-  margin: -22px 0 0 -22px;
-}
-.cursor-ring .ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 999px;
-  border: 1px solid rgba(236, 232, 225, 0.45);
-  transition:
-    transform 0.6s var(--ease-expo),
-    background-color 0.4s,
-    border-color 0.4s;
-}
-.cursor-ring .label {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font: 500 9px/1 var(--font-mono);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--color-ink);
-  opacity: 0;
-  transform: scale(0.6);
-  transition:
-    opacity 0.3s,
-    transform 0.5s var(--ease-expo);
-}
-html.cursor-link .cursor-ring .ring {
-  transform: scale(1.55);
-  background: rgba(236, 232, 225, 0.08);
-  border-color: rgba(236, 232, 225, 0.2);
-}
-html.cursor-drag .cursor-ring .ring {
-  transform: scale(1.9);
-  background: var(--color-bone);
-  border-color: var(--color-bone);
-}
-html.cursor-drag .cursor-ring .label {
-  opacity: 1;
-  transform: scale(1);
-}
-html.cursor-down .cursor-ring .ring {
-  transform: scale(0.8);
-}
-html.cursor-drag.cursor-down .cursor-ring .ring {
-  transform: scale(1.6);
+a, button, [role="button"] {
+  cursor: pointer; /* الروابط والأزرار تفضل بإيد */
 }
 
 /* ───────────────────────── Navigation ───────────────────────── */
@@ -724,18 +654,55 @@ html.cursor-drag.cursor-down .cursor-ring .ring {
 
 /* ───────────────────────── Scene 8 · telemetry ───────────────────────── */
 .tl-bar {
-  --fill: clamp(0, calc(var(--d, 0) * 8 - var(--i)), 1);
+  position: relative;
+  height: 100%;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.tl-bar-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
 }
 .tl-bar-fill {
-  transform-origin: 50% 100%;
-  transform: scaleY(calc(var(--fill) * var(--h)));
+  width: 100%;
+  height: calc(var(--h, 0%) * var(--p, 0));
+  border-radius: 6px 6px 0 0;
+  transition: height 0.12s linear;
+  will-change: height;
+  position: relative;
+  box-shadow: 0 -2px 14px rgba(255, 138, 61, 0.22);
 }
 .tl-bar-cap {
-  bottom: calc(var(--fill) * var(--h) * 100%);
-  opacity: clamp(0, calc(var(--fill) * 4), 1);
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--h, 0%) * var(--p, 0) + 6px);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--color-bone);
+  transition: bottom 0.12s linear, opacity 0.2s ease;
+  will-change: bottom;
+  opacity: clamp(0.35, calc(var(--p, 0) * 4), 1);
+  pointer-events: none;
 }
-.tl-marker {
-  left: calc(var(--d, 0) * (100% - 2.5rem));
+@media (min-width: 640px) {
+  .tl-bar-cap {
+    font-size: 9.5px;
+    bottom: calc(var(--h, 0%) * var(--p, 0) + 8px);
+  }
+}
+@media (min-width: 768px) {
+  .tl-bar-cap {
+    font-size: 11px;
+    bottom: calc(var(--h, 0%) * var(--p, 0) + 10px);
+  }
 }
 .caret {
   display: inline-block;

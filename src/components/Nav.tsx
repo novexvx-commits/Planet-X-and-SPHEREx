@@ -4,8 +4,9 @@ import { cn } from "../utils/cn";
 import { Arrow, LogoMark, Magnetic, dv } from "./ui";
 
 export const NAV_LINKS = [
-  { href: "#voyage", label: "Voyage", n: "02" },
-  { href: "#meridian", label: "Meridian", n: "03" },
+  { href: "#spacewalk", label: "Spacewalk", n: "02" },
+  { href: "#voyage", label: "Voyage", n: "03" },
+  { href: "#meridian", label: "Meridian", n: "04" },
   { href: "#log", label: "Mission Log", n: "07" },
   { href: "#telemetry", label: "Telemetry", n: "08" },
   { href: "#vision", label: "Vision", n: "10" },

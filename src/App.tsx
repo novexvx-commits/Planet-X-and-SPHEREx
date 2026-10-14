@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { initEngine, setScrollLocked } from "./lib/engine";
 import Loader from "./components/Loader";
-import Cursor from "./components/Cursor";
+import FluidCursor from "./components/FluidCursor";
 import Nav from "./components/Nav";
 import SceneIndex from "./components/SceneIndex";
 import Hero from "./sections/Hero";
 import Prologue from "./sections/Prologue";
+import Spacewalk from "./sections/Spacewalk";
 import Voyage from "./sections/Voyage";
 import Spotlight from "./sections/Spotlight";
 import ZigZag from "./sections/ZigZag";
@@ -50,13 +51,14 @@ export default function App() {
   return (
     <>
       <Loader onComplete={() => setReady(true)} />
-      <Cursor />
+      <FluidCursor />
       <div className="grain" aria-hidden="true" />
       <Nav ready={ready} />
       <SceneIndex />
       <main className="page">
         <Hero ready={ready} />
         <Prologue />
+        <Spacewalk />
         <Voyage />
         <Spotlight />
         <ZigZag />

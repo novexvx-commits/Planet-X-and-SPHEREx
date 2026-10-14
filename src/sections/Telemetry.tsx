@@ -11,8 +11,7 @@ const ALTS = [1e7, 1e6, 1e5, 1e4, 1e3, 1e2, 1e1, 1];
 const ALT_LABELS = ["10⁴ km", "10³ km", "100 km", "10 km", "1 km", "100 m", "10 m", "1 m"];
 const gamma = (h: number) => Math.sqrt((RS + h) / h);
 const G = ALTS.map(gamma);
-const LOGMAX = Math.log10(G[G.length - 1]);
-const HEIGHTS = G.map((g) => Math.max(0.035, Math.log10(g) / LOGMAX));
+const HEIGHTS = G.map((_, i) => Number((0.20 + 0.80 * Math.pow(i / (G.length - 1), 1.25)).toFixed(3)));
 
 const MESSAGES: [number, string][] = [
   [0, "Lantern released from Meridian. Descent nominal."],
@@ -65,22 +64,28 @@ export default function Telemetry() {
   useScrollProgress(
     ref,
     (p, el) => {
-      const d = clamp((p - 0.05) / 0.85);
-      el.style.setProperty("--d", d.toFixed(4));
-      const h = Math.pow(10, 8 - 8 * d);
+      // app.scrollytelling.ai style progress: chart fills up smoothly as user scrolls
+      // Progress completes at ~0.80 scroll, holding full height before section unpins
+      const progress = clamp((p - 0.04) / 0.78);
+      el.style.setProperty("--p", progress.toFixed(4));
+      el.style.setProperty("--d", progress.toFixed(4));
+
+      const h = Math.pow(10, 8 - 8 * progress);
       const g = gamma(h);
       if (altRef.current) altRef.current.textContent = fmtAlt(h);
       if (gamRef.current) gamRef.current.textContent = fmtGamma(g);
       if (homeRef.current) homeRef.current.textContent = fmtHome(g);
       if (zRef.current) zRef.current.textContent = (g - 1).toFixed(g - 1 < 1 ? 4 : g - 1 < 10 ? 3 : 1);
+
       capRefs.current.forEach((cap, i) => {
         if (!cap) return;
-        const f = clamp(d * 8 - i);
-        cap.textContent = fmtGamma(1 + (G[i] - 1) * f);
+        const curGamma = 1 + (G[i] - 1) * progress;
+        cap.textContent = fmtGamma(curGamma);
       });
+
       let m = 0;
       MESSAGES.forEach(([th], i) => {
-        if (d >= th) m = i;
+        if (progress >= th) m = i;
       });
       const msg = msgRef.current;
       if (msg && m !== lastMsg.current) {
@@ -95,7 +100,7 @@ export default function Telemetry() {
   );
 
   return (
-    <section id="telemetry" ref={ref} className="relative h-[400vh]" style={dv({ "--d": 0 })}>
+    <section id="telemetry" ref={ref} className="relative h-[400vh]" style={dv({ "--p": 0, "--d": 0 })}>
       <div className="sticky top-0 flex h-screen items-center overflow-hidden">
         <div aria-hidden="true" className="grid-lines pointer-events-none absolute inset-0" />
         <div aria-hidden="true" className="pointer-events-none absolute -right-[10vw] top-[8%] h-[60vw] w-[60vw] rounded-full bg-[radial-gradient(circle,rgba(255,138,61,0.12),transparent_60%)]" />
@@ -133,36 +138,34 @@ export default function Telemetry() {
               </div>
 
               <div className="relative mt-6 h-[30vh] md:mt-8 md:h-[44vh]">
-                {[
-                  [0, "1×"],
-                  [1 / LOGMAX, "10×"],
-                  [2 / LOGMAX, "100×"],
-                ].map(([pos, label]) => (
-                  <div key={label as string} className="absolute inset-x-0 border-t border-dashed border-white/10" style={{ bottom: `${(pos as number) * 100}%` }}>
-                    <span className="absolute -top-2 right-0 font-mono text-[9px] text-bone/35">{label}</span>
-                  </div>
-                ))}
-                <div aria-hidden="true" className="tl-marker pointer-events-none absolute inset-y-0 z-10 w-px bg-linear-to-b from-transparent via-ember/80 to-transparent">
-                  <span className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-ember shadow-[0_0_12px_#ff8a3d]" />
-                </div>
-                <div className="relative flex h-full items-end gap-2 pr-10 md:gap-4">
+                <div className="relative flex h-full items-end gap-2 md:gap-4">
                   {G.map((_, i) => (
-                    <div key={i} className="tl-bar relative h-full flex-1" style={dv({ "--i": i, "--h": HEIGHTS[i] })}>
-                      <div className="absolute inset-0 rounded-t-md border border-white/[0.05] bg-white/[0.02] md:rounded-t-lg" />
-                      <div className="tl-bar-fill absolute inset-0 rounded-t-md md:rounded-t-lg" style={{ background: barColor(i) }} />
-                      <span
-                        ref={(el) => {
-                          capRefs.current[i] = el;
-                        }}
-                        className="tl-bar-cap absolute left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap font-mono text-[8px] tabular-nums text-bone sm:text-[9.5px] md:text-[11px]"
-                      >
-                        ×1.000
-                      </span>
+                    <div
+                      key={i}
+                      className="tl-bar relative h-full flex-1"
+                      style={dv({
+                        "--i": i,
+                        "--h": `${(HEIGHTS[i] * 100).toFixed(2)}%`,
+                        "--val": HEIGHTS[i],
+                      })}
+                    >
+                      <div className="tl-bar-track">
+                        <div className="pointer-events-none absolute inset-0 rounded-t-md border border-white/[0.05] bg-white/[0.02] md:rounded-t-lg" />
+                        <div className="tl-bar-fill" style={{ background: barColor(i) }} />
+                        <span
+                          ref={(el) => {
+                            capRefs.current[i] = el;
+                          }}
+                          className="tl-bar-cap"
+                        >
+                          ×1.000
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="mt-3 flex gap-2 pr-10 md:gap-4">
+              <div className="mt-3 flex gap-2 md:gap-4">
                 {ALT_LABELS.map((l) => (
                   <span key={l} className="flex-1 text-center font-mono text-[7.5px] text-bone/40 sm:text-[9px] md:text-[10px]">
                     {l}
