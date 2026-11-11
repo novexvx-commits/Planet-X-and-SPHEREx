@@ -230,12 +230,12 @@ export default function ObservationTimelineComparator({ targetId, targetName, ob
   };
 
   return (
-    <div className="h-full w-full flex flex-col md:flex-row gap-4 p-2 overflow-hidden select-none">
+    <div className="w-full flex flex-col xl:flex-row gap-4 p-1 sm:p-2">
       
       {/* ═════════════════════════════════════════════════════════════════════
           LEFT AREA (HERO VIEWPORT & TIMELINE - 68% WIDTH)
       ═════════════════════════════════════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col justify-between rounded-2xl border border-slate-800 bg-[#0d1322] p-4 min-h-0 overflow-hidden shadow-xl">
+      <div className="flex-1 flex flex-col justify-between rounded-2xl border border-slate-800 bg-[#0d1322] p-4 shadow-xl">
         
         {/* TOP BAR: Clean Mode Toggle & Color Style */}
         <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-800/80 shrink-0">
@@ -465,7 +465,7 @@ export default function ObservationTimelineComparator({ targetId, targetName, ob
       {/* ═════════════════════════════════════════════════════════════════════
           RIGHT AREA (FRIENDLY INSIGHTS & EXPLANATIONS - 32% WIDTH)
       ═════════════════════════════════════════════════════════════════════ */}
-      <div className="w-full md:w-80 lg:w-96 flex flex-col justify-between rounded-2xl border border-slate-800 bg-[#0d1322] p-4 min-h-0 overflow-y-auto shadow-xl space-y-3">
+      <div className="w-full xl:w-96 flex flex-col justify-between rounded-2xl border border-slate-800 bg-[#0d1322] p-4 shadow-xl space-y-3 shrink-0">
         
         {/* SECTION 1: Target Identity & Clear Plain-Language Story */}
         <div className="space-y-2">
