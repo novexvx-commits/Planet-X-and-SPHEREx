@@ -1,11 +1,11 @@
-# NASA SPHEREx 2026 Space Apps Challenge: Nocturne SPHEREx Exploration Platform
+# MARSAD: NASA SPHEREx 2026 Space Apps Challenge Exploration Platform
 
 [![NASA Space Apps Challenge](https://img.shields.io/badge/NASA%20Space%20Apps-2026%20Challenge-orange.svg)](https://www.spaceappschallenge.org/)
 [![SPHEREx Mission](https://img.shields.io/badge/Mission-NASA%20SPHEREx-blue.svg)](https://spherex.caltech.edu/)
 [![IRSA Archive](https://img.shields.io/badge/Archive-NASA%2FIPAC%20IRSA-red.svg)](https://irsa.ipac.caltech.edu/Missions/spherex.html)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-A complete, science-driven, production-quality web platform built for the **2026 NASA Space Apps Challenge** to explore time-dependent astronomical observations from NASA's **SPHEREx** (Spectro-Photometer for the History of the Universe, Epoch of Reionization, and Ices Explorer) mission.
+**MARSAD** is a complete, science-driven, production-quality web platform built for the **2026 NASA Space Apps Challenge** to explore time-dependent astronomical observations from NASA's **SPHEREx** (Spectro-Photometer for the History of the Universe, Epoch of Reionization, and Ices Explorer) mission.
 
 SPHEREx maps the entire celestial sphere every six months in **102 near-infrared spectral bands** (0.75 µm to 5.00 µm). This platform enables researchers, educators, and the public to navigate the infrared sky, track moving objects, detect proper motion, monitor variable stars, analyze spectral features, and conduct registered difference imaging across observation epochs.
 
@@ -76,8 +76,11 @@ cinematic-scrollytelling-web-experience/
 │       ├── Hero.tsx                       # WebGL 3D black hole & starfield
 │       ├── Prologue.tsx                   # Narrative mission prologue
 │       ├── Spacewalk.tsx                  # Three.js 3D space walk & hyperspace warp
-│       ├── Telemetry.tsx                  # Time-dilation & mission telemetry
-│       └── MissionLog.tsx                 # Historical mission milestones
+│       ├── Telemetry.tsx                  # Cosmic Dawn lookback depth & redshift mapping
+│       ├── Systems.tsx                    # SPHEREx telescope & cryogenic subsystems
+│       ├── Vision.tsx                     # 3 Grand questions of cosmic science
+│       ├── MissionLog.tsx                 # SPHEREx survey cadence & mission chronology
+│       └── Finale.tsx                     # Open science & community research platform
 ├── dist/                                  # Production single-file bundle
 ├── package.json                           # Scripts and dependencies
 └── vite.config.ts                         # Vite configuration with /api proxy
@@ -96,8 +99,8 @@ cinematic-scrollytelling-web-experience/
 
 ```bash
 # Clone the repository and install dependencies
-git clone https://github.com/your-org/cinematic-scrollytelling-web-experience.git
-cd cinematic-scrollytelling-web-experience
+git clone https://github.com/novexvx-commits/nasa_2.git
+cd nasa_2
 npm install
 ```
 
