@@ -232,7 +232,7 @@ export default function SpherexHub() {
   }, [tourStep]);
 
   return (
-    <section id="spherex-hub" className="min-h-screen w-full flex flex-col bg-[#070b14] text-slate-100">
+    <section id="spherex-hub" className="h-full w-full flex flex-col bg-[#070b14] text-slate-100 overflow-hidden select-none">
       {/* ── UNIFIED MINIMALIST TOP BAR (Height: 52px) ── */}
       <header className="h-13 shrink-0 border-b border-slate-800/80 bg-[#0b1120] px-4 flex items-center justify-between gap-4 z-30">
         
@@ -358,8 +358,8 @@ export default function SpherexHub() {
         </div>
       )}
 
-      {/* ── WORKSTATION VIEWPORT (ROW 2, flex-1) ── */}
-      <main className="flex-1 p-3 sm:p-4 relative">
+      {/* ── WORKSTATION VIEWPORT (ROW 3, flex-1, overflow-hidden) ── */}
+      <main className="flex-1 min-h-0 overflow-hidden p-3 relative">
         {activeTab === "timeline" && (
           <ObservationTimelineComparator
             targetId={selectedTargetId}
