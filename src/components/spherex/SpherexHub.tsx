@@ -151,6 +151,7 @@ export default function SpherexHub() {
               ].map((t) => (
                 <button
                   key={t.id}
+                  data-target-id={t.id}
                   onClick={() => setSelectedTargetId(t.id)}
                   className={cn(
                     "flex items-center gap-2 rounded-lg px-3 py-1.5 font-mono text-xs transition-all",
@@ -251,6 +252,7 @@ export default function SpherexHub() {
           ].map((tab) => (
             <button
               key={tab.key}
+              data-tab={tab.key}
               onClick={() => setActiveTab(tab.key as TabKey)}
               className={cn(
                 "flex items-center gap-2 border-b-2 px-5 py-3.5 transition-colors whitespace-nowrap",

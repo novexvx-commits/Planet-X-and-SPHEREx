@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { initEngine, setScrollLocked } from "./lib/engine";
+import { RouterProvider, useRouter } from "./lib/router";
 import Loader from "./components/Loader";
 import FluidCursor from "./components/FluidCursor";
 import Nav from "./components/Nav";
@@ -18,8 +19,9 @@ import Systems from "./sections/Systems";
 import Vision from "./sections/Vision";
 import Finale from "./sections/Finale";
 
-export default function App() {
+function AppContent() {
   const [ready, setReady] = useState(false);
+  const { route } = useRouter();
 
   // Boot the scroll engine; hold the page at the top while the loader runs.
   useEffect(() => {
@@ -49,6 +51,17 @@ export default function App() {
     return () => io.disconnect();
   }, [ready]);
 
+  // When switching routes via client navigation, ensure visible elements are in
+  useEffect(() => {
+    const els = document.querySelectorAll<HTMLElement>("[data-reveal]");
+    els.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight) {
+        el.classList.add("is-in");
+      }
+    });
+  }, [route]);
+
   return (
     <>
       <Loader onComplete={() => setReady(true)} />
@@ -72,5 +85,13 @@ export default function App() {
         <Finale />
       </main>
     </>
+  );
+}
+
+export default function App() {
+  return (
+    <RouterProvider>
+      <AppContent />
+    </RouterProvider>
   );
 }

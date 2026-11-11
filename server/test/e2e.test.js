@@ -102,11 +102,16 @@ async function runE2ETests() {
       const jsonMost = await resMost.json();
       assert(jsonMost.ephemerides && jsonMost.ephemerides.length > 0, `MOST returns orbital ephemerides`);
 
-      // 12. Static Frontend Single-Page Application Serving
+      // 12. Static Frontend Single-Page Application Serving (both / and /experience)
       const resFrontend = await fetch(`http://localhost:${PORT}/`);
       assert(resFrontend.status === 200, `GET / (frontend bundle) returned 200`);
       const frontendHtml = await resFrontend.text();
       assert(frontendHtml.includes('SPHEREx') || frontendHtml.includes('html'), `Frontend HTML delivered successfully`);
+
+      const resExperience = await fetch(`http://localhost:${PORT}/experience`);
+      assert(resExperience.status === 200, `GET /experience (dedicated experience route) returned 200`);
+      const experienceHtml = await resExperience.text();
+      assert(experienceHtml.includes('SPHEREx') || experienceHtml.includes('html'), `Dedicated /experience route delivers SPA bundle`);
 
       console.log(`\n========================================`);
       console.log(`E2E TEST SUMMARY: ${passed} PASSED, ${failed} FAILED`);

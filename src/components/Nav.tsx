@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { scrollToTarget, setScrollLocked, subscribe } from "../lib/engine";
+import { useRouter } from "../lib/router";
 import { cn } from "../utils/cn";
 import { Arrow, LogoMark, Magnetic, dv } from "./ui";
 
@@ -13,6 +14,7 @@ export const NAV_LINKS = [
 ];
 
 export default function Nav({ ready }: { ready: boolean }) {
+  const { isExperience, navigate } = useRouter();
   const headerRef = useRef<HTMLElement>(null);
   const progRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -61,7 +63,19 @@ export default function Nav({ ready }: { ready: boolean }) {
       <header ref={headerRef} className={cn("site-header fixed inset-x-0 top-0 z-50", ready && "is-ready", open && "menu-open")}>
         <div className="nav-bg absolute inset-0" />
         <div className="shell relative flex h-[72px] items-center justify-between md:h-20">
-          <a href="#top" onClick={(e) => go(e, "#top")} className="flex items-center gap-3" aria-label="MARSAD SPHEREx — back to beginning">
+          <a
+            href={isExperience ? "/" : "#top"}
+            onClick={(e) => {
+              e.preventDefault();
+              if (isExperience) {
+                navigate("/");
+              } else {
+                go(e, "#top");
+              }
+            }}
+            className="flex items-center gap-3"
+            aria-label="MARSAD SPHEREx — home"
+          >
             <LogoMark className="h-7 w-7 text-ember" />
             <span className="font-mono text-[11px] uppercase tracking-[0.42em] text-bone">
               MARSAD <span className="text-ember font-semibold">SPHEREx</span>
@@ -84,12 +98,46 @@ export default function Nav({ ready }: { ready: boolean }) {
           </nav>
 
           <div className="flex items-center gap-3">
-            <Magnetic className="hidden sm:inline-block">
-              <a href="#spherex-hub" onClick={(e) => go(e, "#spherex-hub")} className="btn-ghost">
-                <span className="h-1.5 w-1.5 rounded-full bg-ember shadow-[0_0_10px_#ff8a3d]" />
-                Explore SPHEREx Hub
-              </a>
-            </Magnetic>
+            {isExperience ? (
+              <>
+                <span className="hidden items-center gap-1.5 rounded-full border border-ember/40 bg-ember/15 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.2em] text-ember-soft sm:inline-flex">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-ember" />
+                  Experience Mode
+                </span>
+                <Magnetic>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/")}
+                    className="btn-ghost group"
+                    aria-label="Return to Homepage"
+                  >
+                    <Arrow className="h-4 w-4 transition-transform group-hover:-translate-x-1" dir="left" />
+                    Return to Home
+                  </button>
+                </Magnetic>
+              </>
+            ) : (
+              <>
+                <Magnetic className="hidden md:inline-block">
+                  <a href="#spherex-hub" onClick={(e) => go(e, "#spherex-hub")} className="btn-ghost">
+                    <span className="h-1.5 w-1.5 rounded-full bg-ember shadow-[0_0_10px_#ff8a3d]" />
+                    Explore SPHEREx Hub
+                  </a>
+                </Magnetic>
+                <Magnetic>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/experience")}
+                    className="group relative inline-flex items-center gap-2 rounded-full border border-ember/60 bg-linear-to-r from-ember/30 via-ember/20 to-ion/20 px-4 py-2 text-xs font-medium text-bone shadow-[0_0_20px_-4px_rgba(255,138,61,0.5)] transition-all duration-300 hover:border-ember hover:bg-ember hover:text-ink hover:shadow-[0_0_30px_rgba(255,138,61,0.8)]"
+                    aria-label="Launch Experience"
+                  >
+                    <span className="h-2 w-2 animate-ping rounded-full bg-ember" />
+                    <span>Launch Experience</span>
+                    <Arrow className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+                  </button>
+                </Magnetic>
+              </>
+            )}
             <button
               type="button"
               className="burger lg:hidden"
@@ -125,6 +173,33 @@ export default function Nav({ ready }: { ready: boolean }) {
               </a>
             ))}
           </nav>
+          <div className="mt-6">
+            {isExperience ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  navigate("/");
+                }}
+                className="flex w-full items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 py-3 font-mono text-xs uppercase tracking-wider text-bone"
+              >
+                <Arrow className="h-4 w-4" dir="left" />
+                Return to Homepage
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  navigate("/experience");
+                }}
+                className="flex w-full items-center justify-center gap-2 rounded-full border border-ember/60 bg-ember py-3 font-mono text-xs uppercase tracking-wider text-ink shadow-[0_0_30px_rgba(255,138,61,0.6)]"
+              >
+                <span>Launch Experience</span>
+                <Arrow className="h-4 w-4" />
+              </button>
+            )}
+          </div>
           <div className="mm-fade mt-auto flex items-end justify-between font-mono text-[10px] uppercase leading-5 tracking-[0.2em] text-bone/40">
             <span>
               NASA SPHEREx Mission

@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
-import { band, clamp, isCoarse, smoothstep, subscribe } from "../lib/engine";
+import { band, clamp, isCoarse, scrollToTarget, smoothstep, subscribe } from "../lib/engine";
+import { useRouter } from "../lib/router";
 import { cn } from "../utils/cn";
-import { dv } from "../components/ui";
+import { Arrow, Magnetic, dv } from "../components/ui";
 
 const TAU = Math.PI * 2;
 const STAR_RGB = ["255,255,255", "186,214,255", "255,216,176"];
@@ -20,6 +21,7 @@ const R_OUT = 6.4;
  *   0.92 → 1.00  the shadow swallows the frame — darkness, final line
  */
 export default function Hero({ ready }: { ready: boolean }) {
+  const { isExperience, navigate } = useRouter();
   const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const nebulaRef = useRef<HTMLDivElement>(null);
@@ -470,6 +472,66 @@ export default function Hero({ ready }: { ready: boolean }) {
           <p className="hero-fade mt-8 max-w-md text-[15px] leading-relaxed text-bone/70 md:text-base" style={dv({ "--d": "900ms" })}>
             MARSAD is an interactive scientific observatory exploring NASA SPHEREx’s all-sky time-domain infrared spectroscopy.
           </p>
+
+          <div className="hero-fade pointer-events-auto mt-8 flex flex-wrap items-center justify-center gap-4" style={dv({ "--d": "1050ms" })}>
+            {isExperience ? (
+              <>
+                <Magnetic strength={0.35}>
+                  <span className="relative inline-block">
+                    <span className="cta-halo" aria-hidden="true" />
+                    <button
+                      type="button"
+                      onClick={() => scrollToTarget("#spherex-hub", { duration: 2 })}
+                      className="cta"
+                    >
+                      <span>Explore Scientific Station</span>
+                      <span className="cta-icon">
+                        <Arrow className="h-5 w-5" />
+                      </span>
+                    </button>
+                  </span>
+                </Magnetic>
+                <Magnetic>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/")}
+                    className="btn-ghost"
+                  >
+                    <Arrow dir="left" className="h-4 w-4" />
+                    Return to Home
+                  </button>
+                </Magnetic>
+              </>
+            ) : (
+              <>
+                <Magnetic strength={0.35}>
+                  <span className="relative inline-block">
+                    <span className="cta-halo" aria-hidden="true" />
+                    <button
+                      type="button"
+                      onClick={() => navigate("/experience")}
+                      className="cta"
+                    >
+                      <span>Launch Experience</span>
+                      <span className="cta-icon">
+                        <Arrow className="h-5 w-5" />
+                      </span>
+                    </button>
+                  </span>
+                </Magnetic>
+                <Magnetic>
+                  <button
+                    type="button"
+                    onClick={() => scrollToTarget("#spherex-hub", { duration: 2 })}
+                    className="btn-ghost"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-ember shadow-[0_0_10px_#ff8a3d]" />
+                    Explore Station
+                  </button>
+                </Magnetic>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Scroll cue */}

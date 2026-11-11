@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { scrollToTarget } from "../lib/engine";
+import { useRouter } from "../lib/router";
 import { useScrollProgress } from "../hooks/useScrollProgress";
 import { NAV_LINKS } from "../components/Nav";
 import { Arrow, Kicker, LogoMark, Magnetic, SplitText, dv } from "../components/ui";
@@ -189,6 +190,7 @@ function ManifestCTA() {
 }
 
 function Footer() {
+  const { isExperience, navigate } = useRouter();
   return (
     <footer className="relative z-10 pt-36 md:pt-48">
       <div className="shell grid gap-12 pb-14 md:grid-cols-12">
@@ -225,12 +227,26 @@ function Footer() {
             <br />
             Orbit: 700 km Sun-Synchronous Polar
           </p>
-          <Magnetic className="mt-6">
-            <button type="button" onClick={() => scrollToTarget("#top", { duration: 3 })} className="btn-ghost">
-              Back to the beginning
-              <Arrow className="h-4 w-4" dir="up" />
-            </button>
-          </Magnetic>
+          <div className="mt-6 flex flex-col items-end gap-2">
+            <Magnetic>
+              <button type="button" onClick={() => scrollToTarget("#top", { duration: 3 })} className="btn-ghost">
+                Back to the beginning
+                <Arrow className="h-4 w-4" dir="up" />
+              </button>
+            </Magnetic>
+            {isExperience && (
+              <Magnetic>
+                <button
+                  type="button"
+                  onClick={() => navigate("/")}
+                  className="btn-ghost text-ember-soft border-ember/30 hover:border-ember"
+                >
+                  <Arrow className="h-4 w-4" dir="left" />
+                  Return to Homepage
+                </button>
+              </Magnetic>
+            )}
+          </div>
         </div>
       </div>
       <div className="shell flex flex-col gap-3 border-t border-white/[0.06] py-6 text-[11px] text-bone/35 md:flex-row md:items-center md:justify-between">
