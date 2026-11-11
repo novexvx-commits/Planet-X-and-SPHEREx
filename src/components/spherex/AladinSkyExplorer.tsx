@@ -243,32 +243,32 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
   };
 
   return (
-    <div className="rounded-xl border border-white/10 bg-ink-2 shadow-2xl overflow-hidden">
+    <div className="h-full w-full flex flex-col rounded-2xl border border-slate-800 bg-[#0d1322] shadow-xl overflow-hidden">
       {/* Top Controls Header */}
-      <div className="flex flex-wrap items-center justify-between border-b border-white/10 bg-ink px-4 py-3 text-xs gap-3">
+      <div className="h-12 shrink-0 border-b border-slate-800 bg-[#0b1120] px-4 flex items-center justify-between text-xs gap-3">
         <div className="flex items-center gap-3">
-          <span className="flex h-2.5 w-2.5 rounded-full bg-ember shadow-[0_0_8px_#ff8a3d] animate-pulse" />
-          <span className="font-mono text-xs uppercase tracking-wider text-bone font-semibold">
+          <span className="flex h-2.5 w-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] animate-pulse" />
+          <span className="font-mono text-xs uppercase tracking-wider text-slate-100 font-semibold">
             Aladin Lite v3 Celestial Sky Map
           </span>
-          <span className="text-mist">·</span>
-          <span className="rounded bg-ember/10 border border-ember/30 px-2 py-0.5 font-mono text-[10px] text-ember-soft">
+          <span className="text-slate-600">·</span>
+          <span className="rounded bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 font-mono text-[10px] text-amber-300">
             {target.name} ({target.raSexagesimal}, {target.decSexagesimal})
           </span>
         </div>
 
         {/* Survey Layer Selector Tabs */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="font-mono text-[10px] text-mist uppercase mr-1">Survey:</span>
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-[10px] text-slate-400 uppercase mr-1 hidden sm:inline">Survey:</span>
           {SURVEYS.map((s) => (
             <button
               key={s.id}
               onClick={() => switchSurvey(s.id)}
               className={cn(
-                "rounded px-2.5 py-1 font-mono text-[10px] transition-all",
+                "rounded px-2.5 py-1 font-mono text-[10px] transition-all cursor-pointer",
                 activeSurvey === s.id
-                  ? "bg-ember text-ink font-bold shadow-[0_0_8px_rgba(255,138,61,0.3)]"
-                  : "bg-white/5 text-mist hover:text-bone hover:bg-white/10"
+                  ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                  : "bg-slate-800/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800"
               )}
               title={s.desc}
             >
@@ -286,23 +286,23 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
               if (aladinInstanceRef.current) updateOverlays(aladinInstanceRef.current);
             }}
             className={cn(
-              "rounded px-2.5 py-1 font-mono text-[10px] transition-colors",
-              showFootprint ? "bg-ember/20 text-ember border border-ember/40" : "bg-white/5 text-mist"
+              "rounded px-2.5 py-1 font-mono text-[10px] transition-colors cursor-pointer",
+              showFootprint ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold" : "bg-slate-800 text-slate-400 hover:text-slate-200"
             )}
           >
             SPHEREx Footprint
           </button>
-          <div className="h-4 w-px bg-white/10" />
+          <div className="h-4 w-px bg-slate-800" />
           <button
             onClick={() => handleZoom(1.5)}
-            className="rounded bg-white/5 px-2.5 py-1 font-mono text-xs text-bone hover:bg-white/10"
+            className="rounded bg-slate-800 px-2.5 py-1 font-mono text-xs text-slate-200 hover:bg-slate-700 cursor-pointer"
             title="Zoom In"
           >
             +
           </button>
           <button
             onClick={() => handleZoom(0.7)}
-            className="rounded bg-white/5 px-2.5 py-1 font-mono text-xs text-bone hover:bg-white/10"
+            className="rounded bg-slate-800 px-2.5 py-1 font-mono text-xs text-slate-200 hover:bg-slate-700 cursor-pointer"
             title="Zoom Out"
           >
             −
@@ -314,7 +314,7 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
                 aladinInstanceRef.current.setFov(0.25);
               }
             }}
-            className="rounded bg-white/5 px-2.5 py-1 font-mono text-[10px] text-mist hover:text-bone"
+            className="rounded bg-slate-800 px-2.5 py-1 font-mono text-[10px] text-slate-300 hover:text-slate-100 cursor-pointer"
             title="Recenter on Target"
           >
             Recenter
@@ -323,7 +323,7 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
       </div>
 
       {/* Main Aladin Lite Viewport Canvas */}
-      <div className="relative h-[540px] w-full bg-[#05060a]">
+      <div className="flex-1 min-h-0 relative w-full bg-[#05060a]">
         {/* Aladin Div Container */}
         <div
           ref={aladinContainerRef}
@@ -334,26 +334,26 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
 
         {/* Fallback Viewport if Aladin CDN fails or is offline */}
         {loadError && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-ink/95 backdrop-blur-xs text-center z-20">
-            <div className="max-w-md rounded-xl border border-ember/40 bg-ink-2 p-6 shadow-2xl">
-              <span className="font-mono text-xs uppercase tracking-wider text-ember">
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-[#090e1a]/95 backdrop-blur-xs text-center z-20">
+            <div className="max-w-md rounded-xl border border-amber-500/40 bg-[#0d1322] p-6 shadow-2xl">
+              <span className="font-mono text-xs uppercase tracking-wider text-amber-400">
                 Archival Survey Mode Active
               </span>
-              <h4 className="mt-2 font-serif text-xl text-bone">
+              <h4 className="mt-2 font-serif text-xl text-slate-100">
                 Real All-Sky Survey: 2MASS Near-Infrared
               </h4>
-              <p className="mt-2 text-xs text-mist leading-relaxed font-sans">
+              <p className="mt-2 text-xs text-slate-400 leading-relaxed font-sans">
                 {loadError}
               </p>
-              <div className="mt-4 rounded border border-white/10 bg-black/60 p-3 font-mono text-[11px] text-left text-mist space-y-1">
-                <div>Target: <span className="text-bone">{target.name}</span></div>
-                <div>Coordinates (J2000): <span className="text-ember">{target.raSexagesimal} {target.decSexagesimal}</span></div>
-                <div>Survey Baseline: <span className="text-bone">2MASS J/H/Ks (1.2 - 2.2 µm)</span></div>
-                <div>SPHEREx Pixel Scale: <span className="text-ion">6.2 arcsec / pixel</span></div>
+              <div className="mt-4 rounded border border-slate-800 bg-black/60 p-3 font-mono text-[11px] text-left text-slate-400 space-y-1">
+                <div>Target: <span className="text-slate-200">{target.name}</span></div>
+                <div>Coordinates (J2000): <span className="text-amber-400">{target.raSexagesimal} {target.decSexagesimal}</span></div>
+                <div>Survey Baseline: <span className="text-slate-200">2MASS J/H/Ks (1.2 - 2.2 µm)</span></div>
+                <div>SPHEREx Pixel Scale: <span className="text-sky-300">6.2 arcsec / pixel</span></div>
               </div>
               <button
                 onClick={() => window.open(`https://aladin.cds.unistra.fr/AladinLite/?target=${encodeURIComponent(target.name)}&survey=${encodeURIComponent(activeSurvey)}`, "_blank")}
-                className="mt-4 inline-flex items-center gap-2 rounded bg-ember px-4 py-2 font-mono text-xs font-bold text-ink hover:bg-ember-soft transition-colors"
+                className="mt-4 inline-flex items-center gap-2 rounded bg-amber-500 px-4 py-2 font-mono text-xs font-bold text-slate-950 hover:bg-amber-400 transition-colors cursor-pointer"
               >
                 Open Full CDS Sky Atlas In New Tab ↗
               </button>
@@ -362,17 +362,17 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
         )}
 
         {/* Floating Astrometric Coordinate & Survey HUD */}
-        <div className="absolute bottom-4 left-4 z-10 rounded-lg border border-white/15 bg-ink/90 px-3.5 py-2 backdrop-blur-md shadow-xl text-xs font-mono">
-          <div className="flex items-center gap-2 text-bone font-medium">
-            <span className="h-1.5 w-1.5 rounded-full bg-ion" />
+        <div className="absolute bottom-4 left-4 z-10 rounded-lg border border-slate-800 bg-[#0d1322]/90 px-3.5 py-2 backdrop-blur-md shadow-xl text-xs font-mono">
+          <div className="flex items-center gap-2 text-slate-200 font-medium">
+            <span className="h-1.5 w-1.5 rounded-full bg-sky-400" />
             <span>Target: {target.name}</span>
           </div>
-          <div className="mt-1 flex items-center gap-3 text-[10px] text-mist">
-            <span>RA: <strong className="text-bone">{target.raSexagesimal}</strong></span>
-            <span>Dec: <strong className="text-bone">{target.decSexagesimal}</strong></span>
-            <span>FOV: <strong className="text-ember">{fovDegrees.toFixed(3)}°</strong></span>
+          <div className="mt-1 flex items-center gap-3 text-[10px] text-slate-400">
+            <span>RA: <strong className="text-slate-200">{target.raSexagesimal}</strong></span>
+            <span>Dec: <strong className="text-slate-200">{target.decSexagesimal}</strong></span>
+            <span>FOV: <strong className="text-amber-400">{fovDegrees.toFixed(3)}°</strong></span>
           </div>
-          <div className="mt-1 pt-1 border-t border-white/10 text-[9px] text-ember-soft">
+          <div className="mt-1 pt-1 border-t border-slate-800 text-[9px] text-amber-300">
             Active Layer: {SURVEYS.find(s => s.id === activeSurvey)?.name}
           </div>
         </div>
@@ -390,10 +390,10 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
               key={t.id}
               onClick={() => onSelectTarget && onSelectTarget(t.id)}
               className={cn(
-                "rounded px-2.5 py-1 text-left font-mono text-[10px] backdrop-blur-md transition-all shadow-md",
+                "rounded px-2.5 py-1 text-left font-mono text-[10px] backdrop-blur-md transition-all shadow-md cursor-pointer",
                 target.id === t.id
-                  ? "bg-ember text-ink font-bold border border-ember"
-                  : "bg-ink/80 text-bone hover:bg-ink hover:border-white/20 border border-white/10"
+                  ? "bg-amber-500 text-slate-950 font-bold border border-amber-500"
+                  : "bg-[#0d1322]/80 text-slate-300 hover:text-slate-100 hover:bg-[#0d1322] border border-slate-800"
               )}
             >
               {t.name}
@@ -403,22 +403,22 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
       </div>
 
       {/* Survey Information & Scientific Legend Footer */}
-      <div className="border-t border-white/10 bg-ink-3 px-4 py-3 text-xs font-mono text-mist flex flex-wrap items-center justify-between gap-4">
+      <div className="h-10 shrink-0 border-t border-slate-800 bg-[#0b1120] px-4 text-xs font-mono text-slate-400 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full border border-ember bg-ember/30" />
-            SPHEREx 6.2"/pix Detector Footprint
+          <span className="flex items-center gap-1.5 text-[11px]">
+            <span className="h-2 w-2 rounded-full border border-amber-500 bg-amber-500/30" />
+            SPHEREx 6.2"/pix Footprint
           </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-ion" />
-            J2000 Astrometric Center
+          <span className="flex items-center gap-1.5 text-[11px]">
+            <span className="h-2 w-2 rounded-full bg-sky-400" />
+            J2000 Center
           </span>
-          <span className="text-bone">
-            Survey Mode: <span className="text-ember-soft font-semibold">{SURVEYS.find(s => s.id === activeSurvey)?.band}</span>
+          <span className="text-slate-300 text-[11px]">
+            Survey: <span className="text-amber-300 font-semibold">{SURVEYS.find(s => s.id === activeSurvey)?.band}</span>
           </span>
         </div>
-        <div className="text-[10px] text-mist">
-          Data Engine: <span className="text-bone">CDS Strasbourg Aladin Lite v3 · HiPS All-Sky Multi-Resolution Survey</span>
+        <div className="text-[10px] text-slate-500 hidden sm:block">
+          Data: CDS Strasbourg Aladin Lite v3 · HiPS All-Sky Multi-Resolution
         </div>
       </div>
     </div>
