@@ -4,9 +4,9 @@ import { cn } from "../utils/cn";
 import { Arrow, LogoMark, Magnetic, dv } from "./ui";
 
 export const NAV_LINKS = [
+  { href: "#spherex-hub", label: "SPHEREx Hub", n: "01" },
   { href: "#spacewalk", label: "Spacewalk", n: "02" },
   { href: "#voyage", label: "Voyage", n: "03" },
-  { href: "#meridian", label: "Meridian", n: "04" },
   { href: "#log", label: "Mission Log", n: "07" },
   { href: "#telemetry", label: "Telemetry", n: "08" },
   { href: "#vision", label: "Vision", n: "10" },
@@ -61,12 +61,14 @@ export default function Nav({ ready }: { ready: boolean }) {
       <header ref={headerRef} className={cn("site-header fixed inset-x-0 top-0 z-50", ready && "is-ready", open && "menu-open")}>
         <div className="nav-bg absolute inset-0" />
         <div className="shell relative flex h-[72px] items-center justify-between md:h-20">
-          <a href="#top" onClick={(e) => go(e, "#top")} className="flex items-center gap-3" aria-label="Nocturne — back to the beginning">
-            <LogoMark className="h-7 w-7" />
-            <span className="font-mono text-[11px] uppercase tracking-[0.42em]">Nocturne</span>
+          <a href="#top" onClick={(e) => go(e, "#top")} className="flex items-center gap-3" aria-label="SPHEREx Nocturne — back to beginning">
+            <LogoMark className="h-7 w-7 text-ember" />
+            <span className="font-mono text-[11px] uppercase tracking-[0.42em] text-bone">
+              SPHEREx <span className="text-ember font-semibold">2026</span>
+            </span>
           </a>
 
-          <nav className="hidden items-center gap-9 lg:flex" aria-label="Primary">
+          <nav className="hidden items-center gap-8 lg:flex" aria-label="Primary">
             {NAV_LINKS.map((l) => (
               <a
                 key={l.href}
@@ -83,9 +85,9 @@ export default function Nav({ ready }: { ready: boolean }) {
 
           <div className="flex items-center gap-3">
             <Magnetic className="hidden sm:inline-block">
-              <a href="#manifest" onClick={(e) => go(e, "#manifest")} className="btn-ghost">
+              <a href="#spherex-hub" onClick={(e) => go(e, "#spherex-hub")} className="btn-ghost">
                 <span className="h-1.5 w-1.5 rounded-full bg-ember shadow-[0_0_10px_#ff8a3d]" />
-                Join the Manifest
+                Explore SPHEREx Hub
               </a>
             </Magnetic>
             <button
@@ -114,8 +116,8 @@ export default function Nav({ ready }: { ready: boolean }) {
         <div className="shell relative flex h-full flex-col pb-10 pt-28">
           <p className="mm-fade kicker text-ember-soft">Chapters</p>
           <nav className="mt-6 flex flex-col" aria-label="Mobile">
-            {[...NAV_LINKS, { href: "#manifest", label: "The Manifest", n: "11" }].map((l, i) => (
-              <a key={l.href} href={l.href} onClick={(e) => go(e, l.href)} tabIndex={open ? 0 : -1} className="group block overflow-hidden border-b border-white/[0.07] py-3">
+            {NAV_LINKS.map((l, i) => (
+              <a key={`${l.href}_${i}`} href={l.href} onClick={(e) => go(e, l.href)} tabIndex={open ? 0 : -1} className="group block overflow-hidden border-b border-white/[0.07] py-3">
                 <span className="mm-item flex items-baseline justify-between" style={dv({ "--i": i })}>
                   <span className="font-serif text-[2.6rem] leading-tight sm:text-6xl">{l.label}</span>
                   <span className="font-mono text-[10px] tracking-[0.2em] text-bone/40">{l.n}</span>
@@ -125,9 +127,9 @@ export default function Nav({ ready }: { ready: boolean }) {
           </nav>
           <div className="mm-fade mt-auto flex items-end justify-between font-mono text-[10px] uppercase leading-5 tracking-[0.2em] text-bone/40">
             <span>
-              Erebus · 9.6 ly
+              NASA SPHEREx Mission
               <br />
-              RA 18h 52m · Dec +33°
+              102 Infrared Bands · All-Sky
             </span>
             <span className="flex items-center gap-2 text-bone/60">
               Scroll the dark <Arrow className="h-3.5 w-3.5" dir="down" />

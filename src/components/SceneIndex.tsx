@@ -5,6 +5,7 @@ import { cn } from "../utils/cn";
 export const SCENES = [
   ["top", "Descent"],
   ["prologue", "Prologue"],
+  ["spherex-hub", "SPHEREx Station"],
   ["spacewalk", "Spacewalk"],
   ["voyage", "The Voyage"],
   ["meridian", "The Engine"],

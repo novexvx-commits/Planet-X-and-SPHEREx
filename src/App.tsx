@@ -6,6 +6,7 @@ import Nav from "./components/Nav";
 import SceneIndex from "./components/SceneIndex";
 import Hero from "./sections/Hero";
 import Prologue from "./sections/Prologue";
+import SpherexHub from "./components/spherex/SpherexHub";
 import Spacewalk from "./sections/Spacewalk";
 import Voyage from "./sections/Voyage";
 import Spotlight from "./sections/Spotlight";
@@ -58,6 +59,7 @@ export default function App() {
       <main className="page">
         <Hero ready={ready} />
         <Prologue />
+        <SpherexHub />
         <Spacewalk />
         <Voyage />
         <Spotlight />
