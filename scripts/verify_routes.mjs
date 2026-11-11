@@ -91,6 +91,15 @@ async function runRouteVerification() {
       throw new Error('SpherexHub must exist on /experience!');
     }
 
+    const scrollMetrics = await page.evaluate(() => {
+      return {
+        windowInnerHeight: window.innerHeight,
+        docScrollHeight: document.documentElement.scrollHeight,
+        hasVerticalScroll: document.documentElement.scrollHeight > window.innerHeight
+      };
+    });
+    console.log(`✓ Viewport height: ${scrollMetrics.windowInnerHeight}px, Document scrollHeight: ${scrollMetrics.docScrollHeight}px (Zero scroll: ${!scrollMetrics.hasVerticalScroll})`);
+
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '02_experience_isolated_page.png') });
     console.log('✓ Captured 02_experience_isolated_page.png');
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Arrow, Kicker, SplitText } from "../ui";
+import { Arrow, Kicker, LogoMark, SplitText } from "../ui";
+import { useRouter } from "../../lib/router";
 import { cn } from "../../utils/cn";
 import AladinSkyExplorer from "./AladinSkyExplorer";
 import ObservationTimelineComparator from "./ObservationTimelineComparator";
@@ -64,6 +65,7 @@ const TOUR_STEPS: { targetId: string; tab: TabKey; title: string; subtitle: stri
 ];
 
 export default function SpherexHub() {
+  const { navigate } = useRouter();
   const [targets, setTargets] = useState<any[]>([]);
   const [selectedTargetId, setSelectedTargetId] = useState<string>("barnards-star");
   const [activeTab, setActiveTab] = useState<TabKey>("timeline");
@@ -230,253 +232,244 @@ export default function SpherexHub() {
   }, [tourStep]);
 
   return (
-    <section id="spherex-hub" className="relative bg-ink py-20 px-4 md:px-8 border-t border-white/10">
-      <div className="mx-auto max-w-7xl">
-        {/* Section Header */}
-        <div className="mb-10 text-center">
-          <Kicker center>NASA SPHEREx 2026 Exploration Station</Kicker>
-          <SplitText
-            as="h2"
-            text="The Infrared Universe *in Motion*"
-            className="mt-3 font-serif text-4xl sm:text-5xl md:text-6xl text-bone"
-          />
-          <p className="mx-auto mt-4 max-w-3xl font-sans text-sm md:text-base text-mist leading-relaxed">
-            Explore authentic multi-epoch observations from NASA’s SPHEREx mission. Revisit identical sky regions across six-month survey passes in 102 near-infrared spectral channels to detect moving objects, variable stars, brown dwarfs, and changing cosmic phenomena.
-          </p>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={tourStep === null ? startTour : exitTour}
-              className="inline-flex items-center gap-2 rounded-full border border-ember/60 bg-linear-to-r from-ember/30 via-ember/20 to-ion/20 px-4 py-2 font-mono text-xs uppercase tracking-wider text-bone shadow-[0_0_20px_-4px_rgba(255,138,61,0.5)] transition-all hover:bg-ember hover:text-ink cursor-pointer"
-            >
-              <span>{tourStep === null ? "🧭 Launch Guided Science Tour" : "✕ Exit Guided Tour"}</span>
-            </button>
-            <span className="hidden items-center gap-2 font-mono text-[10px] text-mist/60 sm:inline-flex">
-              Keyboard: <kbd className="rounded border border-white/20 bg-white/5 px-1.5 py-0.5 text-bone">1–7</kbd> tabs · <kbd className="rounded border border-white/20 bg-white/5 px-1.5 py-0.5 text-bone">← →</kbd> tour
-            </span>
+    <section id="spherex-hub" className="h-full w-full flex flex-col bg-[#070b14] text-slate-100 overflow-hidden select-none">
+      {/* ── WORKSTATION COMMAND BAR (ROW 1, h-14) ── */}
+      <header className="h-14 shrink-0 border-b border-slate-800/80 bg-[#0b1120] px-4 flex items-center justify-between gap-3 z-30">
+        {/* Left: Brand & Station Identity */}
+        <div className="flex items-center gap-3">
+          <LogoMark className="h-7 w-7 text-amber-500" />
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-xs uppercase tracking-[0.25em] text-slate-100 font-bold">
+                MARSAD <span className="text-amber-400 font-semibold">Station</span>
+              </span>
+              <span className="hidden sm:inline-flex rounded-full border border-amber-500/40 bg-amber-500/15 px-2 py-0.2 font-mono text-[9px] uppercase tracking-wider text-amber-300">
+                SPHEREx QR2
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Guided Tour Interactive Banner */}
-        {tourStep !== null && (
-          <div className="mb-8 rounded-2xl border border-ember/50 bg-linear-to-r from-ember/15 via-ink-2 to-ion/10 p-5 shadow-[0_0_40px_-10px_rgba(255,138,61,0.3)] backdrop-blur-xl">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <div className="flex items-center gap-3">
-                  <span className="rounded-full bg-ember px-2.5 py-0.5 font-mono text-[10px] font-bold text-ink uppercase">
-                    Step {tourStep + 1} of {TOUR_STEPS.length}
-                  </span>
-                  <span className="font-mono text-xs uppercase tracking-wider text-ember-soft">
-                    {TOUR_STEPS[tourStep].subtitle}
-                  </span>
-                </div>
-                <h4 className="mt-2 font-serif text-2xl text-bone">
-                  {TOUR_STEPS[tourStep].title}
-                </h4>
-                <p className="mt-1 text-sm text-mist max-w-3xl leading-relaxed">
-                  {TOUR_STEPS[tourStep].desc}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={prevTourStep}
-                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-xs text-bone hover:bg-white/10"
-                >
-                  ← Previous
-                </button>
-                <button
-                  type="button"
-                  onClick={nextTourStep}
-                  className="rounded-lg bg-ember px-4 py-1.5 font-mono text-xs font-bold text-ink hover:bg-ember-soft shadow-[0_0_15px_rgba(255,138,61,0.5)]"
-                >
-                  {tourStep === TOUR_STEPS.length - 1 ? "Finish Tour ↺" : "Next Step →"}
-                </button>
-                <button
-                  type="button"
-                  onClick={exitTour}
-                  className="rounded-lg border border-white/10 px-2.5 py-1.5 font-mono text-xs text-mist hover:text-bone"
-                  title="Close tour"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 5 Required Targets Selector Bar */}
-        <div className="mb-6 rounded-xl border border-white/10 bg-ink-2 p-3 shadow-xl">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-mist px-2">
-              Required Mission Targets:
-            </span>
-
-            <div className="flex flex-wrap items-center gap-2">
-              {[
-                { id: "barnards-star", name: "Barnard's Star", badge: "Proper Motion" },
-                { id: "epsilon-indi-b", name: "Epsilon Indi B", badge: "Brown Dwarf" },
-                { id: "wise-0855", name: "WISE 0855", badge: "Coldest Y-Dwarf" },
-                { id: "rw-aurigae", name: "RW Aurigae", badge: "Variable Star" },
-                { id: "r-draconis", name: "R Draconis", badge: "Mira Variable" }
-              ].map((t) => (
-                <button
-                  key={t.id}
-                  data-target-id={t.id}
-                  onClick={() => setSelectedTargetId(t.id)}
+        {/* Center: 5 Target Pills & Quick Search */}
+        <div className="hidden md:flex items-center gap-2">
+          <div className="flex items-center gap-1 rounded-lg border border-slate-800 bg-[#070b14] p-1">
+            {[
+              { id: "barnards-star", name: "Barnard's Star", badge: "Motion" },
+              { id: "epsilon-indi-b", name: "Epsilon Indi B", badge: "Brown Dwarf" },
+              { id: "wise-0855", name: "WISE 0855", badge: "Y-Dwarf" },
+              { id: "rw-aurigae", name: "RW Aurigae", badge: "Variable" },
+              { id: "r-draconis", name: "R Draconis", badge: "Mira" }
+            ].map((t) => (
+              <button
+                key={t.id}
+                data-target-id={t.id}
+                onClick={() => setSelectedTargetId(t.id)}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-md px-2.5 py-1 font-mono text-[11px] transition-all cursor-pointer",
+                  selectedTargetId === t.id
+                    ? "bg-amber-500 text-slate-950 font-bold shadow-[0_0_12px_rgba(251,191,36,0.4)]"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+                )}
+              >
+                <span>{t.name}</span>
+                <span
                   className={cn(
-                    "flex items-center gap-2 rounded-lg px-3 py-1.5 font-mono text-xs transition-all",
-                    selectedTargetId === t.id
-                      ? "bg-ember text-ink font-bold shadow-[0_0_12px_rgba(255,138,61,0.4)]"
-                      : "bg-white/5 text-bone hover:bg-white/10"
+                    "rounded px-1 text-[8.5px]",
+                    selectedTargetId === t.id ? "bg-slate-950/30 text-slate-950 font-semibold" : "bg-slate-800 text-slate-400"
                   )}
                 >
-                  <span>{t.name}</span>
-                  <span
-                    className={cn(
-                      "rounded px-1.5 py-0.2 text-[9px]",
-                      selectedTargetId === t.id ? "bg-ink/30 text-ink" : "bg-white/10 text-mist"
-                    )}
-                  >
-                    {t.badge}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            {/* Quick Search */}
-            <form onSubmit={onSearchSubmit} className="flex items-center gap-1.5">
-              <input
-                type="text"
-                placeholder="Search object or RA, Dec..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="rounded border border-white/10 bg-ink px-3 py-1 text-xs font-mono text-bone focus:border-ember focus:outline-none w-44 sm:w-52"
-              />
-              <button
-                type="submit"
-                className="rounded bg-white/10 px-2.5 py-1 text-xs font-mono text-bone hover:bg-white/20 transition-colors"
-              >
-                Go
+                  {t.badge}
+                </span>
               </button>
-            </form>
+            ))}
           </div>
 
-          {searchError && (
-            <p className="mt-2 text-xs font-mono text-ember px-2">
-              ⚠ {searchError}
-            </p>
+          {/* Quick Search */}
+          <form onSubmit={onSearchSubmit} className="flex items-center gap-1">
+            <input
+              type="text"
+              placeholder="Search object or RA, Dec..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="rounded border border-slate-800 bg-[#070b14] px-2.5 py-1 text-xs font-mono text-slate-200 focus:border-amber-500 focus:outline-none w-36 lg:w-44"
+            />
+            <button
+              type="submit"
+              className="rounded bg-slate-800 px-2.5 py-1 text-xs font-mono text-slate-200 hover:bg-slate-700 transition-colors cursor-pointer"
+            >
+              Go
+            </button>
+          </form>
+        </div>
+
+        {/* Right: Guided Tour toggle + ONLY "Back to Home" Button */}
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={tourStep === null ? startTour : exitTour}
+            className={cn(
+              "hidden sm:inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[10.5px] uppercase tracking-wider transition-all cursor-pointer",
+              tourStep !== null
+                ? "bg-amber-500 text-slate-950 font-bold shadow-[0_0_12px_rgba(251,191,36,0.6)]"
+                : "border border-slate-700 bg-slate-800/70 text-slate-300 hover:text-slate-100 hover:border-slate-600"
+            )}
+          >
+            <span>🧭 {tourStep === null ? "Tour" : "Exit Tour"}</span>
+          </button>
+
+          {/* Prominent "Back to Home" button */}
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="group inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/15 px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-wider text-amber-300 shadow-md transition-all duration-300 hover:border-amber-400 hover:bg-amber-500 hover:text-slate-950 hover:shadow-[0_0_20px_rgba(251,191,36,0.6)] cursor-pointer"
+            aria-label="Back to Home"
+          >
+            <Arrow className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-1" dir="left" />
+            <span>Back to Home</span>
+          </button>
+        </div>
+      </header>
+
+      {/* ── WORKSTATION SUB-BAR (ROW 2, h-11) ── */}
+      <div className="h-11 shrink-0 border-b border-slate-800/80 bg-[#090e1a]/95 px-4 flex items-center justify-between gap-3 text-xs font-mono z-20">
+        {/* Active Target Meta Chip */}
+        <div className="flex items-center gap-2 overflow-hidden truncate">
+          <span className="flex items-center gap-1.5 font-semibold text-slate-100">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+            {currentTarget.name}
+          </span>
+          <span className="text-slate-600">·</span>
+          <span className="text-amber-300 truncate">{currentTarget.type}</span>
+          <span className="hidden lg:inline text-slate-600">·</span>
+          <span className="hidden lg:inline text-slate-400">
+            RA {currentTarget.raSexagesimal} · Dec {currentTarget.decSexagesimal}
+          </span>
+          {currentTarget.distanceLy && (
+            <>
+              <span className="hidden xl:inline text-slate-600">·</span>
+              <span className="hidden xl:inline text-slate-200">{currentTarget.distanceLy} ly</span>
+            </>
           )}
         </div>
 
-        {/* Target Scientific Dossier Header Card */}
-        <div className="mb-8 rounded-xl border border-white/10 bg-ink-2 p-6 shadow-xl">
-          <div className="flex flex-wrap items-baseline justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3">
-                <h3 className="font-serif text-3xl md:text-4xl text-bone">
-                  {currentTarget.name}
-                </h3>
-                <span className="rounded-full border border-ember/40 bg-ember/10 px-2.5 py-0.5 font-mono text-[10px] text-ember-soft">
-                  {currentTarget.type}
-                </span>
-                <span className="rounded-full border border-ion/40 bg-ion/10 px-2.5 py-0.5 font-mono text-[10px] text-ion">
-                  {currentTarget.spectralType}
-                </span>
-              </div>
-              <p className="mt-2 font-mono text-xs text-mist">
-                RA: <span className="text-bone">{currentTarget.raSexagesimal}</span> ({currentTarget.raDeg?.toFixed(5)}°) · Dec:{" "}
-                <span className="text-bone">{currentTarget.decSexagesimal}</span> ({currentTarget.decDeg?.toFixed(5)}°)
-                {currentTarget.distanceLy && (
-                  <span> · Distance: <span className="text-bone">{currentTarget.distanceLy} ly</span> ({currentTarget.distancePc} pc)</span>
-                )}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-4 font-mono text-xs">
-              <div className="text-right">
-                <span className="block text-[9px] uppercase text-mist">Archive Coverage</span>
-                <span className="text-ember font-bold text-sm">{observations.length} Observations</span>
-              </div>
-              <div className="text-right">
-                <span className="block text-[9px] uppercase text-mist">Data Release</span>
-                <span className="text-bone font-medium text-sm">SPHEREx QR2</span>
-              </div>
-            </div>
-          </div>
-
-          <p className="mt-4 pt-3 border-t border-white/5 text-xs text-mist leading-relaxed font-sans">
-            {currentTarget.scienceDescription}
-          </p>
-        </div>
-
-        {/* Master Exploration Workflow Tabs */}
-        <div className="mb-6 flex overflow-x-auto border-b border-white/10 text-xs font-mono scrollbar-none">
+        {/* 7 Workflow Tool Tabs */}
+        <div className="flex items-center gap-1 overflow-x-auto scrollbar-none">
           {[
-            { key: "timeline", label: "Timeline & Comparator", n: "01" },
-            { key: "sky", label: "Sky Explorer (Aladin)", n: "02" },
-            { key: "motion", label: "Motion Detection", n: "03" },
-            { key: "variable", label: "Variable Star Analysis", n: "04" },
-            { key: "spectra", label: "102 Spectral Bands", n: "05" },
-            { key: "most", label: "Solar System (MOST)", n: "06" },
-            { key: "provenance", label: "Provenance & Lineage", n: "07" }
+            { key: "timeline", label: "Timeline & Diff", n: "01" },
+            { key: "sky", label: "Sky Explorer", n: "02" },
+            { key: "motion", label: "Motion", n: "03" },
+            { key: "variable", label: "Light Curve", n: "04" },
+            { key: "spectra", label: "102 Bands", n: "05" },
+            { key: "most", label: "MOST Asteroids", n: "06" },
+            { key: "provenance", label: "Provenance", n: "07" }
           ].map((tab) => (
             <button
               key={tab.key}
               data-tab={tab.key}
               onClick={() => setActiveTab(tab.key as TabKey)}
               className={cn(
-                "flex items-center gap-2 border-b-2 px-5 py-3.5 transition-colors whitespace-nowrap",
+                "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] whitespace-nowrap transition-all cursor-pointer",
                 activeTab === tab.key
-                  ? "border-ember text-ember font-bold bg-ember/5"
-                  : "border-transparent text-mist hover:text-bone hover:border-white/20"
+                  ? "bg-amber-500 text-slate-950 font-bold shadow-[0_0_8px_rgba(251,191,36,0.35)]"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
               )}
             >
-              <span className="text-[10px] text-ember-soft opacity-70">{tab.n}</span>
+              <span className={cn("text-[9px]", activeTab === tab.key ? "text-slate-950/80 font-bold" : "text-amber-400/80")}>{tab.n}</span>
               <span>{tab.label}</span>
             </button>
           ))}
         </div>
-
-        {/* Active Tab Viewport */}
-        <div>
-          {activeTab === "timeline" && (
-            <ObservationTimelineComparator
-              targetId={selectedTargetId}
-              targetName={currentTarget.name}
-              observations={observations}
-            />
-          )}
-
-          {activeTab === "sky" && (
-            <AladinSkyExplorer
-              target={currentTarget}
-              onSelectTarget={(id) => setSelectedTargetId(id)}
-            />
-          )}
-
-          {activeTab === "motion" && (
-            <MotionDetectionViewer targetId={selectedTargetId} />
-          )}
-
-          {activeTab === "variable" && (
-            <VariableStarLightCurve targetId={selectedTargetId} />
-          )}
-
-          {activeTab === "spectra" && (
-            <SpectralBandExplorer targetId={selectedTargetId} />
-          )}
-
-          {activeTab === "most" && (
-            <MostSolarSystemExplorer />
-          )}
-
-          {activeTab === "provenance" && (
-            <ProvenanceInspector target={currentTarget} observations={observations} />
-          )}
-        </div>
       </div>
+
+      {/* Guided Tour Compact Banner (When Active) */}
+      {tourStep !== null && (
+        <div className="shrink-0 border-b border-ember/40 bg-linear-to-r from-ember/15 via-ink-2 to-ion/10 px-4 py-2 flex items-center justify-between gap-4 z-20">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <span className="rounded-full bg-ember px-2 py-0.5 font-mono text-[9px] font-bold text-ink uppercase shrink-0">
+              Step {tourStep + 1} of {TOUR_STEPS.length}
+            </span>
+            <span className="font-serif text-sm text-bone font-medium truncate">
+              {TOUR_STEPS[tourStep].title}
+            </span>
+            <span className="hidden md:inline text-xs text-mist truncate">
+              — {TOUR_STEPS[tourStep].desc}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={prevTourStep}
+              className="rounded bg-white/10 px-2 py-0.5 font-mono text-[10px] text-bone hover:bg-white/20 cursor-pointer"
+            >
+              ← Prev
+            </button>
+            <button
+              type="button"
+              onClick={nextTourStep}
+              className="rounded bg-ember px-2.5 py-0.5 font-mono text-[10px] font-bold text-ink hover:bg-ember-soft cursor-pointer shadow-sm"
+            >
+              {tourStep === TOUR_STEPS.length - 1 ? "Finish ↺" : "Next →"}
+            </button>
+            <button
+              type="button"
+              onClick={exitTour}
+              className="text-mist hover:text-bone text-xs px-1 cursor-pointer"
+              title="Close tour"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── WORKSTATION VIEWPORT (ROW 3, flex-1, overflow-hidden) ── */}
+      <main className="flex-1 min-h-0 overflow-hidden p-3 relative">
+        {activeTab === "timeline" && (
+          <ObservationTimelineComparator
+            targetId={selectedTargetId}
+            targetName={currentTarget.name}
+            observations={observations}
+          />
+        )}
+
+        {activeTab === "sky" && (
+          <AladinSkyExplorer
+            target={currentTarget}
+            onSelectTarget={(id) => setSelectedTargetId(id)}
+          />
+        )}
+
+        {activeTab === "motion" && (
+          <div className="h-full overflow-y-auto">
+            <MotionDetectionViewer targetId={selectedTargetId} />
+          </div>
+        )}
+
+        {activeTab === "variable" && (
+          <div className="h-full overflow-y-auto">
+            <VariableStarLightCurve targetId={selectedTargetId} />
+          </div>
+        )}
+
+        {activeTab === "spectra" && (
+          <div className="h-full overflow-y-auto">
+            <SpectralBandExplorer targetId={selectedTargetId} />
+          </div>
+        )}
+
+        {activeTab === "most" && (
+          <div className="h-full overflow-y-auto">
+            <MostSolarSystemExplorer />
+          </div>
+        )}
+
+        {activeTab === "provenance" && (
+          <div className="h-full overflow-y-auto">
+            <ProvenanceInspector target={currentTarget} observations={observations} />
+          </div>
+        )}
+      </main>
     </section>
   );
 }

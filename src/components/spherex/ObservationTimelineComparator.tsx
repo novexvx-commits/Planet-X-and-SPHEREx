@@ -110,7 +110,7 @@ export default function ObservationTimelineComparator({ targetId, targetName, ob
       const val = pixelValues[i];
       let norm = (val - min) / range;
       if (isDiff) {
-        // Difference colormap: negative is ion blue, zero is black, positive is ember
+        // Difference colormap: negative is ion blue, zero is black, positive is amber
         const t = Math.max(0, Math.min(1, (val + 1.5) / 3.0));
         let r = 0, g = 0, b = 0;
         if (t < 0.48) {
@@ -143,7 +143,7 @@ export default function ObservationTimelineComparator({ targetId, targetName, ob
         g = Math.round(255 * (t * t));
         b = Math.round(255 * (Math.sin(t * Math.PI)));
       } else {
-        // SPHEREx Infrared (Dark Ink -> Nebula Purple -> Ember Orange -> Hot White)
+        // SPHEREx Infrared (Dark Ink -> Nebula Purple -> Amber Orange -> Hot White)
         const t = intensity / 255;
         if (t < 0.35) {
           const k = t / 0.35;
@@ -229,32 +229,34 @@ export default function ObservationTimelineComparator({ targetId, targetName, ob
   };
 
   return (
-    <div className="rounded-xl border border-white/10 bg-ink-2 p-6 shadow-2xl">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-ember animate-pulse shadow-[0_0_8px_#ff8a3d]" />
-            <span className="font-mono text-[10px] uppercase tracking-widest text-ember-soft font-semibold">
-              Time-Domain Astronomical Engine · SPHEREx QR2
-            </span>
-          </div>
-          <h3 className="mt-1 font-serif text-2xl text-bone">
-            Multi-Epoch Observation Timeline & Difference Imaging
-          </h3>
+    <div className="h-full w-full flex flex-col gap-2.5 overflow-hidden select-none">
+      {/* ── TOP CONTROL STRIP (Height: 40px) ── */}
+      <div className="h-10 shrink-0 px-3.5 rounded-lg border border-slate-800 bg-[#0e1526]/90 backdrop-blur-md flex items-center justify-between gap-3 text-xs">
+        {/* Left: Mode Title */}
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+          <span className="font-mono text-xs font-semibold text-slate-100 tracking-wide">
+            Timeline Scrubber & Difference Engine
+          </span>
+          <span className="hidden sm:inline-block rounded bg-amber-500/15 border border-amber-500/30 px-1.5 py-0.5 font-mono text-[9px] text-amber-300 font-medium">
+            SPHEREx Calibrated
+          </span>
         </div>
 
-        {/* Colormap & Mode Selector Tabs */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-ink p-1 text-xs">
-            <span className="font-mono text-[9px] text-mist uppercase px-1.5">Colormap:</span>
+        {/* Right: Colormap + Mode Switchers */}
+        <div className="flex items-center gap-2">
+          {/* Colormap Pill Group */}
+          <div className="flex items-center gap-1 rounded-md border border-slate-800 bg-[#090e1a] p-0.5">
+            <span className="font-mono text-[9px] text-slate-400 uppercase px-1.5 hidden md:inline">Colormap:</span>
             {(["infrared", "inferno", "greyscale"] as const).map((cmap) => (
               <button
                 key={cmap}
                 onClick={() => setActiveColormap(cmap)}
                 className={cn(
-                  "rounded px-2 py-1 font-mono text-[10px] capitalize transition-colors",
-                  activeColormap === cmap ? "bg-white/15 text-ember font-bold" : "text-mist hover:text-bone"
+                  "rounded px-2 py-0.5 font-mono text-[10px] capitalize transition-colors cursor-pointer",
+                  activeColormap === cmap
+                    ? "bg-slate-700/80 text-amber-300 font-bold"
+                    : "text-slate-400 hover:text-slate-200"
                 )}
               >
                 {cmap}
@@ -262,14 +264,17 @@ export default function ObservationTimelineComparator({ targetId, targetName, ob
             ))}
           </div>
 
-          <div className="flex rounded-lg border border-white/10 bg-ink p-1 text-xs">
+          {/* Mode Switcher Group */}
+          <div className="flex items-center rounded-md border border-slate-800 bg-[#090e1a] p-0.5">
             {(["difference", "blink", "side-by-side", "overlay"] as const).map((mode) => (
               <button
                 key={mode}
                 onClick={() => setComparisonMode(mode)}
                 className={cn(
-                  "rounded-md px-3 py-1.5 font-mono text-[11px] capitalize transition-colors",
-                  comparisonMode === mode ? "bg-ember text-ink font-semibold" : "text-mist hover:text-bone"
+                  "rounded px-2.5 py-0.5 font-mono text-[10px] capitalize transition-all cursor-pointer",
+                  comparisonMode === mode
+                    ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                    : "text-slate-400 hover:text-slate-200"
                 )}
               >
                 {mode.replace("-", " ")}
@@ -279,38 +284,166 @@ export default function ObservationTimelineComparator({ targetId, targetName, ob
         </div>
       </div>
 
-      {/* Main Comparison Stage */}
-      <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Visual Viewport Display */}
-        <div className="lg:col-span-7 flex flex-col items-center justify-center rounded-lg border border-white/10 bg-ink p-6 min-h-[380px] relative overflow-hidden">
+      {/* ── MAIN 3-COLUMN WORKSTATION (flex-1 min-h-0 overflow-hidden) ── */}
+      <div className="flex-1 min-h-0 grid grid-cols-12 gap-2.5 overflow-hidden">
+        
+        {/* ══ COLUMN 1 (Left 3 cols): Timeline Scrubber & Epoch Selection ══ */}
+        <div className="col-span-12 lg:col-span-3 flex flex-col justify-between rounded-xl border border-slate-800/80 bg-[#0e1526]/70 p-3 min-h-0 overflow-hidden">
+          {/* Top Section: Active Observation Details */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-1.5">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-amber-400 font-semibold">
+                Observation Scrubber
+              </span>
+              <span className="font-mono text-[10px] text-slate-400">
+                #{currentIndex + 1} / {observations.length}
+              </span>
+            </div>
+
+            {/* Current Observation Meta Card */}
+            <div className="rounded-lg border border-slate-800/80 bg-[#090e1a] p-2 space-y-1 font-mono text-[11px]">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Obs ID:</span>
+                <span className="text-slate-200 font-medium truncate max-w-[130px]">{currentObs.obs_id || currentObs.obsId || "SPHEREx-01"}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Epoch MJD:</span>
+                <span className="text-amber-400 font-bold">{parseFloat(currentObs.t_min || currentObs.mjd || 0).toFixed(4)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Bandpass:</span>
+                <span className="text-sky-300 font-semibold">{currentObs.energy_bandpassname || currentObs.bandpass || "SPHEREx-D2"}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Exposure:</span>
+                <span className="text-slate-200">{parseFloat(currentObs.t_exptime || currentObs.exposureTimeSec || 113.58).toFixed(1)}s</span>
+              </div>
+            </div>
+
+            {/* Slider */}
+            <div className="pt-1">
+              <input
+                type="range"
+                min="0"
+                max={Math.max(0, observations.length - 1)}
+                value={currentIndex}
+                onChange={(e) => setCurrentIndex(parseInt(e.target.value, 10))}
+                className="w-full accent-amber-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
+              />
+            </div>
+
+            {/* Playback Controls */}
+            <div className="flex items-center gap-1.5 pt-0.5">
+              <button
+                onClick={() => setIsPlaying(!isPlaying)}
+                className="flex-1 flex items-center justify-center gap-1 rounded-md bg-amber-500 py-1 font-mono text-[11px] font-bold text-slate-950 transition-transform active:scale-95 shadow-sm cursor-pointer hover:bg-amber-400"
+              >
+                {isPlaying ? "❚❚ Pause" : "▶ Play"}
+              </button>
+              <button
+                onClick={() => setCurrentIndex((c) => Math.max(0, c - 1))}
+                className="rounded-md bg-slate-800 px-2 py-1 font-mono text-[11px] text-slate-200 hover:bg-slate-700 cursor-pointer"
+                title="Previous frame"
+              >
+                ◄
+              </button>
+              <button
+                onClick={() => setCurrentIndex((c) => Math.min(observations.length - 1, c + 1))}
+                className="rounded-md bg-slate-800 px-2 py-1 font-mono text-[11px] text-slate-200 hover:bg-slate-700 cursor-pointer"
+                title="Next frame"
+              >
+                ►
+              </button>
+              <div className="flex items-center rounded-md border border-slate-800 bg-[#090e1a] p-0.5">
+                {[0.5, 1, 2, 4].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setPlaybackSpeed(s)}
+                    className={cn(
+                      "px-1 font-mono text-[9px] rounded cursor-pointer",
+                      playbackSpeed === s ? "text-amber-400 font-bold bg-slate-800" : "text-slate-400 hover:text-slate-200"
+                    )}
+                  >
+                    {s}x
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Section: Difference Epoch Pair Selectors */}
+          <div className="pt-2 border-t border-slate-800/80 space-y-1.5">
+            <span className="block font-mono text-[9px] uppercase tracking-wider text-slate-400">
+              Comparison Pair (Difference Baseline):
+            </span>
+            <div>
+              <div className="flex justify-between font-mono text-[9px] text-slate-400 mb-0.5">
+                <span>Epoch 1 (Ref):</span>
+                <span className="text-slate-300 font-medium">{obs1.obs_id || `#${epoch1Index+1}`}</span>
+              </div>
+              <select
+                value={epoch1Index}
+                onChange={(e) => setEpoch1Index(parseInt(e.target.value, 10))}
+                className="w-full rounded border border-slate-800 bg-[#090e1a] px-2 py-1 font-mono text-[10px] text-slate-200 focus:border-amber-500 focus:outline-none cursor-pointer"
+              >
+                {observations.map((obs, i) => (
+                  <option key={`ep1_${obs.obs_id || i}`} value={i}>
+                    #{i+1} · MJD {parseFloat(obs.t_min || obs.mjd || 0).toFixed(1)} ({obs.energy_bandpassname || obs.bandpass})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <div className="flex justify-between font-mono text-[9px] text-slate-400 mb-0.5">
+                <span>Epoch 2 (Target):</span>
+                <span className="text-slate-300 font-medium">{obs2.obs_id || `#${epoch2Index+1}`}</span>
+              </div>
+              <select
+                value={epoch2Index}
+                onChange={(e) => setEpoch2Index(parseInt(e.target.value, 10))}
+                className="w-full rounded border border-slate-800 bg-[#090e1a] px-2 py-1 font-mono text-[10px] text-slate-200 focus:border-amber-500 focus:outline-none cursor-pointer"
+              >
+                {observations.map((obs, i) => (
+                  <option key={`ep2_${obs.obs_id || i}`} value={i}>
+                    #{i+1} · MJD {parseFloat(obs.t_min || obs.mjd || 0).toFixed(1)} ({obs.energy_bandpassname || obs.bandpass})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* ══ COLUMN 2 (Center 6 cols): Main Astronomical Cutout & Difference Canvas ══ */}
+        <div className="col-span-12 lg:col-span-6 flex flex-col items-center justify-between rounded-xl border border-slate-800/80 bg-[#090e1a] p-3 min-h-0 relative overflow-hidden">
           {loadingComparison && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center bg-ink/80 backdrop-blur-xs">
-              <span className="font-mono text-xs text-ember-soft animate-pulse">
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#090e1a]/85 backdrop-blur-xs">
+              <span className="font-mono text-xs text-amber-300 animate-pulse">
                 Aligning astrometry & computing calibrated difference matrix...
               </span>
             </div>
           )}
 
-          {/* Mode 1: Difference Imaging */}
+          {/* Mode 1: Difference Imaging Canvas */}
           {comparisonMode === "difference" && (
-            <div className="flex flex-col items-center">
-              <div className="relative h-64 w-64 rounded border border-ember/40 bg-black shadow-[0_0_25px_rgba(255,138,61,0.2)] image-rendering-pixelated cursor-crosshair">
+            <div className="flex-1 flex flex-col items-center justify-center w-full min-h-0">
+              <div className="relative aspect-square h-full max-h-[min(310px,38vh)] w-auto rounded border border-amber-500/40 bg-black shadow-[0_0_25px_rgba(251,146,60,0.2)] image-rendering-pixelated cursor-crosshair">
                 <canvas
                   ref={canvasDiffRef}
                   className="h-full w-full object-contain"
                   onMouseMove={(e) => onCanvasMouseMove(e, comparisonData?.differenceAnalysis?.diffPixels)}
                   onMouseLeave={onCanvasMouseLeave}
                 />
-                <div className="absolute top-2 left-2 rounded bg-ink/85 px-2 py-0.5 font-mono text-[9px] text-ember border border-ember/30">
-                  Residual Matrix D = (I₂ - B₂) - (I₁ - B₁)
+                <div className="absolute top-2 left-2 rounded bg-slate-900/90 px-2 py-0.5 font-mono text-[9px] text-amber-300 border border-amber-500/30">
+                  Residual D = (I₂ - B₂) - (I₁ - B₁)
                 </div>
               </div>
-              <div className="mt-3 flex items-center gap-4 text-[10px] font-mono text-mist">
-                <span className="flex items-center gap-1.5 text-ember">
-                  <span className="h-2 w-2 rounded-full bg-ember" /> Positive Flux (Brightened / Arrived)
+              <div className="mt-2 flex items-center gap-4 text-[10px] font-mono">
+                <span className="flex items-center gap-1.5 text-amber-400">
+                  <span className="h-2 w-2 rounded-full bg-amber-400" /> Positive Flux (Brightened / Arrived)
                 </span>
-                <span className="flex items-center gap-1.5 text-ion">
-                  <span className="h-2 w-2 rounded-full bg-ion" /> Negative Flux (Dimmed / Departed)
+                <span className="flex items-center gap-1.5 text-sky-400">
+                  <span className="h-2 w-2 rounded-full bg-sky-400" /> Negative Flux (Dimmed / Departed)
                 </span>
               </div>
             </div>
@@ -318,8 +451,8 @@ export default function ObservationTimelineComparator({ targetId, targetName, ob
 
           {/* Mode 2: Blink Comparator */}
           {comparisonMode === "blink" && (
-            <div className="flex flex-col items-center">
-              <div className="relative h-64 w-64 rounded border border-white/20 bg-black image-rendering-pixelated shadow-2xl cursor-crosshair">
+            <div className="flex-1 flex flex-col items-center justify-center w-full min-h-0">
+              <div className="relative aspect-square h-full max-h-[min(310px,38vh)] w-auto rounded border border-slate-700 bg-black image-rendering-pixelated shadow-2xl cursor-crosshair">
                 <canvas
                   ref={canvas1Ref}
                   className={cn("h-full w-full object-contain transition-opacity duration-75", blinkActiveEpoch === 1 ? "opacity-100" : "hidden")}
@@ -332,22 +465,22 @@ export default function ObservationTimelineComparator({ targetId, targetName, ob
                   onMouseMove={(e) => onCanvasMouseMove(e, comparisonData?.epoch2?.frame?.pixelValues)}
                   onMouseLeave={onCanvasMouseLeave}
                 />
-                <div className="absolute top-2 left-2 rounded bg-ink/90 px-2.5 py-1 font-mono text-[10px] text-bone border border-white/10">
-                  Active: <span className="text-ember font-bold">Epoch {blinkActiveEpoch}</span> ({blinkActiveEpoch === 1 ? obs1.obs_id || obs1.obsId : obs2.obs_id || obs2.obsId})
+                <div className="absolute top-2 left-2 rounded bg-slate-900/90 px-2 py-0.5 font-mono text-[10px] text-slate-200 border border-slate-700">
+                  Active: <span className="text-amber-400 font-bold">Epoch {blinkActiveEpoch}</span>
                 </div>
-                <div className="absolute bottom-2 right-2 rounded bg-ink/90 px-2 py-0.5 font-mono text-[9px] text-mist">
+                <div className="absolute bottom-2 right-2 rounded bg-slate-900/90 px-2 py-0.5 font-mono text-[9px] text-slate-400">
                   {blinkSpeedHz} Hz Blink
                 </div>
               </div>
-              <div className="mt-4 flex items-center gap-2">
-                <span className="font-mono text-[11px] text-mist">Blink Speed:</span>
+              <div className="mt-2 flex items-center gap-2">
+                <span className="font-mono text-[10px] text-slate-400">Blink Frequency:</span>
                 {[1, 2, 4].map((hz) => (
                   <button
                     key={hz}
                     onClick={() => setBlinkSpeedHz(hz)}
                     className={cn(
-                      "rounded px-2.5 py-0.5 font-mono text-[10px]",
-                      blinkSpeedHz === hz ? "bg-ember text-ink font-bold" : "bg-white/5 text-mist hover:text-bone"
+                      "rounded px-2.5 py-0.5 font-mono text-[10px] cursor-pointer transition-colors",
+                      blinkSpeedHz === hz ? "bg-amber-500 text-slate-950 font-bold" : "bg-slate-800 text-slate-400 hover:text-slate-200"
                     )}
                   >
                     {hz} Hz
@@ -357,11 +490,11 @@ export default function ObservationTimelineComparator({ targetId, targetName, ob
             </div>
           )}
 
-          {/* Mode 3: Side-by-Side Synchronized Comparison */}
+          {/* Mode 3: Side-by-Side Comparison */}
           {comparisonMode === "side-by-side" && (
-            <div className="flex flex-wrap items-center justify-center gap-6">
+            <div className="flex-1 flex items-center justify-center gap-4 w-full min-h-0">
               <div className="flex flex-col items-center">
-                <div className="h-48 w-48 rounded border border-white/20 bg-black image-rendering-pixelated shadow-lg cursor-crosshair">
+                <div className="h-40 w-40 rounded border border-slate-700 bg-black image-rendering-pixelated shadow-lg cursor-crosshair">
                   <canvas
                     ref={canvas1Ref}
                     className="h-full w-full object-contain"
@@ -369,11 +502,11 @@ export default function ObservationTimelineComparator({ targetId, targetName, ob
                     onMouseLeave={onCanvasMouseLeave}
                   />
                 </div>
-                <p className="mt-2 font-mono text-[10px] text-bone font-medium">Epoch 1: MJD {parseFloat(obs1.mjd || obs1.t_min || 0).toFixed(1)}</p>
-                <p className="font-mono text-[9px] text-mist">{obs1.energy_bandpassname || obs1.bandpass}</p>
+                <p className="mt-1 font-mono text-[10px] text-slate-200 font-medium">Epoch 1: MJD {parseFloat(obs1.mjd || obs1.t_min || 0).toFixed(1)}</p>
+                <p className="font-mono text-[9px] text-slate-400">{obs1.energy_bandpassname || obs1.bandpass}</p>
               </div>
               <div className="flex flex-col items-center">
-                <div className="h-48 w-48 rounded border border-white/20 bg-black image-rendering-pixelated shadow-lg cursor-crosshair">
+                <div className="h-40 w-40 rounded border border-slate-700 bg-black image-rendering-pixelated shadow-lg cursor-crosshair">
                   <canvas
                     ref={canvas2Ref}
                     className="h-full w-full object-contain"
@@ -381,16 +514,16 @@ export default function ObservationTimelineComparator({ targetId, targetName, ob
                     onMouseLeave={onCanvasMouseLeave}
                   />
                 </div>
-                <p className="mt-2 font-mono text-[10px] text-bone font-medium">Epoch 2: MJD {parseFloat(obs2.mjd || obs2.t_min || 0).toFixed(1)}</p>
-                <p className="font-mono text-[9px] text-mist">{obs2.energy_bandpassname || obs2.bandpass}</p>
+                <p className="mt-1 font-mono text-[10px] text-slate-200 font-medium">Epoch 2: MJD {parseFloat(obs2.mjd || obs2.t_min || 0).toFixed(1)}</p>
+                <p className="font-mono text-[9px] text-slate-400">{obs2.energy_bandpassname || obs2.bandpass}</p>
               </div>
             </div>
           )}
 
           {/* Mode 4: Opacity Overlay */}
           {comparisonMode === "overlay" && (
-            <div className="flex flex-col items-center">
-              <div className="relative h-64 w-64 rounded border border-white/20 bg-black image-rendering-pixelated shadow-2xl cursor-crosshair">
+            <div className="flex-1 flex flex-col items-center justify-center w-full min-h-0">
+              <div className="relative aspect-square h-full max-h-[min(310px,38vh)] w-auto rounded border border-slate-700 bg-black image-rendering-pixelated shadow-2xl cursor-crosshair">
                 <canvas ref={canvas1Ref} className="absolute inset-0 h-full w-full object-contain" />
                 <canvas
                   ref={canvas2Ref}
@@ -398,11 +531,11 @@ export default function ObservationTimelineComparator({ targetId, targetName, ob
                   style={{ opacity: overlayOpacity }}
                 />
               </div>
-              <div className="mt-4 w-64">
-                <div className="flex justify-between font-mono text-[10px] text-mist mb-1">
-                  <span>Epoch 1 (100%)</span>
-                  <span className="text-ember font-bold">{(overlayOpacity * 100).toFixed(0)}% Epoch 2</span>
-                  <span>Epoch 2 (100%)</span>
+              <div className="mt-2 w-56">
+                <div className="flex justify-between font-mono text-[9px] text-slate-400 mb-0.5">
+                  <span>Epoch 1</span>
+                  <span className="text-amber-400 font-bold">{(overlayOpacity * 100).toFixed(0)}% Epoch 2</span>
+                  <span>Epoch 2</span>
                 </div>
                 <input
                   type="range"
@@ -411,207 +544,101 @@ export default function ObservationTimelineComparator({ targetId, targetName, ob
                   step="0.01"
                   value={overlayOpacity}
                   onChange={(e) => setOverlayOpacity(parseFloat(e.target.value))}
-                  className="w-full accent-ember cursor-pointer"
+                  className="w-full accent-amber-500 cursor-pointer h-1 bg-slate-800 rounded-lg"
                 />
               </div>
             </div>
           )}
 
           {/* Live Pixel Value Inspector HUD */}
-          {hoverPixel && (
-            <div className="mt-4 rounded border border-white/10 bg-black/80 px-3 py-1.5 font-mono text-[11px] text-bone flex items-center gap-4">
-              <span>Pixel: <strong className="text-ember">[{hoverPixel.x}, {hoverPixel.y}]</strong></span>
-              {hoverPixel.val !== null && (
-                <span>Flux / Brightness: <strong className="text-ion">{hoverPixel.val.toFixed(4)} MJy/sr</strong></span>
-              )}
-              <span>Scale: <strong className="text-mist">6.2"/px</strong></span>
-            </div>
-          )}
+          <div className="w-full rounded-lg border border-slate-800 bg-[#0e1526]/90 px-3 py-1 font-mono text-[10.5px] text-slate-200 flex items-center justify-between shrink-0 mt-1">
+            <span>Pixel: <strong className="text-amber-400">{hoverPixel ? `[${hoverPixel.x}, ${hoverPixel.y}]` : "Hover to inspect"}</strong></span>
+            <span>Flux: <strong className="text-sky-400">{hoverPixel && hoverPixel.val !== null ? `${hoverPixel.val.toFixed(3)} MJy/sr` : "--"}</strong></span>
+            <span>Scale: <strong className="text-slate-400">6.2"/px</strong></span>
+          </div>
         </div>
 
-        {/* Right Column: Comparison Diagnostics & Ephemeris Controls */}
-        <div className="lg:col-span-5 flex flex-col justify-between rounded-lg border border-white/10 bg-ink-3 p-5">
-          <div>
-            <div className="flex items-center justify-between">
-              <h4 className="font-mono text-[11px] uppercase tracking-wider text-ember-soft font-semibold">
-                Observation Selection & Ephemerides
+        {/* ══ COLUMN 3 (Right 3 cols): Difference Diagnostics & Provenance ══ */}
+        <div className="col-span-12 lg:col-span-3 flex flex-col justify-between rounded-xl border border-slate-800/80 bg-[#0e1526]/70 p-3 min-h-0 overflow-hidden">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-1.5">
+              <h4 className="font-mono text-[10px] uppercase tracking-wider text-amber-400 font-semibold">
+                Difference Diagnostics
               </h4>
               <button
                 onClick={() => setShowFitsHeader(!showFitsHeader)}
-                className="rounded border border-white/10 bg-white/5 px-2 py-1 font-mono text-[10px] text-bone hover:bg-white/10 transition-colors"
+                className="rounded border border-slate-700 bg-slate-800 px-2 py-0.5 font-mono text-[9px] text-slate-200 hover:bg-slate-700 transition-colors cursor-pointer"
               >
-                {showFitsHeader ? "Hide FITS Header" : "View FITS Cards"}
+                {showFitsHeader ? "Hide FITS" : "FITS Cards"}
               </button>
             </div>
 
-            {/* Epoch 1 Selector */}
-            <div className="mt-4">
-              <label className="block font-mono text-[10px] uppercase text-mist">
-                Reference Frame (Epoch 1)
-              </label>
-              <select
-                value={epoch1Index}
-                onChange={(e) => setEpoch1Index(parseInt(e.target.value, 10))}
-                className="mt-1 w-full rounded border border-white/10 bg-ink px-3 py-2 font-mono text-xs text-bone focus:border-ember focus:outline-none"
-              >
-                {observations.map((obs, i) => (
-                  <option key={`ep1_${obs.obs_id || i}`} value={i}>
-                    {obs.obs_id || `Obs #${i+1}`} · MJD {parseFloat(obs.t_min || obs.mjd || 0).toFixed(1)} ({obs.energy_bandpassname || obs.bandpass})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Epoch 2 Selector */}
-            <div className="mt-3">
-              <label className="block font-mono text-[10px] uppercase text-mist">
-                Comparison Frame (Epoch 2)
-              </label>
-              <select
-                value={epoch2Index}
-                onChange={(e) => setEpoch2Index(parseInt(e.target.value, 10))}
-                className="mt-1 w-full rounded border border-white/10 bg-ink px-3 py-2 font-mono text-xs text-bone focus:border-ember focus:outline-none"
-              >
-                {observations.map((obs, i) => (
-                  <option key={`ep2_${obs.obs_id || i}`} value={i}>
-                    {obs.obs_id || `Obs #${i+1}`} · MJD {parseFloat(obs.t_min || obs.mjd || 0).toFixed(1)} ({obs.energy_bandpassname || obs.bandpass})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Scientific Difference Diagnostics */}
-            {comparisonData?.differenceAnalysis && (
-              <div className="mt-5 space-y-2 rounded border border-white/5 bg-ink/60 p-3.5 text-xs font-mono">
-                <div className="flex justify-between text-mist">
-                  <span>Astrometric Alignment:</span>
-                  <span className="text-ion font-medium">
-                    {comparisonData.astrometricAlignment?.isCompatible ? "Aligned (Δθ < 0.5 pix)" : "Offset Detected"}
+            {/* Scientific Difference Diagnostics Metrics */}
+            {comparisonData?.differenceAnalysis ? (
+              <div className="space-y-1.5 rounded-lg border border-slate-800/80 bg-[#090e1a] p-2 text-xs font-mono">
+                <div className="flex justify-between text-slate-400">
+                  <span>Alignment:</span>
+                  <span className="text-sky-400 font-medium">
+                    {comparisonData.astrometricAlignment?.isCompatible ? "Aligned (Δθ < 0.5 px)" : "Offset Detected"}
                   </span>
                 </div>
-                <div className="flex justify-between text-mist">
-                  <span>Residual RMS Noise:</span>
-                  <span className="text-bone">{comparisonData.differenceAnalysis.rmsResidualMJyPerSr} MJy/sr</span>
+                <div className="flex justify-between text-slate-400">
+                  <span>Residual RMS:</span>
+                  <span className="text-slate-200">{comparisonData.differenceAnalysis.rmsResidualMJyPerSr} MJy/sr</span>
                 </div>
-                <div className="flex justify-between text-mist">
-                  <span>Significance Threshold:</span>
-                  <span className="text-bone">&gt; 3.0σ ({comparisonData.differenceAnalysis.detectionThreshold3Sigma} MJy/sr)</span>
+                <div className="flex justify-between text-slate-400">
+                  <span>Threshold:</span>
+                  <span className="text-slate-200">&gt; 3.0σ ({comparisonData.differenceAnalysis.detectionThreshold3Sigma} MJy/sr)</span>
                 </div>
-                <div className="flex justify-between text-mist">
-                  <span>Changed Pixels (&gt;3σ):</span>
-                  <span className="text-ember font-bold">{comparisonData.differenceAnalysis.significantPixelsCount} px</span>
+                <div className="flex justify-between text-slate-400">
+                  <span>Changed Pixels:</span>
+                  <span className="text-amber-400 font-bold">{comparisonData.differenceAnalysis.significantPixelsCount} px</span>
                 </div>
-                <div className="flex justify-between text-mist pt-1 border-t border-white/5">
-                  <span>Baseline Shift / Motion:</span>
-                  <span className="text-bone">{comparisonData.differenceAnalysis.motionDetected ? "Scientifically Detected" : "Stationary"}</span>
+                <div className="flex justify-between text-slate-400 pt-1 border-t border-slate-800/80">
+                  <span>Motion State:</span>
+                  <span className="text-slate-100 font-semibold">{comparisonData.differenceAnalysis.motionDetected ? "Scientifically Detected" : "Stationary"}</span>
                 </div>
+              </div>
+            ) : (
+              <div className="rounded border border-slate-800/80 bg-[#090e1a] p-3 text-xs font-mono text-slate-400 text-center">
+                Select epoch pair to compute difference metrics
+              </div>
+            )}
+
+            {/* FITS Header Inspector Panel (Collapsible) */}
+            {showFitsHeader && (
+              <div className="max-h-36 overflow-y-auto rounded border border-slate-800 bg-black/90 p-2 font-mono text-[9px] text-slate-400 scrollbar-thin">
+                <div className="text-amber-400 font-bold mb-0.5">=== PRIMARY FITS HEADER CARDS ===</div>
+                <div>SIMPLE  =                    T / Standard FITS</div>
+                <div>BITPIX  =                  -32 / IEEE 32-bit float</div>
+                <div>NAXIS   =                    2 / 2-Dimensional matrix</div>
+                <div>NAXIS1  =                   32 / Spatial X</div>
+                <div>NAXIS2  =                   32 / Spatial Y</div>
+                <div>BUNIT   = 'MJy/sr  '           / Calibrated Surface Brightness</div>
+                <div>TELESCOP= 'SPHEREx '           / NASA SPHEREx</div>
+                <div>INSTRUME= 'LVF     '           / Linear Variable Filter</div>
+                <div>FILTER  = '{obs1.energy_bandpassname || obs1.bandpass || "SPHEREx-D2"}'</div>
+                <div>CTYPE1  = 'RA---TAN'           / Tangent projection</div>
+                <div>CTYPE2  = 'DEC--TAN'          / Tangent projection</div>
+                <div>CDELT1  =            -0.001708 / 6.15 arcsec/pixel</div>
+                <div>CDELT2  =             0.001708 / 6.15 arcsec/pixel</div>
+                <div>RADESYS = 'ICRS    '           / J2000 System</div>
               </div>
             )}
           </div>
 
-          {/* FITS Header Inspector Panel */}
-          {showFitsHeader && (
-            <div className="mt-4 max-h-48 overflow-y-auto rounded border border-white/10 bg-black/90 p-3 font-mono text-[10px] text-mist scrollbar-thin">
-              <div className="text-ember font-bold mb-1">=== PRIMARY FITS HEADER CARDS ===</div>
-              <div>SIMPLE  =                    T / Standard FITS format</div>
-              <div>BITPIX  =                  -32 / IEEE single precision floating point</div>
-              <div>NAXIS   =                    2 / 2-Dimensional image matrix</div>
-              <div>NAXIS1  =                   32 / Spatial pixel dimension X</div>
-              <div>NAXIS2  =                   32 / Spatial pixel dimension Y</div>
-              <div>BUNIT   = 'MJy/sr  '           / Calibrated Surface Brightness</div>
-              <div>TELESCOP= 'SPHEREx '           / NASA SPHEREx Observatory</div>
-              <div>INSTRUME= 'LVF     '           / Linear Variable Filter Spectrophotometer</div>
-              <div>FILTER  = '{obs1.energy_bandpassname || obs1.bandpass || "SPHEREx-D2"}' / Dispersed bandpass channel</div>
-              <div>CTYPE1  = 'RA---TAN'           / Tangent celestial projection</div>
-              <div>CTYPE2  = 'DEC--TAN'          / Tangent celestial projection</div>
-              <div>CDELT1  =            -0.001708 / Deg/pixel (-6.15 arcsec/pixel)</div>
-              <div>CDELT2  =             0.001708 / Deg/pixel (+6.15 arcsec/pixel)</div>
-              <div>RADESYS = 'ICRS    '           / International Celestial Reference System</div>
-              <div>MJD-OBS = {parseFloat(obs1.mjd || obs1.t_min || 60676).toFixed(4)} / Observation Epoch</div>
-              <div>EXPTIME =              113.580 / Integration duration in seconds</div>
-            </div>
-          )}
-
-          {/* Provenance Badge */}
-          <div className="mt-4 pt-3 border-t border-white/10 text-[10px] font-mono text-mist flex flex-col gap-1">
+          {/* Lineage Footnote */}
+          <div className="pt-2 border-t border-slate-800/80 text-[9px] font-mono text-slate-400">
             <div className="flex justify-between items-center">
-              <span>Pixel Scale: <strong>6.2" / pixel</strong></span>
-              <span className="text-ember-soft font-semibold">NASA SPHEREx Level 2 MEF</span>
+              <span>Pixel Scale: <strong className="text-slate-200">6.2"/pixel</strong></span>
+              <span className="text-amber-300 font-semibold">Level 2 MEF</span>
             </div>
-            <div className="text-[9px] text-bone/60">
-              Provenance: NASA/IPAC IRSA SPHEREx QR2 Archival Product · Astrometric WCS TAN
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Chronological Observation Timeline Scrubber */}
-      <div className="mt-8 rounded-lg border border-white/10 bg-ink p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsPlaying(!isPlaying)}
-              className="flex items-center gap-2 rounded bg-ember px-3.5 py-1.5 font-mono text-xs font-semibold text-ink transition-transform active:scale-95 shadow-md"
-            >
-              {isPlaying ? "❚❚ Pause" : "▶ Play Timeline"}
-            </button>
-            <button
-              onClick={() => setCurrentIndex((c) => Math.max(0, c - 1))}
-              className="rounded bg-white/5 px-3 py-1 font-mono text-xs text-bone hover:bg-white/10"
-            >
-              ◄ Prev
-            </button>
-            <button
-              onClick={() => setCurrentIndex((c) => Math.min(observations.length - 1, c + 1))}
-              className="rounded bg-white/5 px-3 py-1 font-mono text-xs text-bone hover:bg-white/10"
-            >
-              Next ►
-            </button>
-          </div>
-
-          <div className="flex items-center gap-2 font-mono text-xs text-mist">
-            <span>Playback Speed:</span>
-            {[0.5, 1, 2, 4].map((s) => (
-              <button
-                key={s}
-                onClick={() => setPlaybackSpeed(s)}
-                className={cn(
-                  "rounded px-2.5 py-1 text-[10px]",
-                  playbackSpeed === s ? "bg-ember text-ink font-bold" : "bg-white/5 text-mist hover:text-bone"
-                )}
-              >
-                {s}x
-              </button>
-            ))}
+            <p className="mt-0.5 text-[8.5px] text-slate-500">
+              NASA/IPAC IRSA SPHEREx QR2 · WCS TAN Calibrated Cutout
+            </p>
           </div>
         </div>
 
-        {/* Timeline Slider Track */}
-        <input
-          type="range"
-          min="0"
-          max={Math.max(0, observations.length - 1)}
-          value={currentIndex}
-          onChange={(e) => setCurrentIndex(parseInt(e.target.value, 10))}
-          className="w-full accent-ember cursor-pointer"
-        />
-
-        {/* Current Observation Details Bar */}
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-mist border-t border-white/5 pt-2">
-          <div>
-            Observation <span className="text-ember font-bold">#{currentIndex + 1}</span> of {observations.length}:{" "}
-            <span className="text-bone font-medium">{currentObs.obs_id || currentObs.obsId}</span>
-          </div>
-          <div>
-            MJD: <span className="text-bone">{parseFloat(currentObs.t_min || currentObs.mjd || 0).toFixed(4)}</span>
-          </div>
-          <div>
-            Spectral Band: <span className="text-ember-soft font-semibold">{currentObs.energy_bandpassname || currentObs.bandpass}</span>
-          </div>
-          <div>
-            Integration: <span className="text-bone">{parseFloat(currentObs.t_exptime || currentObs.exposureTimeSec || 113.58).toFixed(1)}s</span>
-          </div>
-        </div>
       </div>
     </div>
   );
