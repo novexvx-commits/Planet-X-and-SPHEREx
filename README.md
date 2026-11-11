@@ -60,9 +60,14 @@ cinematic-scrollytelling-web-experience/
 │       ├── api.test.js                    # Scientific calculation unit tests
 │       └── e2e.test.js                    # End-to-end HTTP integration tests
 ├── src/                                   # Modern React 19 Frontend
-│   ├── App.tsx                            # Root application & scrollytelling page flow
+│   ├── App.tsx                            # Root application with client-side SPA routing
+│   ├── pages/
+│   │   ├── HomePage.tsx                   # Dedicated cinematic scrollytelling page (with "Try MARSAD")
+│   │   └── ExperiencePage.tsx             # Completely isolated scientific platform (No navbar, only Back to Home)
+│   ├── lib/
+│   │   └── router.tsx                     # Zero-dependency History API router (/ and /experience)
 │   ├── components/
-│   │   ├── Nav.tsx                        # Cinematic navigation header
+│   │   ├── Nav.tsx                        # Cinematic navigation header (Homepage)
 │   │   └── spherex/
 │   │       ├── SpherexHub.tsx             # Master scientific exploration command station
 │   │       ├── AladinSkyExplorer.tsx      # Interactive celestial viewport & FOV footprint
@@ -73,7 +78,7 @@ cinematic-scrollytelling-web-experience/
 │   │       ├── MostSolarSystemExplorer.tsx# IRSA MOST moving object orbit matcher
 │   │       └── ProvenanceInspector.tsx    # Scientific data lineage & JSON export
 │   └── sections/                          # Cinematic scrollytelling narrative
-│       ├── Hero.tsx                       # WebGL 3D black hole & starfield
+│       ├── Hero.tsx                       # WebGL 3D black hole, starfield & "Try MARSAD" CTA
 │       ├── Prologue.tsx                   # Narrative mission prologue
 │       ├── Spacewalk.tsx                  # Three.js 3D space walk & hyperspace warp
 │       ├── Telemetry.tsx                  # Cosmic Dawn lookback depth & redshift mapping
