@@ -4,17 +4,17 @@ import { useScrollProgress } from "../hooks/useScrollProgress";
 import { cn } from "../utils/cn";
 import { CountUp, Kicker, SplitText, dv } from "../components/ui";
 
-// positions mapped onto the engine plate (21:10 crop of a 16:9 frame)
+// positions mapped onto the telescope plate (21:10 crop of a 16:9 frame)
 const NOTES = [
-  { x: "60%", y: "21%", label: "Casimir lattice core", value: "4.1 × 10¹⁹ J stored", side: "right", c: "#6ce5ff" },
-  { x: "33%", y: "62%", label: "Containment coil array", value: "−271.1 °C", side: "left", c: "#9b7bff" },
-  { x: "72%", y: "47%", label: "Equatorial field ring", value: "3.4 MN thrust vector", side: "right", c: "#ff8a3d" },
+  { x: "60%", y: "21%", label: "Three-Mirror Anastigmat", value: "20 cm aperture · f/3.0 optics", side: "right", c: "#6ce5ff" },
+  { x: "33%", y: "62%", label: "Cryogenic V-Groove Shield", value: "< 80 Kelvin passive cooling", side: "left", c: "#9b7bff" },
+  { x: "72%", y: "47%", label: "Linear Variable Filter Arrays", value: "6 Arrays · 2048×2048 pixels each", side: "right", c: "#ff8a3d" },
 ];
 
 const SPECS = [
-  { to: 4.1, d: 1, suf: "×10¹⁹ J", label: "Energy held in the lattice" },
-  { to: 3.4, d: 1, suf: " MN", label: "Continuous thrust" },
-  { to: 22, d: 0, suf: " yrs", label: "Longest unbroken burn" },
+  { to: 102, d: 0, suf: " Bands", label: "Continuous Spectral Channels (0.75 – 5.0 µm)" },
+  { to: 80, d: 0, suf: " K", label: "Cryogenic Detector Temperature" },
+  { to: 20, d: 0, suf: " cm", label: "Telescope Primary Aperture" },
 ];
 
 /** Scene 4 — Cinematic feature spotlight in a luminous, rotating mesh border */
@@ -31,21 +31,20 @@ export default function Spotlight() {
   );
 
   return (
-    <section id="meridian" ref={ref} className="relative overflow-hidden py-28 md:py-44">
+    <section id="optics" ref={ref} className="relative overflow-hidden py-28 md:py-44">
       <div aria-hidden="true" className="mesh pointer-events-none absolute inset-0" />
       <div aria-hidden="true" className="grid-lines pointer-events-none absolute inset-0 opacity-70" />
 
       <div className="shell relative">
         <div className="mx-auto max-w-4xl text-center">
-          <Kicker center>Chapter III — The Heart of Meridian</Kicker>
+          <Kicker center>Instrumentation & Payload — The SPHEREx Optical Assembly</Kicker>
           <SplitText
-            text="A sun, held in | a *bottle of light.*"
+            text="Cryogenic Optics, | a *Lens for the Void.*"
             emClass="em-ion"
             className="mt-7 font-serif text-[clamp(3rem,8.4vw,8.8rem)] leading-[0.9] tracking-[-0.015em]"
           />
           <p data-reveal="up" style={dv({ "--d": "250ms" })} className="mx-auto mt-8 max-w-xl text-[16px] leading-[1.75] text-bone/60 md:text-[17px]">
-            At the core of Meridian burns the Casimir Lattice — a crystal of engineered vacuum that drinks energy from empty space itself. The most
-            powerful machine ever built, small enough to fit inside a cathedral.
+            At the heart of the SPHEREx spacecraft is a 20-centimeter aluminum three-mirror anastigmat telescope. Cooled passively below 80 Kelvin by conical thermal radiation shields, it feeds six Linear Variable Filter (LVF) detector arrays without requiring moving parts.
           </p>
         </div>
 
@@ -56,7 +55,7 @@ export default function Spotlight() {
               <img
                 ref={imgRef}
                 src={engineImg}
-                alt="Meridian's engine core: a blazing cyan plasma ring held inside dark titanium magnetic coils"
+                alt="SPHEREx telescope optical assembly: three-mirror anastigmat telescope with cryogenic thermal shield"
                 className="absolute inset-0 h-full w-full object-cover will-change-transform"
                 style={{ transform: "scale(1.2)" }}
               />
@@ -79,11 +78,11 @@ export default function Spotlight() {
               ))}
 
               <div className="absolute bottom-5 left-5 font-mono text-[10px] uppercase tracking-[0.2em] text-bone/65 md:bottom-7 md:left-8">
-                Fig. 05 — Lattice chamber, Deck 0
+                Fig. 04 — SPHEREx Focal Plane Array & Optical Bench
               </div>
               <div className="absolute right-5 top-5 flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-bone/80 backdrop-blur-md md:right-8 md:top-7">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-ion" />
-                Output nominal
+                Detector Status: Active
               </div>
             </div>
           </div>

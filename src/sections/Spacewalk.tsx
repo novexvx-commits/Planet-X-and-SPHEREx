@@ -425,20 +425,20 @@ export default function Spacewalk() {
           <div className="pointer-events-none absolute z-25 flex flex-col items-center gap-3">
             <div className="h-9 w-9 animate-spin rounded-full border-2 border-white/10 border-t-[#00E5FF]" />
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-bone/60">
-              Locating Astronaut in Void · {loadingProgress}%
+              Calibrating Celestial Viewport · {loadingProgress}%
             </p>
           </div>
         )}
 
-        {/* Cinematic Header Overlay (Fades out smoothly as astronaut approaches) */}
+        {/* Cinematic Header Overlay (Fades out smoothly as user scrolls) */}
         <div
           ref={headerRef}
           className="pointer-events-none absolute top-12 md:top-16 inset-x-0 z-20 will-change-transform"
         >
           <div className="shell text-center">
-            <Kicker center>Chapter II.5 · Extravehicular Mobility</Kicker>
+            <Kicker center>Scientific Exploration · Observing the Infrared Sky</Kicker>
             <SplitText
-              text="Suspended in the | *Infinite Quiet.*"
+              text="Suspended in the | *Infinite Infrared.*"
               emClass="em-ion"
               className="mt-4 md:mt-5 font-serif text-[clamp(2.4rem,6.5vw,6rem)] leading-[0.94] tracking-[-0.015em]"
             />
@@ -447,8 +447,8 @@ export default function Spacewalk() {
               style={dv({ "--d": "200ms" })}
               className="mx-auto mt-4 max-w-xl text-[14px] md:text-[16px] leading-[1.7] text-bone/60"
             >
-              Far across the cosmic dark, a lone figure drifts in eternal silence.
-              Scroll to bridge the distance and bring the voyager into view.
+              Beyond the narrow window of visible light, the cold universe glows.
+              NASA's SPHEREx surveys the entire cosmos in 102 near-infrared spectral channels.
             </p>
           </div>
         </div>

@@ -40,34 +40,34 @@ function IconMind() {
 
 const SYSTEMS: { code: string; cat: string; title: string; rgb: string; icon: ReactNode; desc: string; bullets: string[]; stat: [string, string] }[] = [
   {
-    code: "SYS-01",
-    cat: "Propulsion",
-    title: "Casimir Lattice Drive",
+    code: "TEL-01",
+    cat: "Optics",
+    title: "All-Aluminum TMA Telescope",
     rgb: "108,229,255",
     icon: <IconDrive />,
-    desc: "A crystal of engineered vacuum that harvests zero-point energy and pours it through a magnetic nozzle.",
-    bullets: ["4.1 × 10¹⁹ joules held in the lattice", "3.4 meganewtons of continuous thrust", "A 22-year burn without a single shutdown"],
-    stat: ["Peak", "0.21c"],
+    desc: "A 20 cm aperture Three-Mirror Anastigmat diamond-turned telescope delivering a wide 3.5° × 11.3° field of view.",
+    bullets: ["20 cm diameter all-aluminum monolithic optics", "Wide 3.5° × 11.3° survey field of view", "Diffraction-limited across 0.75 – 5.0 µm"],
+    stat: ["Aperture", "20 cm f/3.0"],
   },
   {
-    code: "SYS-02",
-    cat: "Habitat",
-    title: "The Verdance Ring",
+    code: "DET-02",
+    cat: "Spectroscopy",
+    title: "Linear Variable Filter Arrays",
     rgb: "255,138,61",
     icon: <IconRing />,
-    desc: "A 1.2-kilometre toroid spun to nine-tenths of Earth’s gravity, wrapped around a living forest.",
-    bullets: ["2,814 species in a closed biosphere", "99.97% water recovery — every drop", "A ribbon sun that keeps Earth’s hours"],
-    stat: ["Crew", "108 → 145"],
+    desc: "Six Teledyne H2RG 2048×2048 pixel infrared detector arrays bonded with wedged dielectric Linear Variable Filters.",
+    bullets: ["102 spectral resolution elements (R = 40–130)", "Six cryogenically cooled H2RG focal planes", "Slitless spectral dispersion in every exposure"],
+    stat: ["Coverage", "102 Bands"],
   },
   {
-    code: "SYS-03",
-    cat: "Intelligence",
-    title: "Vesper Cognitive Core",
+    code: "CRY-03",
+    cat: "Cryogenics",
+    title: "V-Groove Radiative Cooling",
     rgb: "155,123,255",
     icon: <IconMind />,
-    desc: "A photonic mind cooled to four kelvin — navigator, physician, engineer and, in the long dark, companion.",
-    bullets: ["1.6 billion autonomous repair decisions", "Zero critical failures in 71 years", "One symphony composed for every year"],
-    stat: ["Uptime", "99.9998%"],
+    desc: "Three concentric conical aluminum V-groove thermal shields passively rejecting Earth and solar infrared heat loads.",
+    bullets: ["100% passive cooling to sub-80K without liquid cryogens", "Thermal isolation maintaining <55 K detector stage", "25-month continuous all-sky prime mission baseline"],
+    stat: ["FPA Temp", "< 55 Kelvin"],
   },
 ];
 
@@ -88,16 +88,15 @@ export default function Systems() {
 
       <div className="shell relative grid gap-10 md:grid-cols-12 md:items-end">
         <div className="md:col-span-7">
-          <Kicker>Chapter IX — Engineering the Impossible</Kicker>
-          <SplitText text="Three systems. | *Zero margin.*" className="mt-6 font-serif text-[clamp(3rem,7.4vw,7.6rem)] leading-[0.9] tracking-[-0.015em]" />
+          <Kicker>Chapter IX — Observatory Subsystems</Kicker>
+          <SplitText text="Three innovations. | *All-sky reach.*" className="mt-6 font-serif text-[clamp(3rem,7.4vw,7.6rem)] leading-[0.9] tracking-[-0.015em]" />
         </div>
         <div className="md:col-span-4 md:col-start-9">
           <p data-reveal="up" className="text-[16px] leading-[1.75] text-bone/60">
-            Seventy-one years from the nearest spare part, every system aboard Meridian had to be self-healing, redundant, and quietly brilliant.
-            Three of them carried the weight of everything else.
+            Operating in a 700 km polar terminator orbit, SPHEREx eliminates moving mechanisms and cryogen depletion through passive thermal staging and slitless LVF dispersion. Three subsystems anchor the observatory.
           </p>
           <p data-reveal="fade" style={dv({ "--d": "200ms" })} className="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-bone/40">
-            Meridian · Class-I interstellar vessel · 1.9 km
+            SPHEREx · NASA Astrophysics MIDEX · Caltech / JPL
           </p>
         </div>
       </div>

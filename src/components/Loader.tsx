@@ -4,7 +4,12 @@ import ignitionImg from "../assets/img/ignition.jpg";
 import { cn } from "../utils/cn";
 import { LogoMark } from "./ui";
 
-const LINES = ["Calibrating the Casimir lattice", "Spinning up the Verdance", "Waking Vesper", "Plotting a course to Erebus"];
+const LINES = [
+  "Calibrating Linear Variable Filters (0.75 – 5.00 µm)",
+  "Aligning 6 Detector Arrays (2048×2048)",
+  "Connecting NASA/IPAC IRSA Archive",
+  "Resolving Target Coordinates via ICRS"
+];
 
 export default function Loader({ onComplete }: { onComplete: () => void }) {
   const numRef = useRef<HTMLSpanElement>(null);
@@ -81,15 +86,15 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
       className={cn("loader fixed inset-0 z-[96] flex flex-col bg-ink", phase === "exit" && "is-exit")}
       role="status"
       aria-live="polite"
-      aria-label="Loading the Nocturne experience"
+      aria-label="Loading the MARSAD scientific observatory"
     >
       <div className="pointer-events-none absolute left-1/2 top-1/2 h-[70vmin] w-[70vmin] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,138,61,0.12),rgba(107,70,255,0.06)_45%,transparent_70%)]" />
       <div className="shell relative flex h-[72px] items-center justify-between md:h-20">
         <div className="flex items-center gap-3">
           <LogoMark className="spin-slow h-7 w-7" />
-          <span className="font-mono text-[11px] uppercase tracking-[0.42em]">Nocturne</span>
+          <span className="font-mono text-[11px] uppercase tracking-[0.42em]">MARSAD</span>
         </div>
-        <span className="hidden font-mono text-[10px] uppercase tracking-[0.2em] text-bone/40 sm:block">Meridian Consortium · Log 000</span>
+        <span className="hidden font-mono text-[10px] uppercase tracking-[0.2em] text-bone/40 sm:block">NASA SPHEREx Mission · Calibration</span>
       </div>
 
       <div className="relative flex flex-1 items-center justify-center">

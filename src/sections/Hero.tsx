@@ -15,7 +15,7 @@ const R_OUT = 6.4;
  * Scene 1 — "Descent"
  * A fully procedural, scroll-scrubbed canvas film:
  *   0.00 → 0.20  drifting starfield, title pushes through camera
- *   0.10 → 0.60  warp streaks; Erebus emerges with Einstein-ring lensing of background stars
+ *   0.10 → 0.60  warp streaks; celestial sphere emerges with Einstein-ring lensing of background stars
  *   0.60 → 0.92  accretion disk swells, lensed halo arcs over the shadow
  *   0.92 → 1.00  the shadow swallows the frame — darkness, final line
  */
@@ -190,7 +190,7 @@ export default function Hero({ ready }: { ready: boolean }) {
 
       if (bhA < 0.002) return;
 
-      // ── Erebus
+      // ── Core Horizon Accretion & Lensing
       const A = bhA * (1 - smoothstep(0.82, 0.93, bh));
       ctx.save();
       ctx.translate(cx, cy);
@@ -407,7 +407,7 @@ export default function Hero({ ready }: { ready: boolean }) {
               "radial-gradient(55% 45% at 72% 28%, rgba(107,70,255,0.22), transparent 70%), radial-gradient(45% 40% at 22% 72%, rgba(42,169,214,0.15), transparent 70%), radial-gradient(30% 30% at 50% 50%, rgba(255,138,61,0.10), transparent 70%)",
           }}
         />
-        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" aria-label="A starship's view falling toward the black hole Erebus" role="img" />
+        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" aria-label="NASA SPHEREx all-sky cosmic infrared simulation" role="img" />
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_85%_at_50%_50%,transparent_52%,rgba(2,3,6,0.85)_100%)]" />
 
         {/* HUD */}
@@ -419,34 +419,34 @@ export default function Hero({ ready }: { ready: boolean }) {
             <span className="hud-corner bottom-5 right-5 border-b border-r md:bottom-8 md:right-8" />
 
             <div className="absolute left-8 top-1/2 hidden h-[38vh] -translate-y-1/2 md:block lg:left-12">
-              <span className="absolute -top-7 left-0 font-mono text-[9px] tracking-[0.2em] text-bone/40">2187</span>
+              <span className="absolute -top-7 left-0 font-mono text-[9px] tracking-[0.2em] text-bone/40">2025</span>
               <div className="relative h-full w-px bg-white/15">
                 {Array.from({ length: 11 }).map((_, i) => (
                   <span key={i} className="absolute -left-[3px] h-px w-[7px] bg-white/30" style={{ top: `${i * 10}%` }} />
                 ))}
                 <div ref={markerRef} className="absolute -left-[3.5px] -mt-[4px] h-2 w-2 rounded-full bg-ember shadow-[0_0_14px_#ff8a3d]" style={{ top: 0 }} />
               </div>
-              <span className="absolute -bottom-7 left-0 font-mono text-[9px] tracking-[0.2em] text-bone/40">2258</span>
+              <span className="absolute -bottom-7 left-0 font-mono text-[9px] tracking-[0.2em] text-bone/40">2027</span>
             </div>
 
             <div className="absolute bottom-9 left-9 hidden font-mono text-[10px] uppercase leading-5 tracking-[0.16em] text-bone/45 sm:block md:bottom-12 md:left-14">
               <div className="flex items-center gap-2 text-bone/70">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-ember" />
-                Live · Forward array α
+                Active · SPHEREx All-Sky Survey
               </div>
-              <div>Sector Lyra-7</div>
-              <div>RA 18h 52m 07s · Dec +33° 14′</div>
+              <div>102 Spectral Channels · 0.75 – 5.00 µm</div>
+              <div>Sun-Synchronous Low Earth Orbit · 700 km</div>
             </div>
 
             <div className="absolute bottom-9 right-9 hidden text-right font-mono text-[10px] uppercase leading-5 tracking-[0.16em] text-bone/45 sm:block md:bottom-12 md:right-14">
               <div>
-                Vel <span ref={velRef} className="tabular-nums text-bone/85">0.000c</span>
+                Array <span ref={velRef} className="tabular-nums text-bone/85">D1–D6</span>
               </div>
               <div>
-                Dist <span ref={distRef} className="tabular-nums text-bone/85">9.60 ly</span>
+                FOV <span ref={distRef} className="tabular-nums text-bone/85">3.5° × 11.3°</span>
               </div>
               <div>
-                <span ref={clockRef} className="tabular-nums text-bone/85">T+ 00Y 000D</span>
+                <span ref={clockRef} className="tabular-nums text-bone/85">QR2 Release</span>
               </div>
             </div>
           </div>
@@ -455,27 +455,27 @@ export default function Hero({ ready }: { ready: boolean }) {
         {/* Title */}
         <div ref={titleRef} className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 text-center will-change-transform">
           <p className="hero-fade kicker text-bone/60" style={dv({ "--d": "250ms" })}>
-            Nocturne Expedition · Log 001 · 21.XII.2187
+            NASA SPHEREx Mission · 2026 Space Apps Challenge
           </p>
           <h1 className="mt-6 font-serif text-[clamp(3.6rem,13.5vw,13.5rem)] leading-[0.84] tracking-[-0.02em]">
             <span className="hero-line">
-              <span style={{ transitionDelay: "200ms" }}>Beyond the</span>
+              <span style={{ transitionDelay: "200ms" }}>The Infrared</span>
             </span>
             <span className="hero-line">
               <span className="em" style={{ transitionDelay: "340ms" }}>
-                Last Light
+                Universe in Motion
               </span>
             </span>
           </h1>
           <p className="hero-fade mt-8 max-w-md text-[15px] leading-relaxed text-bone/70 md:text-base" style={dv({ "--d": "900ms" })}>
-            In 2187, one hundred and eight people left the Sun behind to look into the eye of a dark star.
+            MARSAD is an interactive scientific observatory exploring NASA SPHEREx’s all-sky time-domain infrared spectroscopy.
           </p>
         </div>
 
         {/* Scroll cue */}
         <div className="hero-fade pointer-events-none absolute inset-x-0 bottom-8 flex justify-center md:bottom-10" style={dv({ "--d": "1300ms" })}>
           <div ref={cueRef} className="flex flex-col items-center gap-4">
-            <span className="kicker text-bone/50">Scroll to begin the descent</span>
+            <span className="kicker text-bone/50">Scroll to explore the cosmic survey</span>
             <span className="scroll-line" />
           </div>
         </div>
@@ -486,12 +486,12 @@ export default function Hero({ ready }: { ready: boolean }) {
             <div className="max-w-xl text-glow md:pl-10">
               <p className="kicker flex items-center gap-3 text-ember-soft">
                 <span className="h-px w-10 bg-current" />
-                Target acquired
+                Time-Domain Survey
               </p>
               <p className="mt-5 font-serif text-[clamp(2.2rem,5vw,4.6rem)] leading-[0.96]">
-                They named it <em className="em">Erebus</em> — a star so heavy it swallowed its own light.
+                Mapping the sky in <em className="em">102 infrared colors</em> every six months.
               </p>
-              <p className="mt-6 font-mono text-[10.5px] uppercase tracking-[0.18em] text-bone/55">7.8 solar masses · Constellation Lyra · 9.6 light-years</p>
+              <p className="mt-6 font-mono text-[10.5px] uppercase tracking-[0.18em] text-bone/55">6 Linear Variable Filters · Resolving Power R = 35–130 · 6.2"/pixel</p>
             </div>
           </div>
         </div>
@@ -501,11 +501,11 @@ export default function Hero({ ready }: { ready: boolean }) {
           <div className="shell flex justify-end">
             <div className="max-w-lg text-right text-glow md:pr-10 xl:pr-40">
               <p className="kicker flex items-center justify-end gap-3 text-ion">
-                Approaching the event horizon
+                Unveiling Cosmic Phenomena
                 <span className="h-px w-10 bg-current" />
               </p>
               <p className="mt-5 font-serif text-[clamp(2rem,4.4vw,4.1rem)] leading-[0.98]">
-                Here, time thickens like honey. <em className="em-ion">One heartbeat at the rim outlasts a hundred at home.</em>
+                From high-velocity proper motion stars to <em className="em-ion">cold brown dwarfs and interstellar water-ice clouds.</em>
               </p>
             </div>
           </div>
@@ -513,9 +513,9 @@ export default function Hero({ ready }: { ready: boolean }) {
 
         {/* Beat C — darkness */}
         <div ref={cRef} className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 text-center opacity-0" style={{ visibility: "hidden" }}>
-          <p className="kicker text-bone/45">Log 4,117 · Inside the photon sphere</p>
-          <p className="mt-7 max-w-5xl font-serif text-[clamp(2.6rem,7vw,7.2rem)] leading-[0.92]">Some horizons are not meant to be crossed.</p>
-          <p className="mt-6 font-serif text-2xl italic text-ember-soft md:text-3xl">We crossed anyway.</p>
+          <p className="kicker text-bone/45">Spectroscopy Beyond Human Vision · 0.75 – 5.00 µm</p>
+          <p className="mt-7 max-w-5xl font-serif text-[clamp(2.6rem,7vw,7.2rem)] leading-[0.92]">The cosmos is not silent or still.</p>
+          <p className="mt-6 font-serif text-2xl italic text-ember-soft md:text-3xl">It breathes, shifts, and glows in the dark.</p>
         </div>
       </div>
     </section>

@@ -5,16 +5,16 @@ import { Arrow, Kicker, Magnetic, SplitText, dv } from "../components/ui";
 type Kind = "lens" | "star" | "ship" | "planet" | "hole" | "signal";
 
 const LOG: { year: string; tag: string; title: string; text: string; rgb: string; kind: Kind }[] = [
-  { year: "2142", tag: "Discovery", title: "The Erebus Anomaly", text: "A microlensing flicker in the Lyra field betrays a dark mass of 7.8 suns, just 9.6 light-years away.", rgb: "155,123,255", kind: "lens" },
-  { year: "2156", tag: "Breakthrough", title: "The Ceres Lattice", text: "Engineers on Ceres hold a Casimir lattice stable for eleven minutes. Interstellar flight stops being fiction.", rgb: "108,229,255", kind: "star" },
-  { year: "2171", tag: "Construction", title: "Keel at Lagrange-2", text: "The first ring of Meridian is laid in Earth’s shadow. Four nations, sixteen years, one ship.", rgb: "236,232,225", kind: "ship" },
-  { year: "2187", tag: "Departure", title: "Ignition", text: "On the winter solstice, 108 crew watch the Sun shrink to a bright coin in the aft windows.", rgb: "255,138,61", kind: "planet" },
-  { year: "2203", tag: "Threshold", title: "Beyond the Heliopause", text: "The solar wind falls silent. For the first time, humans sail the open ocean between stars.", rgb: "108,229,255", kind: "star" },
-  { year: "2216", tag: "Silence", title: "The Last Clear Signal", text: "Earth’s voices dissolve into static. The crew holds a vigil and plays the final broadcast on loop.", rgb: "155,123,255", kind: "signal" },
-  { year: "2229", tag: "Midpoint", title: "Turnover", text: "Meridian flips end over end and begins a twenty-two-year deceleration burn toward the dark.", rgb: "236,232,225", kind: "ship" },
-  { year: "2244", tag: "First Sight", title: "A Hole in the Stars", text: "Forward telescopes resolve Erebus at last: a perfect absence, ringed in fire.", rgb: "255,138,61", kind: "hole" },
-  { year: "2258", tag: "Arrival", title: "Orbit Insertion", text: "Meridian settles into a stable orbit at 3.1 AU and opens her eyes on forever.", rgb: "255,192,138", kind: "hole" },
-  { year: "2267", tag: "Echo", title: "Message Home", text: "Earth receives the first close image of an event horizon. Nine years late. Perfectly on time.", rgb: "108,229,255", kind: "signal" },
+  { year: "2015", tag: "Selection", title: "NASA MIDEX Selection", text: "NASA selects SPHEREx (Caltech/JPL) for Phase A study to map the entire sky in 102 near-infrared bands.", rgb: "155,123,255", kind: "lens" },
+  { year: "2019", tag: "Confirmation", title: "Phase C Baseline", text: "NASA formally approves SPHEREx for construction, confirming the 20cm telescope and Linear Variable Filter design.", rgb: "108,229,255", kind: "star" },
+  { year: "2022", tag: "Cryo Testing", title: "LVF Focal Plane Arrays", text: "Six Teledyne H2RG 2048x2048 detectors and mosaic LVFs demonstrate sub-80K performance in cryo-vacuum.", rgb: "236,232,225", kind: "ship" },
+  { year: "2024", tag: "Integration", title: "Observatory Assembly", text: "Spacecraft bus, V-groove thermal shields, and the Three-Mirror Anastigmat telescope are integrated at Ball Aerospace.", rgb: "255,138,61", kind: "planet" },
+  { year: "2025", tag: "Launch", title: "Sun-Synchronous Orbit", text: "SPHEREx launches into a 700 km terminator polar orbit, initiating its 25-month all-sky spectroscopic prime mission.", rgb: "108,229,255", kind: "star" },
+  { year: "2025", tag: "Survey 1", title: "First All-Sky Spectral Map", text: "Epoch 1 completes a full 4pi steradian scan of the sky across 0.75–5.0 um in exactly six months.", rgb: "155,123,255", kind: "signal" },
+  { year: "2026", tag: "Survey 2", title: "Multi-Epoch Difference Scan", text: "Epoch 2 revisits every field, enabling difference imaging, variable star detection, and brown dwarf proper motion.", rgb: "236,232,225", kind: "ship" },
+  { year: "2026", tag: "Public Data", title: "Quick Release 2 (QR2)", text: "NASA/IPAC IRSA publishes calibrated 102-band spectral cubes and level-2 time-domain products to researchers.", rgb: "255,138,61", kind: "hole" },
+  { year: "2027", tag: "Surveys 3-4", title: "Four-Epoch Baseline", text: "Four independent passes over every coordinate reach unprecedented all-sky infrared depth for 450M galaxies.", rgb: "255,192,138", kind: "hole" },
+  { year: "2027+", tag: "Legacy", title: "JWST & Roman Synergy", text: "SPHEREx provides the definitive low-resolution infrared reference catalog for deep targeted space observatories.", rgb: "108,229,255", kind: "signal" },
 ];
 
 const TILTS = [-18, 12, -28, 22, -8, 32, -20, 14, -12, 26];
@@ -289,8 +289,8 @@ export default function MissionLog() {
 
       <div className="shell relative flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
         <div>
-          <Kicker>Chapter VII — The Mission Log</Kicker>
-          <SplitText text="A lifetime, | *logged in light.*" className="mt-6 font-serif text-[clamp(2.9rem,7vw,7.2rem)] leading-[0.9] tracking-[-0.015em]" />
+          <Kicker>Chapter VII — Mission Chronology</Kicker>
+          <SplitText text="Survey Cadence, | *logged across epochs.*" className="mt-6 font-serif text-[clamp(2.9rem,7vw,7.2rem)] leading-[0.9] tracking-[-0.015em]" />
         </div>
         <div data-reveal="fade" style={dv({ "--d": "300ms" })} className="flex items-center gap-5">
           <span className="mr-2 font-mono text-xs tabular-nums text-bone/45">

@@ -8,48 +8,48 @@ import { Kicker, SplitText, dv } from "../components/ui";
 
 const ACTS = [
   {
-    act: "Act I",
+    act: "Pillar I",
     n: "01",
-    title: "Ignition",
-    kicker: "Leaving the cradle",
+    title: "Cosmic Dawn",
+    kicker: "Galaxy Formation & Inflation",
     img: ignition,
-    alt: "Meridian igniting its drive above the dawn-lit limb of Earth",
+    alt: "Infrared extragalactic sky survey mapping hundreds of millions of distant galaxies",
     rgb: "108,229,255",
-    text: "On the winter solstice of 2187, Meridian lit her lattice drive above the night side of Earth. For eleven minutes a second sun burned over the Pacific. Then she was gone — a fading spark in Lyra, carrying the full weight of a planet’s hope.",
+    text: "SPHEREx measures 3D large-scale structure across hundreds of millions of galaxies and traces spatial fluctuations in the Cosmic Infrared Background (CIB), testing cosmic inflation models and uncovering the epoch of first star formation.",
     meta: [
-      ["Date", "21 · XII · 2187"],
-      ["Velocity", "0 → 0.08c"],
-      ["Earth recedes", "1 AU / 33 h"],
+      ["Redshift Reach", "z ≈ 0.1 → 5.0"],
+      ["Galaxies Mapped", "450+ Million"],
+      ["Cosmic Era", "Reionization Epoch"],
     ],
   },
   {
-    act: "Act II",
+    act: "Pillar II",
     n: "02",
-    title: "The Drift",
-    kicker: "Forty-four years of silence",
+    title: "Biogenic Ices",
+    kicker: "The Chemistry of Planet Formation",
     img: drift,
-    alt: "A tiny starship drifting through a vast violet nebula",
+    alt: "Dense interstellar molecular clouds where water, carbon dioxide, and carbon monoxide ices condense",
     rgb: "155,123,255",
-    text: "Between stars there is no weather, no up, no news — only the long fall. The crew grew gardens, raised children, buried friends, and learned that silence has a texture. Even the void, given time, can feel like home.",
+    text: "Across dense molecular clouds and young protoplanetary discs, SPHEREx detects solid absorption signatures of prebiotic ices—water ice at 3.05 µm, CO₂ ice at 4.27 µm, and CO ice at 4.67 µm—tracing how water and organics are delivered to newly forming planetary systems.",
     meta: [
-      ["Duration", "44 years"],
-      ["Cruise", "0.21c"],
-      ["Born aboard", "37 children"],
+      ["H₂O Ice Band", "3.05 µm (D4)"],
+      ["CO₂ Ice Band", "4.27 µm (D5)"],
+      ["CO Ice Band", "4.67 µm (D6)"],
     ],
   },
   {
-    act: "Act III",
+    act: "Pillar III",
     n: "03",
-    title: "The Horizon",
-    kicker: "Where time bends",
+    title: "Time-Domain",
+    kicker: "The Universe in Motion",
     img: horizon,
-    alt: "Torrents of amber plasma spiralling into the black void of Erebus",
+    alt: "Multi-epoch astronomical comparison revealing proper motion and variable stellar flux",
     rgb: "255,138,61",
-    text: "In 2258 the stars ahead began to bend. Erebus revealed itself not as an object but as an absence — a perfect circle of nothing, crowned in fire. Here clocks argue with one another, light walks in circles, and the universe shows its hidden architecture.",
+    text: "By revisiting the entire sky every six months, SPHEREx uncovers dynamic cosmic phenomena: high-proper-motion brown dwarfs like WISE 0855, variable accretion discs like RW Aurigae, Mira pulsations in R Draconis, and moving Solar System asteroids.",
     meta: [
-      ["Arrival", "26 · III · 2258"],
-      ["Orbit", "3.1 AU"],
-      ["Mass", "7.8 M☉"],
+      ["Cadence", "Every 6 Months"],
+      ["Spectral Bands", "102 Near-IR Channels"],
+      ["Astrometry", "Multi-Epoch Centroids"],
     ],
   },
 ];
@@ -129,10 +129,10 @@ export default function Voyage() {
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-[40vh] bg-linear-to-t from-ink to-transparent" />
 
         <header className="shell relative flex min-h-[92vh] flex-col justify-end pb-[12vh]">
-          <Kicker>Chapter II — The Voyage</Kicker>
-          <SplitText text="Seventy-one years. | *Three acts.*" className="mt-6 font-serif text-[clamp(3.2rem,9vw,9.4rem)] leading-[0.88] tracking-[-0.015em]" />
+          <Kicker>Mission Architecture — 3 Scientific Pillars</Kicker>
+          <SplitText text="The Full Spectrum. | *Three Pillars.*" className="mt-6 font-serif text-[clamp(3.2rem,9vw,9.4rem)] leading-[0.88] tracking-[-0.015em]" />
           <p data-reveal="up" style={dv({ "--d": "300ms" })} className="mt-8 max-w-md text-[16px] leading-[1.75] text-bone/65">
-            Every voyage is three journeys: the leaving, the long middle no one writes songs about, and the arrival that changes you forever.
+            SPHEREx unites extragalactic cosmology, interstellar astrochemistry, and time-domain stellar astrophysics into one continuous survey.
           </p>
         </header>
 

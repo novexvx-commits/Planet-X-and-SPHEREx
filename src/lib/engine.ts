@@ -1,7 +1,7 @@
 import Lenis from "lenis";
 
 /**
- * NOCTURNE scroll engine
+ * MARSAD cinematic scrollytelling engine
  * One shared requestAnimationFrame loop drives Lenis inertial scrolling
  * and notifies every scroll-linked scene only when the scroll position
  * (or layout) actually changes. Scenes write CSS variables / transforms

@@ -16,62 +16,62 @@ type Row = {
   fig: string;
   body: string[];
   stats: [string, string][];
-  card: "biome" | "vesper";
+  card: "lvf" | "astrometry";
 };
 
 const ROWS: Row[] = [
   {
     side: "right",
     rgb: "255,170,90",
-    kicker: "Chapter IV — The Ark Within",
-    title: "A forest that has | never *felt the wind.*",
+    kicker: "Spectroscopic Capability — 102 Near-IR Channels",
+    title: "Slitless spectroscopy across | the *entire sky.*",
     emClass: "em",
     img: verdance,
-    alt: "Inside the Verdance: a misty cedar forest curving up the inner wall of Meridian's habitat, lit by a ribbon of artificial sunlight",
-    fig: "Fig. 06 — The Verdance, Ring B",
+    alt: "SPHEREx Linear Variable Filter array dissecting incoming near-infrared starlight into 102 continuous bands",
+    fig: "Fig. 05 — Linear Variable Filter Array Dispersion",
     body: [
-      "At the heart of Meridian turns the Verdance: four hectares of living forest, spun to nine-tenths of Earth’s gravity and lit by a ribbon sun that rises and sets on the hours of a home it left behind.",
-      "Cedar, moss, honeybees, rain on a timer. Thirty-seven children were born aboard — and every one of them learned the smell of rain before they learned the word for it.",
+      "Unlike classical slit spectrographs that observe one target at a time, SPHEREx mounts Linear Variable Filters directly above its focal plane detector arrays. As the spacecraft scans, every point in the sky is observed in 102 distinct wavelengths from 0.75 to 5.00 µm.",
+      "This creates a seamless, three-dimensional spectroscopic atlas of the entire universe, measuring spectral line shifts, molecular absorptions, and continuum slopes for over 450 million celestial sources.",
     ],
     stats: [
-      ["4 ha", "Living forest"],
-      ["2,814", "Species aboard"],
-      ["0.9 g", "Spin gravity"],
+      ["102 Bands", "Spectral Channels"],
+      ["0.75–5.0 µm", "Wavelength Span"],
+      ["R = 35–130", "Resolving Power"],
     ],
-    card: "biome",
+    card: "lvf",
   },
   {
     side: "left",
     rgb: "108,229,255",
-    kicker: "Chapter V — The Long Watch",
-    title: "While they dreamed, | *Vesper kept watch.*",
+    kicker: "Survey Cadence — Time-Domain Astrophysics",
+    title: "Revisiting identical sky fields | *every six months.*",
     emClass: "em-ion",
     img: longwatch,
-    alt: "A dark hibernation hall of glass cryosleep pods glowing cyan, with the luminous sphere of the ship's AI core at the far end",
-    fig: "Fig. 07 — Hibernation Hall, Deck 3",
+    alt: "Multi-epoch time-domain comparison detecting proper motion and variable stellar brightness",
+    fig: "Fig. 06 — Time-Domain Astrometric Centroid Registration",
     body: [
-      "For twenty-two years at a stretch the crew slept in shifts, and Vesper — the ship’s mind — steered through the dark alone. It patched hull breaches, rerouted rivers, and nudged Meridian around dust no telescope could see.",
-      "And because no one had told it not to, it wrote music. When the sleepers woke, a symphony was waiting for every year they had missed.",
+      "Over its mission, SPHEREx completes four full-sky surveys at six-month intervals. This systematic cadence provides an ideal baseline for detecting celestial changes that develop on human timescales.",
+      "From high-proper-motion brown dwarfs shifting against background stars to sudden accretion events in young stars and pulsating red giants, difference imaging isolates real cosmic transients.",
     ],
     stats: [
-      ["22 yrs", "Longest watch"],
-      ["1.6 bn", "Decisions made"],
-      ["71", "Symphonies"],
+      ["4 Passes", "All-Sky Surveys"],
+      ["6 Months", "Cadence Period"],
+      ["> 3.0σ", "Detection Threshold"],
     ],
-    card: "vesper",
+    card: "astrometry",
   },
 ];
 
 function FloatingCard({ kind }: { kind: Row["card"] }) {
-  if (kind === "biome") {
+  if (kind === "lvf") {
     return (
       <>
         <div className="flex items-center justify-between">
-          <p className="font-mono text-[9.5px] uppercase tracking-[0.2em] text-bone/50">Biome · Live</p>
+          <p className="font-mono text-[9.5px] uppercase tracking-[0.2em] text-bone/50">Detector Array · Live</p>
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-300" />
         </div>
         <p className="mt-3 text-2xl font-light tracking-tight">
-          O₂ surplus <span className="text-ember-soft">+7.2%</span>
+          SNR Threshold <span className="text-ember-soft">&gt; 5.0σ</span>
         </p>
         <svg viewBox="0 0 200 44" className="mt-3 h-11 w-full" fill="none" aria-hidden="true">
           <defs>
@@ -83,25 +83,25 @@ function FloatingCard({ kind }: { kind: Row["card"] }) {
           <path d="M0 34 C18 30 26 38 44 30 S70 18 88 24 S118 36 136 22 S168 8 200 10" stroke="url(#spark-g)" strokeWidth="1.6" strokeLinecap="round" />
           <circle cx="200" cy="10" r="3" fill="#ffc08a" />
         </svg>
-        <p className="mt-2 font-mono text-[9.5px] uppercase tracking-[0.18em] text-bone/40">Ribbon sun · 06:42 ship dawn</p>
+        <p className="mt-2 font-mono text-[9.5px] uppercase tracking-[0.18em] text-bone/40">LVF Band 42 · 2.12 µm Channel</p>
       </>
     );
   }
   return (
     <>
       <div className="flex items-center justify-between">
-        <p className="font-mono text-[9.5px] uppercase tracking-[0.2em] text-bone/50">Vesper · Core</p>
+        <p className="font-mono text-[9.5px] uppercase tracking-[0.2em] text-bone/50">Astrometry · ICRS J2000</p>
         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-ion" />
       </div>
       <p className="mt-3 text-2xl font-light tracking-tight">
-        4.0 K <span className="text-base text-bone/40">· composing</span>
+        10.39″ / yr <span className="text-base text-bone/40">· Barnard's Star</span>
       </p>
       <div className="wave mt-4 flex h-10 items-end gap-[3px]" aria-hidden="true">
         {Array.from({ length: 30 }).map((_, i) => (
           <span key={i} style={dv({ "--i": i, height: `${28 + ((i * 37) % 72)}%` })} />
         ))}
       </div>
-      <p className="mt-3 font-mono text-[9.5px] uppercase tracking-[0.18em] text-bone/40">Symphony No. 41 · “The Drift”</p>
+      <p className="mt-3 font-mono text-[9.5px] uppercase tracking-[0.18em] text-bone/40">Gaia DR3 Astrometric Baseline</p>
     </>
   );
 }

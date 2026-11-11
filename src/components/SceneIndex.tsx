@@ -3,19 +3,19 @@ import { scrollToTarget } from "../lib/engine";
 import { cn } from "../utils/cn";
 
 export const SCENES = [
-  ["top", "Descent"],
-  ["prologue", "Prologue"],
-  ["spherex-hub", "SPHEREx Station"],
-  ["spacewalk", "Spacewalk"],
-  ["voyage", "The Voyage"],
-  ["meridian", "The Engine"],
-  ["ark", "Life Aboard"],
+  ["top", "Overview"],
+  ["prologue", "Mission Brief"],
+  ["spherex-hub", "MARSAD Station"],
+  ["spacewalk", "Infrared Sky"],
+  ["voyage", "Target Field"],
+  ["optics", "Telescope Optics"],
+  ["ark", "Spectroscopy"],
   ["first-light", "First Light"],
-  ["log", "Mission Log"],
-  ["telemetry", "Telemetry"],
-  ["systems", "Systems"],
-  ["vision", "Vision"],
-  ["manifest", "Manifest"],
+  ["log", "Survey Cadence"],
+  ["telemetry", "Photometry"],
+  ["systems", "Payload Systems"],
+  ["vision", "Cosmic Horizons"],
+  ["manifest", "Science Team"],
 ] as const;
 
 export default function SceneIndex() {

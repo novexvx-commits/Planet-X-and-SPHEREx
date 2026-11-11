@@ -4,10 +4,10 @@ import { useScrollProgress } from "../hooks/useScrollProgress";
 import { CountUp, Kicker, SplitText, dv } from "../components/ui";
 
 const STATS = [
-  { to: 108, decimals: 0, suffix: "", label: "Souls aboard Meridian" },
-  { to: 9.6, decimals: 1, suffix: " ly", label: "Distance to Erebus" },
-  { to: 71, decimals: 0, suffix: " yrs", label: "Earth-time in transit" },
-  { to: 0.21, decimals: 2, suffix: "c", label: "Cruising velocity" },
+  { to: 102, decimals: 0, suffix: "", label: "Near-IR Spectral Bands" },
+  { to: 5.0, decimals: 1, suffix: " µm", label: "Spectral Reach (0.75 – 5.0 µm)" },
+  { to: 6, decimals: 0, suffix: " mo", label: "All-Sky Survey Cadence" },
+  { to: 6.2, decimals: 1, suffix: "″", label: "Spatial Pixel Scale (arcsec)" },
 ];
 
 /** Scene 2 — Asymmetric editorial split with delayed, staggered reveals */
@@ -41,7 +41,7 @@ export default function Prologue() {
                 <img
                   ref={imgRef}
                   src={prologueImg}
-                  alt="An astronaut silhouetted against Meridian's observation viewport, gazing at a violet nebula and the distant ring of Erebus"
+                  alt="Astronomer examining multi-wavelength infrared sky surveys and SPHEREx detector data"
                   className="absolute inset-0 h-full w-full object-cover will-change-transform"
                   style={{ transform: "scale(1.2)" }}
                 />
@@ -49,21 +49,21 @@ export default function Prologue() {
                 <div className="absolute inset-x-5 top-5 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-bone/75">
                   <span className="flex items-center gap-2">
                     <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-ember" />
-                    Rec
+                    SPHEREx QR2
                   </span>
-                  <span>Deck 07 · Observation</span>
+                  <span>Low Earth Orbit · 700 km</span>
                 </div>
                 <div className="absolute inset-x-5 bottom-5 md:inset-x-6 md:bottom-6">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-bone/50">Fig. 01</p>
-                  <p className="mt-2 font-serif text-2xl italic leading-tight text-bone/95 md:text-[1.7rem]">“The first time I saw it, I forgot to breathe.”</p>
-                  <p className="mt-2 text-xs text-bone/50">— Cmdr. Ilse Varga, ship’s log, 2244</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-bone/50">Science Brief</p>
+                  <p className="mt-2 font-serif text-2xl italic leading-tight text-bone/95 md:text-[1.7rem]">“Mapping the cosmic dawn, galaxy formation, and interstellar biogenic ices.”</p>
+                  <p className="mt-2 text-xs text-bone/50">— NASA SPHEREx Science Working Group</p>
                 </div>
               </div>
             </div>
             <div className="glass absolute -right-3 top-[30%] hidden rounded-2xl px-4 py-3 md:block lg:-right-10">
-              <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-bone/45">Signal delay home</p>
+              <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-bone/45">Survey Revisit</p>
               <p className="mt-1 text-lg font-light tabular-nums">
-                9.6 <span className="text-sm text-bone/50">years</span>
+                6 <span className="text-sm text-bone/50">months / all-sky</span>
               </p>
             </div>
           </div>
@@ -71,19 +71,17 @@ export default function Prologue() {
 
         {/* Narrative */}
         <div className="col-span-12 flex flex-col justify-center md:col-span-6 md:col-start-7">
-          <Kicker>Chapter I — The Calling</Kicker>
+          <Kicker>Mission Overview — The Cosmic Infrared Dawn</Kicker>
           <SplitText
-            text="We were never meant | to stay *in the cradle.*"
+            text="Mapping the universe | *in 102 infrared colors.*"
             className="mt-6 font-serif text-[clamp(2.8rem,6.2vw,6.4rem)] leading-[0.92] tracking-[-0.01em]"
           />
           <div className="mt-10 max-w-xl space-y-6 text-[16px] leading-[1.75] text-bone/65 md:text-[17px]">
             <p data-reveal="up" style={dv({ "--d": "150ms" })}>
-              For two hundred thousand years we looked up and wondered. Then, in 2142, a flicker in the light of distant stars betrayed something
-              that should not exist so close to home: a black hole, silent and starless, drifting 9.6 light-years from the Sun.
+              Every six months, NASA’s SPHEREx mission maps the entire celestial vault from polar Low Earth Orbit. Operating across 102 near-infrared spectral channels from 0.75 to 5.00 µm, it captures the spectroscopic fingerprints of hundreds of millions of galaxies, stars, and interstellar clouds.
             </p>
             <p data-reveal="up" style={dv({ "--d": "300ms" })}>
-              We named it <span className="font-serif text-[1.15em] italic text-bone">Erebus</span>, after the primordial darkness of the Greeks.
-              Within a single generation we had built a ship to meet it — and found one hundred and eight people willing to never come home.
+              <span className="font-serif text-[1.15em] italic text-bone">MARSAD</span> transforms this massive time-domain dataset into an accessible scientific observatory—enabling researchers, educators, and citizens to track moving brown dwarfs, monitor pulsating variable stars, and detect prebiotic water and carbon ice reservoirs.
             </p>
           </div>
 

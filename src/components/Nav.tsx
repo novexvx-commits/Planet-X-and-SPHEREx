@@ -4,12 +4,12 @@ import { cn } from "../utils/cn";
 import { Arrow, LogoMark, Magnetic, dv } from "./ui";
 
 export const NAV_LINKS = [
-  { href: "#spherex-hub", label: "SPHEREx Hub", n: "01" },
-  { href: "#spacewalk", label: "Spacewalk", n: "02" },
-  { href: "#voyage", label: "Voyage", n: "03" },
-  { href: "#log", label: "Mission Log", n: "07" },
-  { href: "#telemetry", label: "Telemetry", n: "08" },
-  { href: "#vision", label: "Vision", n: "10" },
+  { href: "#spherex-hub", label: "Scientific Hub", n: "01" },
+  { href: "#spacewalk", label: "Infrared Sky", n: "02" },
+  { href: "#voyage", label: "5 Targets", n: "03" },
+  { href: "#log", label: "Mission Timeline", n: "04" },
+  { href: "#telemetry", label: "Spectrophotometry", n: "05" },
+  { href: "#vision", label: "Science Objectives", n: "06" },
 ];
 
 export default function Nav({ ready }: { ready: boolean }) {
@@ -61,10 +61,10 @@ export default function Nav({ ready }: { ready: boolean }) {
       <header ref={headerRef} className={cn("site-header fixed inset-x-0 top-0 z-50", ready && "is-ready", open && "menu-open")}>
         <div className="nav-bg absolute inset-0" />
         <div className="shell relative flex h-[72px] items-center justify-between md:h-20">
-          <a href="#top" onClick={(e) => go(e, "#top")} className="flex items-center gap-3" aria-label="SPHEREx Nocturne — back to beginning">
+          <a href="#top" onClick={(e) => go(e, "#top")} className="flex items-center gap-3" aria-label="MARSAD SPHEREx — back to beginning">
             <LogoMark className="h-7 w-7 text-ember" />
             <span className="font-mono text-[11px] uppercase tracking-[0.42em] text-bone">
-              SPHEREx <span className="text-ember font-semibold">2026</span>
+              MARSAD <span className="text-ember font-semibold">SPHEREx</span>
             </span>
           </a>
 

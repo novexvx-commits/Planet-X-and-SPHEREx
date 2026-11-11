@@ -77,3 +77,4 @@ Since its launch, NASA's **SPHEREx** (Spectro-Photometer for the History of the 
    - Click **"102 Spectral Bands"**: Drag the wavelength scrubber from $0.75$ to $5.00\,\mu\text{m}$ and view the $\mathrm{H_2O}$ and $\mathrm{CO_2}$ ice absorption features.
 7. **Inspect Solar System Minor Bodies:**
    - Click **"Solar System (MOST)"**: Query asteroid **Ceres** or **Vesta** to view orbital ephemerides intersecting SPHEREx passes.
+

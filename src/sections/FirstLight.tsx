@@ -5,10 +5,10 @@ import { useScrollProgress } from "../hooks/useScrollProgress";
 import { CountUp, dv } from "../components/ui";
 
 const STATS = [
-  { to: 41, d: 0, suf: " Gpx", label: "Resolution of frame 0001", group: true },
-  { to: 3.1, d: 1, suf: " AU", label: "Distance from the horizon", group: true },
-  { to: 23, d: 0, suf: " km", label: "Radius of the event horizon", group: true },
-  { to: 2267, d: 0, suf: "", label: "Year the image reached Earth", group: false },
+  { to: 102, d: 0, suf: " Bands", label: "Spectral Bands per All-Sky Point", group: true },
+  { to: 6.2, d: 1, suf: "″", label: "Astrometric Pixel Scale", group: true },
+  { to: 450, d: 0, suf: "M+", label: "Galaxies with 3D Spectra", group: true },
+  { to: 2026, d: 0, suf: "", label: "NASA Space Apps Exploration Year", group: false },
 ];
 
 /** Scene 6 — Wide-angle milestone: a pinned, letterboxed panorama that "opens its eye" */
@@ -64,7 +64,7 @@ export default function FirstLight() {
             <img
               ref={imgRef}
               src={firstLight}
-              alt="The first photograph of Erebus: a perfect black shadow ringed by a thin photon ring and a blazing lensed accretion disk"
+              alt="NASA SPHEREx all-sky near-infrared survey showing stellar fields, interstellar dust, and cosmic background light"
               className="absolute inset-0 h-full w-full object-cover will-change-transform"
               style={{ transform: "scale(1.36)", transformOrigin: "50% 42.5%" }}
             />
@@ -74,12 +74,11 @@ export default function FirstLight() {
 
           {/* crosshair */}
           <div ref={crossRef} aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-0">
-            {/* anchored on the black hole's true centre (42.5% of the plate) */}
             <div className="absolute left-1/2 top-[calc(50%_-_6vw)] h-0 w-0 landscape:top-[42.5%]">
               <div className="absolute left-0 top-0 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/35" />
               <div className="absolute left-0 top-0 h-px w-48 -translate-x-1/2 bg-linear-to-r from-transparent via-white/45 to-transparent" />
               <div className="absolute left-0 top-0 h-48 w-px -translate-y-1/2 bg-linear-to-b from-transparent via-white/45 to-transparent" />
-              <span className="absolute left-0 top-16 -translate-x-1/2 whitespace-nowrap font-mono text-[9px] uppercase tracking-[0.24em] text-white/70">Lock · Erebus</span>
+              <span className="absolute left-0 top-16 -translate-x-1/2 whitespace-nowrap font-mono text-[9px] uppercase tracking-[0.24em] text-white/70">SPHEREx · Focal Lock</span>
             </div>
           </div>
 
@@ -88,19 +87,19 @@ export default function FirstLight() {
             <div className="shell flex h-full flex-col justify-between py-4 font-mono text-[10px] uppercase leading-5 tracking-[0.18em] text-bone/60">
               <div className="flex justify-between">
                 <div>
-                  <div className="text-bone/85">Meridian · Forward array α</div>
+                  <div className="text-bone/85">SPHEREx · Detector Array D1–D6</div>
                   <div>
                     Frame <span ref={frameRef} className="tabular-nums">00001</span>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-bone/85">26 · III · 2258</div>
-                  <div>04:12:09 ship time</div>
+                  <div className="text-bone/85">NASA/IPAC IRSA QR2</div>
+                  <div>All-Sky Release</div>
                 </div>
               </div>
               <div className="flex justify-between">
-                <div className="hidden sm:block">Exposure 1/240 s · λ 550 nm</div>
-                <div className="text-right sm:ml-auto">Dist 3.1 AU · γ 1.0004</div>
+                <div className="hidden sm:block">Exposure 113.58 s · λ 0.75 – 5.00 µm</div>
+                <div className="text-right sm:ml-auto">FOV 3.5° × 11.3° · 6.2"/pixel</div>
               </div>
             </div>
           </div>
@@ -109,13 +108,13 @@ export default function FirstLight() {
           <div ref={headRef} className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 text-center opacity-0">
             <p className="kicker flex items-center gap-3 text-ember-soft">
               <span className="h-px w-8 bg-current" />
-              Chapter VI — First Light
+              First Light — SPHEREx All-Sky Spectroscopy
               <span className="h-px w-8 bg-current" />
             </p>
             <h2 className="text-glow mt-7 font-serif text-[clamp(3rem,9vw,9.6rem)] leading-[0.88] tracking-[-0.015em]">
-              The first photograph
+              The entire universe
               <br />
-              of <em className="em">forever.</em>
+              in <em className="em">102 colors.</em>
             </h2>
           </div>
 
@@ -123,15 +122,14 @@ export default function FirstLight() {
           <div ref={proseRef} className="pointer-events-none absolute inset-x-0 bottom-[10%] opacity-0 md:bottom-[13%]">
             <div className="shell grid gap-8 md:grid-cols-12">
               <div className="md:col-span-6 lg:col-span-5">
-                <p className="kicker text-ember-soft">26 March 2258 · 04:12 ship time</p>
+                <p className="kicker text-ember-soft">NASA SPHEREx Mission · All-Sky Spectroscopy</p>
                 <p className="mt-5 font-serif text-[clamp(1.9rem,3.6vw,3.3rem)] leading-[1.02]">
-                  A perfect circle of nothing, crowned in fire, bending the light of ten thousand stars into a halo.
+                  Every point in the sky mapped in continuous near-infrared spectra.
                 </p>
               </div>
               <div className="md:col-span-5 md:col-start-8 md:self-end">
                 <p className="text-[15px] leading-[1.75] text-bone/75 md:text-base">
-                  What Meridian’s forward array saw had never been seen by any living thing. Nine years later, the image arrived on Earth. For one
-                  minute, every screen on the planet went dark — and then showed this.
+                  SPHEREx captures what human vision and broadband surveys miss. From the diffuse glow of the cosmic dawn to the molecular fingerprint of water ice in nascent planetary systems, the infrared sky is unveiled with full archival calibration.
                 </p>
               </div>
             </div>

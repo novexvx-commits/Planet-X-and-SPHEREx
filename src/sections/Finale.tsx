@@ -130,7 +130,7 @@ function ManifestCTA() {
                 window.setTimeout(() => setState("form"), 260);
               }}
             >
-              <span>Add your name to the manifest</span>
+              <span>Join the MARSAD Research Circle</span>
               <span className="cta-icon">
                 <Arrow className="h-5 w-5" />
               </span>
@@ -155,7 +155,7 @@ function ManifestCTA() {
               type="email"
               autoFocus
               autoComplete="email"
-              placeholder="you@earth.sol"
+              placeholder="astronomer@observatory.edu"
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -164,11 +164,11 @@ function ManifestCTA() {
               className="min-w-0 flex-1 bg-transparent text-[15px] text-bone outline-none placeholder:text-bone/35"
             />
             <button type="submit" className="rounded-full bg-bone px-5 py-3 text-sm font-medium text-ink transition-colors duration-300 hover:bg-ember-soft">
-              Transmit
+              Subscribe
             </button>
           </form>
           <p className="mt-4 h-4 font-mono text-[10px] uppercase tracking-[0.2em] text-ember" aria-live="polite">
-            {error ? "That frequency doesn’t look right — try again." : ""}
+            {error ? "Please enter a valid email address." : ""}
           </p>
         </div>
       )}
@@ -180,8 +180,8 @@ function ManifestCTA() {
               <path d="M5 12.5l4.2 4.2L19 7" />
             </svg>
           </span>
-          <p className="font-serif text-3xl md:text-4xl">Transmission received.</p>
-          <p className="text-sm text-bone/55">Your name is on the manifest. See you in the dark, traveller.</p>
+          <p className="font-serif text-3xl md:text-4xl">Registration confirmed.</p>
+          <p className="text-sm text-bone/55">You will receive alerts for new SPHEREx data releases and transient detections.</p>
         </div>
       )}
     </div>
@@ -195,15 +195,14 @@ function Footer() {
         <div className="md:col-span-5">
           <div className="flex items-center gap-3">
             <LogoMark className="h-8 w-8" />
-            <span className="font-mono text-xs uppercase tracking-[0.42em]">Nocturne</span>
+            <span className="font-mono text-xs uppercase tracking-[0.42em]">MARSAD</span>
           </div>
           <p className="mt-6 max-w-sm text-sm leading-relaxed text-bone/50">
-            An expedition of the Meridian Consortium. Built by four nations, carried by one hundred and eight people, dedicated to everyone who ever
-            looked up.
+            Interactive Scientific Observatory for NASA SPHEREx. Developed for the 2026 NASA Space Apps Challenge, combining authentic IRSA data, slitless spectroscopy, and time-domain astronomical analysis.
           </p>
         </div>
         <nav className="grid grid-cols-2 content-start gap-x-8 gap-y-3 text-sm md:col-span-4" aria-label="Footer">
-          {[{ href: "#prologue", label: "Prologue", n: "01" }, ...NAV_LINKS, { href: "#manifest", label: "Manifest", n: "11" }].map((l) => (
+          {[{ href: "#prologue", label: "Mission Brief", n: "01" }, ...NAV_LINKS, { href: "#manifest", label: "Open Science", n: "11" }].map((l) => (
             <a
               key={l.href}
               href={l.href}
@@ -220,9 +219,11 @@ function Footer() {
         </nav>
         <div className="md:col-span-3 md:text-right">
           <p className="font-mono text-[10px] uppercase leading-6 tracking-[0.2em] text-bone/40">
-            Erebus · RA 18h 52m 07s
+            NASA JPL · Caltech · IPAC IRSA
             <br />
-            Dec +33° 14′ · 9.6 ly
+            SPHEREx All-Sky Survey · 102 Near-IR Bands
+            <br />
+            Orbit: 700 km Sun-Synchronous Polar
           </p>
           <Magnetic className="mt-6">
             <button type="button" onClick={() => scrollToTarget("#top", { duration: 3 })} className="btn-ghost">
@@ -233,11 +234,11 @@ function Footer() {
         </div>
       </div>
       <div className="shell flex flex-col gap-3 border-t border-white/[0.06] py-6 text-[11px] text-bone/35 md:flex-row md:items-center md:justify-between">
-        <span>© 2187 – 2291 Meridian Consortium. All voyages fictional — the wonder is real.</span>
-        <span className="font-mono uppercase tracking-[0.2em]">Transmission ends ·</span>
+        <span>© 2026 MARSAD · NASA Space Apps Challenge. Powered by NASA/IPAC IRSA, CDS Strasbourg & ESA Gaia archives.</span>
+        <span className="font-mono uppercase tracking-[0.2em]">Open Science · All Data Authentic</span>
       </div>
       <div aria-hidden="true" className="pointer-events-none select-none overflow-hidden">
-        <p className="footer-word -mb-[0.16em] text-center font-serif text-[24vw] leading-[0.82] tracking-[-0.04em]">Nocturne</p>
+        <p className="footer-word -mb-[0.16em] text-center font-serif text-[24vw] leading-[0.82] tracking-[-0.04em]">MARSAD</p>
       </div>
     </footer>
   );
@@ -255,16 +256,14 @@ export default function Finale() {
       <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-[12%] h-[60vw] w-[90vw] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(255,138,61,0.08),transparent_60%)]" />
 
       <div className="shell relative z-10 text-center">
-        <Kicker center>Chapter XI — The Manifest</Kicker>
-        <SplitText text="The dark | is *not empty.*" stagger={80} className="mt-8 font-serif text-[clamp(4rem,14.5vw,15.5rem)] leading-[0.8] tracking-[-0.03em]" />
+        <Kicker center>Chapter XI — Open Science & The Sky</Kicker>
+        <SplitText text="The infrared | is *unlocked.*" stagger={80} className="mt-8 font-serif text-[clamp(4rem,14.5vw,15.5rem)] leading-[0.8] tracking-[-0.03em]" />
         <p data-reveal="up" style={dv({ "--d": "250ms" })} className="mx-auto mt-12 max-w-2xl text-[17px] leading-[1.75] text-bone/70 md:text-xl md:leading-[1.7]">
-          We went to Erebus not because it was close, or safe, or useful. We went because a species that stops asking what lies beyond the light
-          has already begun to go dark. The next voyage departs on the winter solstice of 2291. There are four thousand berths. One of them could
-          carry your name.
+          MARSAD was built to make NASA’s revolutionary all-sky spectroscopic dataset accessible to researchers, educators, and curious minds worldwide. Every six months, SPHEREx maps the entire cosmos across 102 colors of infrared light—revealing moving asteroids, variable stars, and the ancient glow of cosmic dawn. Explore the data, inspect the FITS images, and discover what changes across epochs.
         </p>
         <div data-reveal="up" style={dv({ "--d": "420ms" })} className="mt-14 flex flex-col items-center gap-7">
           <ManifestCTA />
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-bone/40">Departure 21 · XII · 2291 — 4,000 berths — One way</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-bone/40">NASA SPHEREx Quick Release 2 · 102 Bands · All-Sky Survey Cadence</p>
         </div>
       </div>
 
