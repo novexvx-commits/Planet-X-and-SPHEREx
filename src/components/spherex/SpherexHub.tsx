@@ -233,153 +233,88 @@ export default function SpherexHub() {
 
   return (
     <section id="spherex-hub" className="h-full w-full flex flex-col bg-[#070b14] text-slate-100 overflow-hidden select-none">
-      {/* ── WORKSTATION COMMAND BAR (ROW 1, h-14) ── */}
-      <header className="h-14 shrink-0 border-b border-slate-800/80 bg-[#0b1120] px-4 flex items-center justify-between gap-3 z-30">
-        {/* Left: Brand & Station Identity */}
-        <div className="flex items-center gap-3">
-          <LogoMark className="h-7 w-7 text-amber-500" />
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs uppercase tracking-[0.25em] text-slate-100 font-bold">
-                MARSAD <span className="text-amber-400 font-semibold">Station</span>
-              </span>
-              <span className="hidden sm:inline-flex rounded-full border border-amber-500/40 bg-amber-500/15 px-2 py-0.2 font-mono text-[9px] uppercase tracking-wider text-amber-300">
-                SPHEREx QR2
-              </span>
-            </div>
-          </div>
+      {/* ── UNIFIED MINIMALIST TOP BAR (Height: 52px) ── */}
+      <header className="h-13 shrink-0 border-b border-slate-800/80 bg-[#0b1120] px-4 flex items-center justify-between gap-4 z-30">
+        
+        {/* Left: Brand Mark */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          <LogoMark className="h-6 w-6 text-amber-500" />
+          <span className="font-mono text-xs uppercase tracking-[0.25em] text-slate-100 font-bold">
+            MARSAD <span className="text-amber-400 font-normal">Station</span>
+          </span>
         </div>
 
-        {/* Center: 5 Target Pills & Quick Search */}
-        <div className="hidden md:flex items-center gap-2">
-          <div className="flex items-center gap-1 rounded-lg border border-slate-800 bg-[#070b14] p-1">
+        {/* Center: Clean Targets & Workflow Tabs */}
+        <div className="flex items-center gap-3 overflow-x-auto scrollbar-none py-1">
+          {/* Target Selector Group */}
+          <div className="flex items-center gap-1 rounded-lg bg-[#070b14] p-0.5 border border-slate-800 shrink-0">
             {[
-              { id: "barnards-star", name: "Barnard's Star", badge: "Motion" },
-              { id: "epsilon-indi-b", name: "Epsilon Indi B", badge: "Brown Dwarf" },
-              { id: "wise-0855", name: "WISE 0855", badge: "Y-Dwarf" },
-              { id: "rw-aurigae", name: "RW Aurigae", badge: "Variable" },
-              { id: "r-draconis", name: "R Draconis", badge: "Mira" }
+              { id: "barnards-star", name: "Barnard's Star" },
+              { id: "epsilon-indi-b", name: "Epsilon Indi B" },
+              { id: "wise-0855", name: "WISE 0855" },
+              { id: "rw-aurigae", name: "RW Aurigae" },
+              { id: "r-draconis", name: "R Draconis" }
             ].map((t) => (
               <button
                 key={t.id}
                 data-target-id={t.id}
                 onClick={() => setSelectedTargetId(t.id)}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-md px-2.5 py-1 font-mono text-[11px] transition-all cursor-pointer",
+                  "px-2.5 py-1 rounded-md font-mono text-[11px] transition-all cursor-pointer whitespace-nowrap",
                   selectedTargetId === t.id
-                    ? "bg-amber-500 text-slate-950 font-bold shadow-[0_0_12px_rgba(251,191,36,0.4)]"
+                    ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
                     : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
                 )}
               >
-                <span>{t.name}</span>
-                <span
-                  className={cn(
-                    "rounded px-1 text-[8.5px]",
-                    selectedTargetId === t.id ? "bg-slate-950/30 text-slate-950 font-semibold" : "bg-slate-800 text-slate-400"
-                  )}
-                >
-                  {t.badge}
-                </span>
+                {t.name}
               </button>
             ))}
           </div>
 
-          {/* Quick Search */}
-          <form onSubmit={onSearchSubmit} className="flex items-center gap-1">
-            <input
-              type="text"
-              placeholder="Search object or RA, Dec..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="rounded border border-slate-800 bg-[#070b14] px-2.5 py-1 text-xs font-mono text-slate-200 focus:border-amber-500 focus:outline-none w-36 lg:w-44"
-            />
-            <button
-              type="submit"
-              className="rounded bg-slate-800 px-2.5 py-1 text-xs font-mono text-slate-200 hover:bg-slate-700 transition-colors cursor-pointer"
-            >
-              Go
-            </button>
-          </form>
+          <div className="h-4 w-px bg-slate-800 shrink-0" />
+
+          {/* Workflow Tabs */}
+          <div className="flex items-center gap-1 shrink-0">
+            {[
+              { key: "timeline", label: "Timeline" },
+              { key: "sky", label: "Sky Map" },
+              { key: "motion", label: "Motion" },
+              { key: "variable", label: "Light Curve" },
+              { key: "spectra", label: "Spectra" },
+              { key: "most", label: "Asteroids" },
+              { key: "provenance", label: "Data Lineage" }
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                data-tab={tab.key}
+                onClick={() => setActiveTab(tab.key as TabKey)}
+                className={cn(
+                  "px-2.5 py-1 rounded-md text-[11.5px] font-medium transition-all cursor-pointer whitespace-nowrap",
+                  activeTab === tab.key
+                    ? "bg-slate-800 text-amber-300 font-semibold"
+                    : "text-slate-400 hover:text-slate-200"
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Right: Guided Tour toggle + ONLY "Back to Home" Button */}
-        <div className="flex items-center gap-2.5">
-          <button
-            type="button"
-            onClick={tourStep === null ? startTour : exitTour}
-            className={cn(
-              "hidden sm:inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[10.5px] uppercase tracking-wider transition-all cursor-pointer",
-              tourStep !== null
-                ? "bg-amber-500 text-slate-950 font-bold shadow-[0_0_12px_rgba(251,191,36,0.6)]"
-                : "border border-slate-700 bg-slate-800/70 text-slate-300 hover:text-slate-100 hover:border-slate-600"
-            )}
-          >
-            <span>🧭 {tourStep === null ? "Tour" : "Exit Tour"}</span>
-          </button>
-
-          {/* Prominent "Back to Home" button */}
+        {/* Right: Back to Home Button */}
+        <div className="shrink-0 flex items-center">
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="group inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/15 px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-wider text-amber-300 shadow-md transition-all duration-300 hover:border-amber-400 hover:bg-amber-500 hover:text-slate-950 hover:shadow-[0_0_20px_rgba(251,191,36,0.6)] cursor-pointer"
+            className="group inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1.5 font-mono text-xs font-semibold text-amber-300 transition-all hover:bg-amber-500 hover:text-slate-950 cursor-pointer shadow-xs"
             aria-label="Back to Home"
           >
             <Arrow className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-1" dir="left" />
             <span>Back to Home</span>
           </button>
         </div>
+
       </header>
-
-      {/* ── WORKSTATION SUB-BAR (ROW 2, h-11) ── */}
-      <div className="h-11 shrink-0 border-b border-slate-800/80 bg-[#090e1a]/95 px-4 flex items-center justify-between gap-3 text-xs font-mono z-20">
-        {/* Active Target Meta Chip */}
-        <div className="flex items-center gap-2 overflow-hidden truncate">
-          <span className="flex items-center gap-1.5 font-semibold text-slate-100">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-            {currentTarget.name}
-          </span>
-          <span className="text-slate-600">·</span>
-          <span className="text-amber-300 truncate">{currentTarget.type}</span>
-          <span className="hidden lg:inline text-slate-600">·</span>
-          <span className="hidden lg:inline text-slate-400">
-            RA {currentTarget.raSexagesimal} · Dec {currentTarget.decSexagesimal}
-          </span>
-          {currentTarget.distanceLy && (
-            <>
-              <span className="hidden xl:inline text-slate-600">·</span>
-              <span className="hidden xl:inline text-slate-200">{currentTarget.distanceLy} ly</span>
-            </>
-          )}
-        </div>
-
-        {/* 7 Workflow Tool Tabs */}
-        <div className="flex items-center gap-1 overflow-x-auto scrollbar-none">
-          {[
-            { key: "timeline", label: "Timeline & Diff", n: "01" },
-            { key: "sky", label: "Sky Explorer", n: "02" },
-            { key: "motion", label: "Motion", n: "03" },
-            { key: "variable", label: "Light Curve", n: "04" },
-            { key: "spectra", label: "102 Bands", n: "05" },
-            { key: "most", label: "MOST Asteroids", n: "06" },
-            { key: "provenance", label: "Provenance", n: "07" }
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              data-tab={tab.key}
-              onClick={() => setActiveTab(tab.key as TabKey)}
-              className={cn(
-                "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] whitespace-nowrap transition-all cursor-pointer",
-                activeTab === tab.key
-                  ? "bg-amber-500 text-slate-950 font-bold shadow-[0_0_8px_rgba(251,191,36,0.35)]"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
-              )}
-            >
-              <span className={cn("text-[9px]", activeTab === tab.key ? "text-slate-950/80 font-bold" : "text-amber-400/80")}>{tab.n}</span>
-              <span>{tab.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
 
       {/* Guided Tour Compact Banner (When Active) */}
       {tourStep !== null && (
