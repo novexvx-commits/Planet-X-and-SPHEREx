@@ -474,63 +474,22 @@ export default function Hero({ ready }: { ready: boolean }) {
           </p>
 
           <div className="hero-fade pointer-events-auto mt-8 flex flex-wrap items-center justify-center gap-4" style={dv({ "--d": "1050ms" })}>
-            {isExperience ? (
-              <>
-                <Magnetic strength={0.35}>
-                  <span className="relative inline-block">
-                    <span className="cta-halo" aria-hidden="true" />
-                    <button
-                      type="button"
-                      onClick={() => scrollToTarget("#spherex-hub", { duration: 2 })}
-                      className="cta"
-                    >
-                      <span>Explore Scientific Station</span>
-                      <span className="cta-icon">
-                        <Arrow className="h-5 w-5" />
-                      </span>
-                    </button>
+            <Magnetic strength={0.38}>
+              <span className="relative inline-block">
+                <span className="cta-halo" aria-hidden="true" />
+                <button
+                  type="button"
+                  onClick={() => navigate("/experience")}
+                  className="cta cursor-pointer"
+                  aria-label="Try MARSAD"
+                >
+                  <span>Try MARSAD — Launch Experience</span>
+                  <span className="cta-icon">
+                    <Arrow className="h-5 w-5" />
                   </span>
-                </Magnetic>
-                <Magnetic>
-                  <button
-                    type="button"
-                    onClick={() => navigate("/")}
-                    className="btn-ghost"
-                  >
-                    <Arrow dir="left" className="h-4 w-4" />
-                    Return to Home
-                  </button>
-                </Magnetic>
-              </>
-            ) : (
-              <>
-                <Magnetic strength={0.35}>
-                  <span className="relative inline-block">
-                    <span className="cta-halo" aria-hidden="true" />
-                    <button
-                      type="button"
-                      onClick={() => navigate("/experience")}
-                      className="cta"
-                    >
-                      <span>Launch Experience</span>
-                      <span className="cta-icon">
-                        <Arrow className="h-5 w-5" />
-                      </span>
-                    </button>
-                  </span>
-                </Magnetic>
-                <Magnetic>
-                  <button
-                    type="button"
-                    onClick={() => scrollToTarget("#spherex-hub", { duration: 2 })}
-                    className="btn-ghost"
-                  >
-                    <span className="h-1.5 w-1.5 rounded-full bg-ember shadow-[0_0_10px_#ff8a3d]" />
-                    Explore Station
-                  </button>
-                </Magnetic>
-              </>
-            )}
+                </button>
+              </span>
+            </Magnetic>
           </div>
         </div>
 

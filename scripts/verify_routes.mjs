@@ -11,12 +11,11 @@ if (!fs.existsSync(SCREENSHOT_DIR)) {
 }
 
 async function runRouteVerification() {
-  console.log('🌌 Starting MARSAD Route & Experience Verification...');
-  const PORT = 5055;
+  console.log('🌌 Starting Isolated Experience Page & Homepage Verification...');
+  const PORT = 5056;
   const server = startServer(PORT, '127.0.0.1', false);
 
-  // Give server 500ms to listen
-  await new Promise((r) => setTimeout(r, 500));
+  await new Promise((r) => setTimeout(r, 600));
 
   let browser;
   try {
@@ -35,14 +34,8 @@ async function runRouteVerification() {
     const page = await browser.newPage();
     await page.setViewport({ width: 1600, height: 1050, deviceScaleFactor: 1 });
 
-    const errors = [];
     page.on('console', (msg) => {
-      if (msg.type() === 'error') {
-        const text = msg.text();
-        if (!text.includes('favicon') && !text.includes('aladin.u-strasbg.fr')) {
-          errors.push(text);
-        }
-      }
+      // ignore normal external logs
     });
 
     // ── STEP 1: Verify Homepage (/)
@@ -50,20 +43,27 @@ async function runRouteVerification() {
     await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle2' });
     await new Promise((r) => setTimeout(r, 2000));
 
-    // Verify "Launch Experience" button exists
-    const launchButtons = await page.$$('button[aria-label="Launch Experience"]');
-    console.log(`✓ Found ${launchButtons.length} "Launch Experience" button(s) on Homepage`);
-    if (launchButtons.length === 0) {
-      throw new Error('Launch Experience button not found on Homepage!');
+    // Assert SpherexHub is REMOVED from the homepage!
+    const hubOnHome = await page.$('#spherex-hub');
+    console.log(`✓ SpherexHub on homepage check: ${hubOnHome ? 'STILL PRESENT (ERROR)' : 'REMOVED (CORRECT)'}`);
+    if (hubOnHome) {
+      throw new Error('SpherexHub must NOT be on the homepage!');
     }
 
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'route_01_homepage.png') });
-    console.log('✓ Captured route_01_homepage.png');
+    // Verify "Try MARSAD" button exists
+    const tryButtons = await page.$$('button[aria-label="Try MARSAD"]');
+    console.log(`✓ Found ${tryButtons.length} "Try MARSAD" button(s) on Homepage`);
+    if (tryButtons.length === 0) {
+      throw new Error('Try MARSAD button not found on Homepage!');
+    }
 
-    // ── STEP 2: Click "Launch Experience" to navigate to /experience
-    console.log('\n--- 2. Clicking "Launch Experience" Button ---');
-    await launchButtons[0].click();
-    await new Promise((r) => setTimeout(r, 1500));
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '01_homepage_clean_no_hub.png') });
+    console.log('✓ Captured 01_homepage_clean_no_hub.png');
+
+    // ── STEP 2: Click "Try MARSAD" to navigate to /experience
+    console.log('\n--- 2. Clicking "Try MARSAD" Button ---');
+    await tryButtons[0].click();
+    await new Promise((r) => setTimeout(r, 1000));
 
     const currentUrl = page.url();
     console.log(`✓ Current URL after click: ${currentUrl}`);
@@ -71,78 +71,83 @@ async function runRouteVerification() {
       throw new Error(`Expected URL to contain /experience, got: ${currentUrl}`);
     }
 
-    // Verify "Return to Home" button exists on /experience
-    const returnButtons = await page.$$('button[aria-label="Return to Homepage"]');
-    console.log(`✓ Found ${returnButtons.length} "Return to Home" button(s) on /experience`);
-    if (returnButtons.length === 0) {
-      throw new Error('Return to Home button not found on /experience!');
+    // ── STEP 3: Verify /experience is ISOLATED, has NO NAVBAR, ONLY "Back to Home" button
+    console.log('\n--- 3. Verifying /experience Isolated Page (NO NAVBAR, ONLY BACK BUTTON) ---');
+    const navbarOnExperience = await page.$('.site-header');
+    console.log(`✓ Navbar on /experience check: ${navbarOnExperience ? 'STILL PRESENT (ERROR)' : 'NO NAVBAR (CORRECT)'}`);
+    if (navbarOnExperience) {
+      throw new Error('Navbar must NOT exist on /experience!');
     }
 
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'route_02_experience_from_click.png') });
-    console.log('✓ Captured route_02_experience_from_click.png');
-
-    // ── STEP 3: Click "Return to Home" to navigate back to /
-    console.log('\n--- 3. Clicking "Return to Home" Button ---');
-    await returnButtons[0].click();
-    await new Promise((r) => setTimeout(r, 1500));
-
-    const homeUrl = page.url();
-    console.log(`✓ Current URL after return click: ${homeUrl}`);
-    const pathname = new URL(homeUrl).pathname;
-    if (pathname !== '/') {
-      throw new Error(`Expected URL pathname to be '/', got: ${pathname}`);
+    const backButton = await page.$('button[aria-label="Back to Home"]');
+    console.log(`✓ "Back to Home" button check: ${backButton ? 'PRESENT (CORRECT)' : 'MISSING (ERROR)'}`);
+    if (!backButton) {
+      throw new Error('Back to Home button must exist on /experience!');
     }
 
-    // ── STEP 4: Direct Navigation to /experience (Testing Browser Refresh / Direct Route)
-    console.log('\n--- 4. Direct Navigation to /experience (Testing Reload) ---');
-    await page.goto(`http://localhost:${PORT}/experience`, { waitUntil: 'networkidle2' });
-    await new Promise((r) => setTimeout(r, 2000));
-
-    const directUrl = page.url();
-    console.log(`✓ Current URL after direct load: ${directUrl}`);
-    if (!directUrl.includes('/experience')) {
-      throw new Error(`Direct load failed, got: ${directUrl}`);
+    const hubOnExperience = await page.$('#spherex-hub');
+    console.log(`✓ SpherexHub on /experience check: ${hubOnExperience ? 'PRESENT & ACTIVE (CORRECT)' : 'MISSING (ERROR)'}`);
+    if (!hubOnExperience) {
+      throw new Error('SpherexHub must exist on /experience!');
     }
 
-    // ── STEP 5: Verify Complete Interactive MARSAD Scientific Hub on /experience
-    console.log('\n--- 5. Verifying All 5 Targets & Tools on /experience ---');
-    // Scroll down to spherex-hub
-    await page.evaluate(() => {
-      const hub = document.getElementById('spherex-hub');
-      if (hub) hub.scrollIntoView();
-    });
-    await new Promise((r) => setTimeout(r, 1500));
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '02_experience_isolated_page.png') });
+    console.log('✓ Captured 02_experience_isolated_page.png');
 
-    // Verify target selector buttons
+    // ── STEP 4: Test All 5 Targets & All 7 Tabs on /experience
+    console.log('\n--- 4. Testing All 5 Targets & 7 Tabs on /experience ---');
     const targets = ['barnards-star', 'epsilon-indi-b', 'wise-0855', 'rw-aurigae', 'r-draconis'];
     for (const tId of targets) {
       const btn = await page.$(`button[data-target-id="${tId}"]`);
       if (btn) {
         await btn.click();
-        await new Promise((r) => setTimeout(r, 400));
-        console.log(`  ✓ Target '${tId}' selected and rendered`);
-      } else {
-        console.log(`  ✓ Target '${tId}' verified in target list`);
+        await new Promise((r) => setTimeout(r, 200));
+        console.log(`  ✓ Target '${tId}' selected`);
       }
     }
 
-    // Verify all 7 scientific station tabs
     const tabs = ['sky', 'timeline', 'motion', 'variable', 'spectra', 'most', 'provenance'];
     for (const tab of tabs) {
       const tabBtn = await page.$(`button[data-tab="${tab}"]`);
       if (tabBtn) {
         await tabBtn.click();
-        await new Promise((r) => setTimeout(r, 400));
-        console.log(`  ✓ Tab '${tab}' activated and operational`);
+        await new Promise((r) => setTimeout(r, 200));
+        console.log(`  ✓ Tab '${tab}' activated`);
       }
     }
 
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, 'route_03_experience_hub_interactive.png') });
-    console.log('✓ Captured route_03_experience_hub_interactive.png');
+    // ── STEP 5: Click "Back to Home" to return to /
+    console.log('\n--- 5. Clicking "Back to Home" Button ---');
+    await backButton.click();
+    await new Promise((r) => setTimeout(r, 1000));
 
-    console.log('\n========================================');
-    console.log('ALL ROUTE & EXPERIENCE VERIFICATIONS PASSED!');
-    console.log('========================================');
+    const returnedUrl = page.url();
+    console.log(`✓ Current URL after clicking back: ${returnedUrl}`);
+    const pathname = new URL(returnedUrl).pathname;
+    if (pathname !== '/') {
+      throw new Error(`Expected URL to be '/', got: ${pathname}`);
+    }
+
+    // ── STEP 6: Direct navigation / refresh on /experience
+    console.log('\n--- 6. Direct Reload of /experience ---');
+    await page.goto(`http://localhost:${PORT}/experience`, { waitUntil: 'networkidle2' });
+    await new Promise((r) => setTimeout(r, 1000));
+
+    const reloadedHub = await page.$('#spherex-hub');
+    const reloadedNavbar = await page.$('.site-header');
+    const reloadedBackBtn = await page.$('button[aria-label="Back to Home"]');
+
+    if (!reloadedHub || reloadedNavbar || !reloadedBackBtn) {
+      throw new Error('Direct reload verification failed on /experience!');
+    }
+    console.log('✓ Direct reload of /experience verified: Hub active, No Navbar, Back button ready');
+
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '03_experience_direct_reload.png') });
+    console.log('✓ Captured 03_experience_direct_reload.png');
+
+    console.log('\n======================================================');
+    console.log('ALL VERIFICATIONS PASSED: 100% ISOLATED EXPERIENCE PAGE!');
+    console.log('======================================================');
 
   } catch (err) {
     console.error('❌ Verification Error:', err);

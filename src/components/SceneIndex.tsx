@@ -5,7 +5,6 @@ import { cn } from "../utils/cn";
 export const SCENES = [
   ["top", "Overview"],
   ["prologue", "Mission Brief"],
-  ["spherex-hub", "MARSAD Station"],
   ["spacewalk", "Infrared Sky"],
   ["voyage", "Target Field"],
   ["optics", "Telescope Optics"],
