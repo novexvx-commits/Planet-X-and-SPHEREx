@@ -422,6 +422,9 @@ export default function ObservationTimelineComparator({
                     <div className="absolute top-2.5 left-2.5 rounded-md bg-slate-950/90 px-2.5 py-1 text-xs font-mono text-amber-300 border border-amber-500/30 backdrop-blur-sm">
                       {isProperMotionTarget ? "Proper Motion Dipole Residual" : "Photometric Variability Residual"}
                     </div>
+                    <div className="absolute top-2.5 right-2.5 rounded-md bg-purple-950/90 px-2 py-0.5 text-[10px] font-mono text-purple-300 border border-purple-500/40 backdrop-blur-sm">
+                      PSF Model (σ=1.15 px)
+                    </div>
                     <div className="absolute bottom-2.5 right-2.5 rounded-md bg-slate-950/90 px-2.5 py-1 text-xs font-mono text-slate-200 border border-slate-700 font-semibold">
                       Δt = {formattedDeltaDays} d
                     </div>
@@ -434,6 +437,9 @@ export default function ObservationTimelineComparator({
                       <span className="h-3 w-3 rounded-full bg-sky-400 shadow-sm" /> −ΔFlux (Epoch 1 Position / Dimmer)
                     </span>
                   </div>
+                  <p className="mt-1 text-center text-[10.5px] font-mono text-slate-400">
+                    Analytical WCS PSF cutout (6.15″/px) convolved from IRSA QR2 observation epochs and catalog fluxes.
+                  </p>
                 </div>
               )}
 
@@ -462,6 +468,9 @@ export default function ObservationTimelineComparator({
                     <div className="absolute top-2.5 left-2.5 rounded-md bg-slate-950/90 px-2.5 py-1 text-xs font-mono text-slate-200 border border-slate-700 backdrop-blur-sm">
                       Showing: <strong className="text-amber-400">Epoch {blinkActiveEpoch}</strong> ({blinkActiveEpoch === 1 ? obs1Id : obs2Id})
                     </div>
+                    <div className="absolute top-2.5 right-2.5 rounded-md bg-purple-950/90 px-2 py-0.5 text-[10px] font-mono text-purple-300 border border-purple-500/40 backdrop-blur-sm">
+                      PSF Model (σ=1.15 px)
+                    </div>
                     <div className="absolute bottom-2.5 right-2.5 rounded-md bg-slate-950/90 px-2.5 py-1 text-xs font-mono text-slate-300">
                       {blinkSpeedHz} Hz
                     </div>
@@ -481,38 +490,52 @@ export default function ObservationTimelineComparator({
                       </button>
                     ))}
                   </div>
+                  <p className="mt-1 text-center text-[10.5px] font-mono text-slate-400">
+                    Analytical WCS PSF cutout (6.15″/px) convolved from IRSA QR2 observation epochs and catalog fluxes.
+                  </p>
                 </div>
               )}
 
               {/* Side by Side */}
               {comparisonMode === "side-by-side" && (
-                <div className="flex flex-wrap items-center justify-center gap-8 h-full w-full">
-                  <div className="flex flex-col items-center">
-                    <div className="h-52 w-52 rounded-2xl border-2 border-slate-700 bg-[#0a0e18] p-1.5 shadow-lg cursor-crosshair">
-                      <canvas
-                        ref={canvas1Ref}
-                        className="h-full w-full object-contain rounded-xl image-rendering-pixelated"
-                        onMouseMove={(e) => onCanvasMouseMove(e, comparisonData?.epoch1?.frame?.pixelValues)}
-                        onMouseLeave={onCanvasMouseLeave}
-                      />
+                <div className="flex flex-col items-center justify-center h-full w-full">
+                  <div className="flex flex-wrap items-center justify-center gap-8 w-full">
+                    <div className="flex flex-col items-center">
+                      <div className="relative h-52 w-52 rounded-2xl border-2 border-slate-700 bg-[#0a0e18] p-1.5 shadow-lg cursor-crosshair">
+                        <canvas
+                          ref={canvas1Ref}
+                          className="h-full w-full object-contain rounded-xl image-rendering-pixelated"
+                          onMouseMove={(e) => onCanvasMouseMove(e, comparisonData?.epoch1?.frame?.pixelValues)}
+                          onMouseLeave={onCanvasMouseLeave}
+                        />
+                        <div className="absolute top-2 right-2 rounded-md bg-purple-950/90 px-1.5 py-0.5 text-[9px] font-mono text-purple-300 border border-purple-500/40">
+                          PSF Model
+                        </div>
+                      </div>
+                      <span className="mt-2 text-xs text-slate-200 font-mono text-center">
+                        Epoch 1: <strong className="text-sky-300">{obs1Id}</strong> (MJD {formattedMjd1})
+                      </span>
                     </div>
-                    <span className="mt-2 text-xs text-slate-200 font-mono">
-                      Epoch 1: <strong className="text-sky-300">{obs1Id}</strong> (MJD {formattedMjd1})
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <div className="h-52 w-52 rounded-2xl border-2 border-slate-700 bg-[#0a0e18] p-1.5 shadow-lg cursor-crosshair">
-                      <canvas
-                        ref={canvas2Ref}
-                        className="h-full w-full object-contain rounded-xl image-rendering-pixelated"
-                        onMouseMove={(e) => onCanvasMouseMove(e, comparisonData?.epoch2?.frame?.pixelValues)}
-                        onMouseLeave={onCanvasMouseLeave}
-                      />
+                    <div className="flex flex-col items-center">
+                      <div className="relative h-52 w-52 rounded-2xl border-2 border-slate-700 bg-[#0a0e18] p-1.5 shadow-lg cursor-crosshair">
+                        <canvas
+                          ref={canvas2Ref}
+                          className="h-full w-full object-contain rounded-xl image-rendering-pixelated"
+                          onMouseMove={(e) => onCanvasMouseMove(e, comparisonData?.epoch2?.frame?.pixelValues)}
+                          onMouseLeave={onCanvasMouseLeave}
+                        />
+                        <div className="absolute top-2 right-2 rounded-md bg-purple-950/90 px-1.5 py-0.5 text-[9px] font-mono text-purple-300 border border-purple-500/40">
+                          PSF Model
+                        </div>
+                      </div>
+                      <span className="mt-2 text-xs text-slate-200 font-mono text-center">
+                        Epoch 2: <strong className="text-amber-300">{obs2Id}</strong> (MJD {formattedMjd2})
+                      </span>
                     </div>
-                    <span className="mt-2 text-xs text-slate-200 font-mono">
-                      Epoch 2: <strong className="text-amber-300">{obs2Id}</strong> (MJD {formattedMjd2})
-                    </span>
                   </div>
+                  <p className="mt-3 text-center text-[10.5px] font-mono text-slate-400">
+                    Analytical WCS PSF cutout (6.15″/px) convolved from IRSA QR2 observation epochs and catalog fluxes.
+                  </p>
                 </div>
               )}
             </>
