@@ -149,7 +149,8 @@ export function getTargetSpectra(targetId) {
   });
 
   return {
-    dataClassification: 'VERIFIED ARCHIVAL PHOTOMETRY (2MASS / AllWISE / Spitzer) + CLEARLY LABELED 102-CHANNEL SPHEREx LVF SPECTRAL MODEL',
+    dataClassification: 'MODEL / SIMULATION',
+    dataClassificationDetail: 'MODEL / SIMULATION (102-Channel SPHEREx LVF Spectral Model Interpolated from 5 Archival Broadband Measurements) + REAL OBSERVATION (2MASS / AllWISE / Spitzer Broadband Photometry Points)',
     target: {
       id: target.id,
       name: target.name,

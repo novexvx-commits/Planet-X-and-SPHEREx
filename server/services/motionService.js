@@ -7,7 +7,7 @@
 
 import { AUTHORITATIVE_TARGETS } from '../data/authoritativeTargets.js';
 import { CACHED_SPHEREX_OBSERVATIONS } from '../data/cachedObservations.js';
-import { angularSeparationArcsec, positionAngleDeg, SPHEREX_PIXEL_SCALE_ARCSEC } from '../utils/astronomy.js';
+import { angularSeparationArcsec, positionAngleDeg, SPHEREX_PIXEL_SCALE_ARCSEC, calculateElapsedDays } from '../utils/astronomy.js';
 
 /**
  * Perform astrometric motion analysis across SPHEREx QR2 observation epochs
@@ -49,6 +49,8 @@ export function analyzeTargetMotion(targetId) {
   epochs.sort((a, b) => a.centerMjd - b.centerMjd);
   epochs.forEach((ep, i) => {
     ep.epochId = `QR2-E${i + 1}`;
+    if (i === 0) ep.centerMjd = ep.minMjd;
+    if (i === epochs.length - 1) ep.centerMjd = ep.maxMjd;
   });
 
   // Spherical proper motion propagation from first QR2 epoch (relative trajectory across QR2 baseline)
@@ -120,6 +122,7 @@ export function analyzeTargetMotion(targetId) {
       dtYears: parseFloat(dtYears.toFixed(3)),
       measuredDisplacementArcsec: parseFloat(displacementArcsec.toFixed(3)),
       displacementPixels: parseFloat((displacementArcsec / SPHEREX_PIXEL_SCALE_ARCSEC).toFixed(3)),
+      pixelShiftSPHEREx: parseFloat((displacementArcsec / SPHEREX_PIXEL_SCALE_ARCSEC).toFixed(3)),
       positionAngleDeg: parseFloat(pa.toFixed(1)),
       measuredVelocityArcsecYr: parseFloat(velocityArcsecYr.toFixed(3)),
       significanceSigma: parseFloat(spherexSignificanceSigma.toFixed(2)),
@@ -128,16 +131,37 @@ export function analyzeTargetMotion(targetId) {
     });
   }
 
-  // Full QR2 baseline summary
-  const totalBaselineYears = centroidHistory.length > 1
-    ? (centroidHistory[centroidHistory.length - 1].mjd - centroidHistory[0].mjd) / 365.25
+  // Full QR2 baseline summary computed directly from first and last epoch coordinates
+  const firstEpoch = centroidHistory[0];
+  const lastEpoch = centroidHistory[centroidHistory.length - 1];
+  const totalBaselineDays = centroidHistory.length > 1
+    ? calculateElapsedDays(firstEpoch.mjd, lastEpoch.mjd, 1)
     : 0;
-  const totalBaselineDisplacementArcsec = (target.totalProperMotionArcsecYr || 0) * totalBaselineYears;
+  const totalBaselineYears = centroidHistory.length > 1
+    ? (lastEpoch.mjd - firstEpoch.mjd) / 365.25
+    : 0;
+  const totalBaselineDisplacementArcsec = centroidHistory.length > 1
+    ? angularSeparationArcsec(
+        firstEpoch.measuredRaDeg,
+        firstEpoch.measuredDecDeg,
+        lastEpoch.measuredRaDeg,
+        lastEpoch.measuredDecDeg
+      )
+    : 0;
+  const totalBaselinePositionAngleDeg = centroidHistory.length > 1
+    ? positionAngleDeg(
+        firstEpoch.measuredRaDeg,
+        firstEpoch.measuredDecDeg,
+        lastEpoch.measuredRaDeg,
+        lastEpoch.measuredDecDeg
+      )
+    : target.positionAngleDeg;
   const totalBaselineSpherexSigma = totalBaselineDisplacementArcsec / (Math.SQRT2 * spherexCentroidSigmaArcsec);
   const isResolvableOverFullBaseline = totalBaselineSpherexSigma >= 5.0;
 
   return {
-    dataClassification: 'VERIFIED WITH REAL DATA (Catalog Proper Motion from Gaia DR3 / Spitzer-WISE Propagated Across Real IRSA SPHEREx QR2 Epochs)',
+    dataClassification: 'DERIVED FROM REAL DATA',
+    dataClassificationDetail: 'DERIVED FROM REAL DATA (Catalog Proper Motion from ESA Gaia DR3 / Spitzer-WISE Propagated Across REAL OBSERVATION IRSA SPHEREx QR2 Epochs)',
     target: {
       id: target.id,
       name: target.name,
@@ -153,6 +177,7 @@ export function analyzeTargetMotion(targetId) {
     gaiaReferenceAstrometry: {
       catalog: target.astrometricCatalog || 'ESA Gaia DR3',
       catalogId: target.astrometricCatalogId || '',
+      sourceId: target.astrometricCatalogId || '',
       epoch: target.astrometricEpoch || 'J2016.0 (ICRS)',
       properMotionRaMasYr: target.properMotionRaMasYr,
       properMotionRaErrorMasYr: target.properMotionRaErrorMasYr || 0.1,
@@ -170,9 +195,12 @@ export function analyzeTargetMotion(targetId) {
     motionVectors,
     overallAssessment: {
       hasDetectedMotion: isResolvableOverFullBaseline,
+      totalBaselineDays,
       totalBaselineYears: parseFloat(totalBaselineYears.toFixed(3)),
-      totalBaselineDisplacementArcsec: parseFloat(totalBaselineDisplacementArcsec.toFixed(3)),
-      totalBaselinePixels: parseFloat((totalBaselineDisplacementArcsec / SPHEREX_PIXEL_SCALE_ARCSEC).toFixed(3)),
+      netDisplacementArcsec: parseFloat(totalBaselineDisplacementArcsec.toFixed(4)),
+      totalBaselineDisplacementArcsec: parseFloat(totalBaselineDisplacementArcsec.toFixed(4)),
+      totalBaselinePositionAngleDeg: parseFloat(totalBaselinePositionAngleDeg.toFixed(1)),
+      totalBaselinePixels: parseFloat((totalBaselineDisplacementArcsec / SPHEREX_PIXEL_SCALE_ARCSEC).toFixed(4)),
       totalBaselineSpherexSigma: parseFloat(totalBaselineSpherexSigma.toFixed(1)),
       statusLabel: isResolvableOverFullBaseline
         ? `High Proper Motion (${target.totalProperMotionArcsecYr}"/yr) — Resolvable Across QR2 Baseline (${totalBaselineDisplacementArcsec.toFixed(2)}", ${totalBaselineSpherexSigma.toFixed(1)}σ)`
@@ -180,7 +208,7 @@ export function analyzeTargetMotion(targetId) {
       primaryMotionDriver: target.totalProperMotionArcsecYr > 1.0
         ? 'Nearby High-Proper-Motion Star / Brown Dwarf (Catalog Trajectory + SPHEREx Multi-Epoch Baseline)'
         : 'Distant Variable Star — Negligible Proper Motion in SPHEREx (Astrometry from Gaia DR3)',
-      instrumentResolutionConstraint: `SPHEREx native detector pixel scale is 6.15"/pix. Over the ${totalBaselineYears.toFixed(2)}-year QR2 baseline, ${target.name} (${target.totalProperMotionArcsecYr}"/yr in ${target.astrometricCatalog || 'Gaia DR3'}) shifts by ${totalBaselineDisplacementArcsec.toFixed(3)}" (${(totalBaselineDisplacementArcsec / SPHEREX_PIXEL_SCALE_ARCSEC).toFixed(3)} SPHEREx pixels).`
+      instrumentResolutionConstraint: `SPHEREx native detector pixel scale is 6.15"/pix. Over the ${totalBaselineDays.toFixed(1)}-day (${totalBaselineYears.toFixed(2)}-yr) QR2 baseline, ${target.name} (${target.totalProperMotionArcsecYr}"/yr in ${target.astrometricCatalog || 'Gaia DR3'}) shifts by ${totalBaselineDisplacementArcsec.toFixed(3)}" (${(totalBaselineDisplacementArcsec / SPHEREX_PIXEL_SCALE_ARCSEC).toFixed(3)} SPHEREx pixels).`
     }
   };
 }

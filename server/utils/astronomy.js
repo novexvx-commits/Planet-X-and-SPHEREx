@@ -115,8 +115,9 @@ export function positionAngleDeg(ra1, dec1, ra2, dec2) {
  * MJD = JD - 2400000.5. Unix epoch 1970-01-01 is MJD 40587.0
  */
 export function mjdToUtc(mjd) {
-  if (!mjd || isNaN(mjd)) return null;
-  const ms = (mjd - 40587.0) * 86400000.0;
+  const num = typeof mjd === 'string' ? parseFloat(mjd) : mjd;
+  if (num === null || num === undefined || isNaN(num) || num <= 0) return null;
+  const ms = (num - 40587.0) * 86400000.0;
   return new Date(ms).toISOString();
 }
 
@@ -126,7 +127,43 @@ export function mjdToUtc(mjd) {
 export function utcToMjd(dateOrStr) {
   const d = new Date(dateOrStr);
   const ms = d.getTime();
+  if (isNaN(ms)) return NaN;
   return 40587.0 + ms / 86400000.0;
+}
+
+/**
+ * Round an MJD value to a consistent decimal precision (default 1 decimal place = 0.1 day)
+ */
+export function roundMjd(mjd, decimals = 1) {
+  const num = typeof mjd === 'string' ? parseFloat(mjd) : mjd;
+  if (num === null || num === undefined || isNaN(num)) return 0;
+  const factor = Math.pow(10, decimals);
+  return Math.round(num * factor) / factor;
+}
+
+/**
+ * Format an MJD value consistently with fixed decimal places (e.g. "60902.9")
+ */
+export function formatMjd(mjd, decimals = 1) {
+  return roundMjd(mjd, decimals).toFixed(decimals);
+}
+
+/**
+ * Calculate elapsed days (Δt) directly from two MJD values using consistent decimal precision.
+ * Ensures that displayed MJD1 (e.g. 60902.9) and MJD2 (e.g. 61164.9) always yield exact Δt = 262.0 days.
+ */
+export function calculateElapsedDays(mjd1, mjd2, decimals = 1) {
+  const r1 = roundMjd(mjd1, decimals);
+  const r2 = roundMjd(mjd2, decimals);
+  const factor = Math.pow(10, decimals);
+  return Math.round(Math.abs(r2 - r1) * factor) / factor;
+}
+
+/**
+ * Format elapsed days consistently (e.g. "262.0")
+ */
+export function formatElapsedDays(mjd1, mjd2, decimals = 1) {
+  return calculateElapsedDays(mjd1, mjd2, decimals).toFixed(decimals);
 }
 
 /**

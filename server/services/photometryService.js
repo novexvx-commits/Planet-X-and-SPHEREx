@@ -7,7 +7,7 @@
 
 import { AUTHORITATIVE_TARGETS } from '../data/authoritativeTargets.js';
 import { CACHED_SPHEREX_OBSERVATIONS } from '../data/cachedObservations.js';
-import { mjdToUtc, fluxUJyToAbMag } from '../utils/astronomy.js';
+import { mjdToUtc, fluxUJyToAbMag, calculateElapsedDays } from '../utils/astronomy.js';
 
 const DETECTOR_WAVELENGTH_UM = {
   D1: 0.93,
@@ -162,7 +162,8 @@ export function getTargetLightCurve(targetId, bandFilter = 'all') {
   const meanFlux = fluxes.length ? fluxes.reduce((a, b) => a + b, 0) / fluxes.length : 0;
 
   return {
-    dataClassification: 'SIMULATED — CLEARLY LABELED (Time-Series Model Sampled at Real IRSA SPHEREx QR2 Epochs, Anchored to Real 2MASS/AllWISE/Spitzer/AAVSO Photometry)',
+    dataClassification: 'MODEL / SIMULATION',
+    dataClassificationDetail: 'MODEL / SIMULATION (Synthetic Spectrophotometric Time-Series Model Evaluated at REAL OBSERVATION IRSA SPHEREx QR2 Timestamps, Anchored to REAL OBSERVATION 2MASS/AllWISE/Spitzer/AAVSO Catalog Photometry — Not Extracted SPHEREx FITS Pixel Photometry)',
     targetType: target.type,
     variabilityMetadata: {
       isVariable: target.id === 'rw-aurigae' || target.id === 'r-draconis',
@@ -191,7 +192,7 @@ export function getTargetLightCurve(targetId, bandFilter = 'all') {
     bandsAvailable,
     totalMeasurementsCount: measurements.length,
     statistics: {
-      timeSpanMjd: measurements.length > 1 ? parseFloat((measurements[measurements.length - 1].mjd - measurements[0].mjd).toFixed(2)) : 0,
+      timeSpanMjd: measurements.length > 1 ? calculateElapsedDays(measurements[0].mjd, measurements[measurements.length - 1].mjd, 1) : 0,
       minFluxDensityMjy: parseFloat(minFlux.toFixed(4)),
       maxFluxDensityMjy: parseFloat(maxFlux.toFixed(4)),
       meanFluxDensityMjy: parseFloat(meanFlux.toFixed(4)),

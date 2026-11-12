@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "../../utils/cn";
-import { compareObservations, getLocalTargetById } from "../../lib/scientificFallback";
+import {
+  compareObservations,
+  getLocalTargetById,
+  formatMjd,
+  formatElapsedDays
+} from "../../lib/scientificFallback";
 
 interface ObservationTimelineProps {
   targetId: string;
@@ -15,7 +20,7 @@ export default function ObservationTimelineComparator({
   target,
   observations
 }: ObservationTimelineProps) {
-  const activeTarget = target || getLocalTargetById(targetId);
+  const activeTarget = { ...getLocalTargetById(targetId), ...(target || {}) };
   const obsCount = observations.length;
   const hasMultipleEpochs = obsCount >= 2;
 
@@ -101,14 +106,17 @@ export default function ObservationTimelineComparator({
     return () => clearInterval(timer);
   }, [comparisonMode, blinkSpeedHz, hasMultipleEpochs]);
 
+  const obs1Id = obs1?.obs_id || obs1?.obsId || "";
+  const obs2Id = obs2?.obs_id || obs2?.obsId || "";
+
   // Sync comparison data with backend API when epochs change
   useEffect(() => {
     setApiComparisonData(null);
-    if (!hasMultipleEpochs || !obs1 || !obs2) return;
+    if (!hasMultipleEpochs || !obs1Id || !obs2Id) return;
 
     let active = true;
-    const id1 = encodeURIComponent(obs1.obs_id || obs1.obsId || "");
-    const id2 = encodeURIComponent(obs2.obs_id || obs2.obsId || "");
+    const id1 = encodeURIComponent(obs1Id);
+    const id2 = encodeURIComponent(obs2Id);
     fetch(`/api/image-compare?targetId=${encodeURIComponent(targetId)}&obsId1=${id1}&obsId2=${id2}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
@@ -123,7 +131,7 @@ export default function ObservationTimelineComparator({
     return () => {
       active = false;
     };
-  }, [targetId, epoch1Index, epoch2Index, hasMultipleEpochs]);
+  }, [targetId, epoch1Index, epoch2Index, obs1Id, obs2Id, hasMultipleEpochs]);
 
   // Canvas rendering helper for cutouts and difference residual map
   const renderCutoutToCanvas = (
@@ -282,15 +290,24 @@ export default function ObservationTimelineComparator({
   const diffAnalysis = comparisonData?.differenceAnalysis;
   const isProperMotionTarget = diffAnalysis?.phenomenonType === "proper-motion" || activeTarget.totalProperMotionArcsecYr > 1.0;
 
+  // Consistent MJD & Elapsed Days formatting (MJD 60902.9 to 61164.9 -> Δt = 262.0 days)
+  const rawMjd1 = obs1 ? Number(obs1.t_min || obs1.mjd) : 0;
+  const rawMjd2 = obs2 ? Number(obs2.t_min || obs2.mjd) : 0;
+  const formattedMjd1 = obs1 ? formatMjd(rawMjd1, 1) : "N/A";
+  const formattedMjd2 = obs2 ? formatMjd(rawMjd2, 1) : "N/A";
+  const formattedDeltaDays =
+    diffAnalysis?.baselineDaysFormatted ||
+    (obs1 && obs2 ? formatElapsedDays(rawMjd1, rawMjd2, 1) : "0.0");
+
   return (
-    <div className="w-full flex flex-col xl:flex-row gap-4 p-1 sm:p-2">
+    <div className="w-full grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
       {/* ═════════════════════════════════════════════════════════════════════
-          LEFT AREA (HERO VIEWPORT & TIMELINE - 68% WIDTH)
+          LEFT AREA (HERO VIEWPORT & TIMELINE - 8 COLUMNS)
       ═════════════════════════════════════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col justify-between rounded-2xl border border-slate-800 bg-[#0d1322] p-4 shadow-xl">
+      <div className="xl:col-span-8 flex flex-col justify-between rounded-2xl border border-slate-800 bg-[#0d1322] p-5 sm:p-6 shadow-xl">
         {/* TOP BAR: Clean Mode Toggle & Color Style */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800/80 shrink-0">
-          <div className="flex items-center gap-1 rounded-xl bg-slate-900/90 p-1 border border-slate-800">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800/80 shrink-0">
+          <div className="flex items-center gap-1.5 rounded-xl bg-[#070b14] p-1 border border-slate-800">
             {[
               { id: "difference", label: "⚡ Difference View", desc: "Background-subtracted residual" },
               { id: "blink", label: "🔄 Blink Animation", desc: "Alternates Epoch 1 & Epoch 2" },
@@ -301,10 +318,10 @@ export default function ObservationTimelineComparator({
                 disabled={!hasMultipleEpochs}
                 onClick={() => setComparisonMode(m.id as any)}
                 className={cn(
-                  "px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
+                  "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
                   comparisonMode === m.id
                     ? "bg-amber-500 text-slate-950 font-bold shadow-sm"
-                    : "text-slate-400 hover:text-slate-200"
+                    : "text-slate-300 hover:text-white"
                 )}
               >
                 {m.label}
@@ -312,17 +329,17 @@ export default function ObservationTimelineComparator({
             ))}
           </div>
 
-          <div className="flex items-center gap-1 rounded-xl bg-slate-900/90 p-1 border border-slate-800 text-xs">
-            <span className="text-slate-500 text-[10px] uppercase font-mono px-2 hidden lg:inline">Palette:</span>
+          <div className="flex items-center gap-1.5 rounded-xl bg-[#070b14] p-1 border border-slate-800 text-xs">
+            <span className="text-slate-400 text-xs font-mono px-2 hidden lg:inline">Palette:</span>
             {(["infrared", "inferno", "greyscale"] as const).map((cmap) => (
               <button
                 key={cmap}
                 onClick={() => setActiveColormap(cmap)}
                 className={cn(
-                  "px-2.5 py-1 rounded-md text-[11px] capitalize transition-colors cursor-pointer",
+                  "px-3 py-1 rounded-lg text-xs capitalize transition-colors cursor-pointer",
                   activeColormap === cmap
                     ? "bg-slate-800 text-amber-300 font-semibold"
-                    : "text-slate-400 hover:text-slate-200"
+                    : "text-slate-300 hover:text-white"
                 )}
               >
                 {cmap}
@@ -331,23 +348,49 @@ export default function ObservationTimelineComparator({
           </div>
         </div>
 
-        {/* DATA CLASSIFICATION & EPOCH PROVENANCE BANNER */}
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-1.5 text-[11px] font-mono">
-          <span className="text-amber-300">
-            Mode: <strong>WCS Cutout Reconstruction</strong> (Real IRSA QR2 Epoch Timestamps + Catalog Astrometry/Photometry)
-          </span>
+        {/* CANONICAL SCIENTIFIC DATA CLASSIFICATION & EPOCH PROVENANCE BANNER */}
+        <div className="mt-4 rounded-xl border border-slate-800 bg-[#090e1a] p-3.5 space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
+              <span className="rounded-md bg-purple-500/15 border border-purple-500/40 px-2.5 py-0.5 text-purple-300 font-bold">
+                MODEL / SIMULATION
+              </span>
+              <span className="text-slate-300">32×32 WCS PSF Cutout Reconstruction</span>
+              <span className="text-slate-600">+</span>
+              <span className="rounded-md bg-sky-500/15 border border-sky-500/40 px-2.5 py-0.5 text-sky-300 font-bold">
+                REAL OBSERVATION
+              </span>
+              <span className="text-slate-300">IRSA QR2 Timestamps</span>
+              <span className="text-slate-600">+</span>
+              <span className="rounded-md bg-amber-500/15 border border-amber-500/40 px-2.5 py-0.5 text-amber-300 font-bold">
+                DERIVED FROM REAL DATA
+              </span>
+              <span className="text-slate-300">Proper Motion Shift</span>
+            </div>
+          </div>
+
           {obs1 && obs2 && (
-            <span className="text-slate-300">
-              Epoch 1: <strong className="text-sky-300">{obs1.obs_id || obs1.obsId}</strong> (MJD {Number(obs1.t_min || obs1.mjd).toFixed(1)}) → Epoch 2: <strong className="text-amber-300">{obs2.obs_id || obs2.obsId}</strong> (MJD {Number(obs2.t_min || obs2.mjd).toFixed(1)})
-            </span>
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80 text-xs font-mono text-slate-300">
+              <div>
+                Epoch 1: <strong className="text-sky-300">{obs1Id}</strong> ({(obs1.utcDate || "").slice(0, 10)} · MJD {formattedMjd1})
+                <span className="mx-2 text-slate-500">→</span>
+                Epoch 2: <strong className="text-amber-300">{obs2Id}</strong> ({(obs2.utcDate || "").slice(0, 10)} · MJD {formattedMjd2})
+              </div>
+              <div className="rounded-md bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 text-amber-300 font-semibold">
+                Baseline Δt = {formattedDeltaDays} days
+              </div>
+            </div>
           )}
         </div>
 
         {/* CENTER: ASTRONOMICAL CANVAS OR EXPLICIT UNAVAILABLE STATE */}
-        <div className="flex-1 flex flex-col items-center justify-center relative min-h-[290px] py-3">
+        <div className="flex-1 flex flex-col items-center justify-center relative min-h-[310px] py-4">
           {!hasMultipleEpochs ? (
-            <div className="max-w-md rounded-2xl border border-slate-700 bg-[#090e1a] p-6 text-center space-y-2">
-              <div className="text-xs font-mono uppercase tracking-wider text-amber-400">
+            <div className="max-w-md rounded-2xl border border-slate-700 bg-[#090e1a] p-6 text-center space-y-3">
+              <div className="inline-block rounded-md bg-rose-500/15 border border-rose-500/40 px-2.5 py-1 text-xs font-mono uppercase tracking-wider text-rose-300 font-bold">
+                UNAVAILABLE
+              </div>
+              <div className="text-sm font-mono uppercase tracking-wider text-amber-400 font-semibold">
                 {obsCount === 0 ? "No Multi-Epoch Cutouts Available" : "Single Epoch Available — Playback Disabled"}
               </div>
               <p className="text-xs text-slate-300 leading-relaxed">
@@ -359,7 +402,7 @@ export default function ObservationTimelineComparator({
                 href={`https://irsa.ipac.caltech.edu/Missions/spherex.html`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-block mt-2 rounded-lg bg-amber-500/20 border border-amber-500/40 px-3 py-1.5 font-mono text-[11px] text-amber-300 hover:bg-amber-500/30"
+                className="inline-block mt-2 rounded-lg bg-amber-500/20 border border-amber-500/40 px-3.5 py-1.5 font-mono text-xs text-amber-300 hover:bg-amber-500/30"
               >
                 Verify NASA/IPAC IRSA SPHEREx Archive ↗
               </a>
@@ -368,27 +411,27 @@ export default function ObservationTimelineComparator({
             <>
               {/* Difference View */}
               {comparisonMode === "difference" && (
-                <div className="flex flex-col items-center justify-center h-full max-h-[320px] w-full">
-                  <div className="relative aspect-square h-[260px] w-[260px] rounded-2xl border-2 border-amber-500/40 bg-[#0a0e18] p-1 shadow-[0_0_35px_rgba(251,146,60,0.15)] cursor-crosshair">
+                <div className="flex flex-col items-center justify-center h-full w-full">
+                  <div className="relative aspect-square h-[270px] w-[270px] rounded-2xl border-2 border-amber-500/40 bg-[#0a0e18] p-1.5 shadow-[0_0_35px_rgba(251,146,60,0.15)] cursor-crosshair">
                     <canvas
                       ref={canvasDiffRef}
                       className="h-full w-full object-contain rounded-xl image-rendering-pixelated"
                       onMouseMove={(e) => onCanvasMouseMove(e, comparisonData?.differenceAnalysis?.diffPixels)}
                       onMouseLeave={onCanvasMouseLeave}
                     />
-                    <div className="absolute top-2.5 left-2.5 rounded-md bg-slate-950/85 px-2.5 py-1 text-[10px] font-mono text-amber-300 border border-amber-500/30 backdrop-blur-sm">
+                    <div className="absolute top-2.5 left-2.5 rounded-md bg-slate-950/90 px-2.5 py-1 text-xs font-mono text-amber-300 border border-amber-500/30 backdrop-blur-sm">
                       {isProperMotionTarget ? "Proper Motion Dipole Residual" : "Photometric Variability Residual"}
                     </div>
-                    <div className="absolute bottom-2.5 right-2.5 rounded-md bg-slate-950/85 px-2 py-0.5 text-[9.5px] font-mono text-slate-300 border border-slate-800">
-                      Δt = {diffAnalysis?.baselineDays ?? 0} d
+                    <div className="absolute bottom-2.5 right-2.5 rounded-md bg-slate-950/90 px-2.5 py-1 text-xs font-mono text-slate-200 border border-slate-700 font-semibold">
+                      Δt = {formattedDeltaDays} d
                     </div>
                   </div>
-                  <div className="mt-2.5 flex items-center gap-5 text-xs">
-                    <span className="flex items-center gap-1.5 text-amber-400 font-medium">
-                      <span className="h-2.5 w-2.5 rounded-full bg-amber-400 shadow-sm" /> +ΔFlux (Epoch 2 Position / Brighter)
+                  <div className="mt-3 flex flex-wrap items-center justify-center gap-6 text-xs">
+                    <span className="flex items-center gap-2 text-amber-300 font-medium">
+                      <span className="h-3 w-3 rounded-full bg-amber-400 shadow-sm" /> +ΔFlux (Epoch 2 Position / Brighter)
                     </span>
-                    <span className="flex items-center gap-1.5 text-sky-400 font-medium">
-                      <span className="h-2.5 w-2.5 rounded-full bg-sky-400 shadow-sm" /> −ΔFlux (Epoch 1 Position / Dimmer)
+                    <span className="flex items-center gap-2 text-sky-300 font-medium">
+                      <span className="h-3 w-3 rounded-full bg-sky-400 shadow-sm" /> −ΔFlux (Epoch 1 Position / Dimmer)
                     </span>
                   </div>
                 </div>
@@ -396,8 +439,8 @@ export default function ObservationTimelineComparator({
 
               {/* Blink Animation */}
               {comparisonMode === "blink" && (
-                <div className="flex flex-col items-center justify-center h-full max-h-[320px] w-full">
-                  <div className="relative aspect-square h-[260px] w-[260px] rounded-2xl border-2 border-slate-700 bg-[#0a0e18] p-1 shadow-2xl cursor-crosshair">
+                <div className="flex flex-col items-center justify-center h-full w-full">
+                  <div className="relative aspect-square h-[270px] w-[270px] rounded-2xl border-2 border-slate-700 bg-[#0a0e18] p-1.5 shadow-2xl cursor-crosshair">
                     <canvas
                       ref={canvas1Ref}
                       className={cn(
@@ -416,22 +459,22 @@ export default function ObservationTimelineComparator({
                       onMouseMove={(e) => onCanvasMouseMove(e, comparisonData?.epoch2?.frame?.pixelValues)}
                       onMouseLeave={onCanvasMouseLeave}
                     />
-                    <div className="absolute top-2.5 left-2.5 rounded-md bg-slate-950/85 px-2.5 py-1 text-[10px] font-mono text-slate-200 border border-slate-700 backdrop-blur-sm">
-                      Showing: <strong className="text-amber-400">Epoch {blinkActiveEpoch}</strong> ({blinkActiveEpoch === 1 ? obs1?.obs_id || obs1?.obsId : obs2?.obs_id || obs2?.obsId})
+                    <div className="absolute top-2.5 left-2.5 rounded-md bg-slate-950/90 px-2.5 py-1 text-xs font-mono text-slate-200 border border-slate-700 backdrop-blur-sm">
+                      Showing: <strong className="text-amber-400">Epoch {blinkActiveEpoch}</strong> ({blinkActiveEpoch === 1 ? obs1Id : obs2Id})
                     </div>
-                    <div className="absolute bottom-2.5 right-2.5 rounded-md bg-slate-950/85 px-2 py-0.5 text-[9px] font-mono text-slate-400">
+                    <div className="absolute bottom-2.5 right-2.5 rounded-md bg-slate-950/90 px-2.5 py-1 text-xs font-mono text-slate-300">
                       {blinkSpeedHz} Hz
                     </div>
                   </div>
-                  <div className="mt-2.5 flex items-center gap-2 text-xs">
-                    <span className="text-slate-400">Blink Speed:</span>
+                  <div className="mt-3 flex items-center gap-2 text-xs">
+                    <span className="text-slate-300">Blink Cadence:</span>
                     {[1, 2, 4].map((hz) => (
                       <button
                         key={hz}
                         onClick={() => setBlinkSpeedHz(hz)}
                         className={cn(
-                          "px-2.5 py-0.5 rounded-md font-mono text-xs transition-colors cursor-pointer",
-                          blinkSpeedHz === hz ? "bg-amber-500 text-slate-950 font-bold" : "bg-slate-800 text-slate-400 hover:text-slate-200"
+                          "px-3 py-1 rounded-md font-mono text-xs transition-colors cursor-pointer",
+                          blinkSpeedHz === hz ? "bg-amber-500 text-slate-950 font-bold" : "bg-slate-800 text-slate-300 hover:text-white"
                         )}
                       >
                         {hz} Hz
@@ -443,9 +486,9 @@ export default function ObservationTimelineComparator({
 
               {/* Side by Side */}
               {comparisonMode === "side-by-side" && (
-                <div className="flex items-center justify-center gap-6 h-full max-h-[320px] w-full">
+                <div className="flex flex-wrap items-center justify-center gap-8 h-full w-full">
                   <div className="flex flex-col items-center">
-                    <div className="h-48 w-48 rounded-2xl border-2 border-slate-700 bg-[#0a0e18] p-1 shadow-lg cursor-crosshair">
+                    <div className="h-52 w-52 rounded-2xl border-2 border-slate-700 bg-[#0a0e18] p-1.5 shadow-lg cursor-crosshair">
                       <canvas
                         ref={canvas1Ref}
                         className="h-full w-full object-contain rounded-xl image-rendering-pixelated"
@@ -453,12 +496,12 @@ export default function ObservationTimelineComparator({
                         onMouseLeave={onCanvasMouseLeave}
                       />
                     </div>
-                    <span className="mt-1.5 text-xs text-slate-300 font-mono">
-                      Epoch 1: {obs1?.obs_id || obs1?.obsId}
+                    <span className="mt-2 text-xs text-slate-200 font-mono">
+                      Epoch 1: <strong className="text-sky-300">{obs1Id}</strong> (MJD {formattedMjd1})
                     </span>
                   </div>
                   <div className="flex flex-col items-center">
-                    <div className="h-48 w-48 rounded-2xl border-2 border-slate-700 bg-[#0a0e18] p-1 shadow-lg cursor-crosshair">
+                    <div className="h-52 w-52 rounded-2xl border-2 border-slate-700 bg-[#0a0e18] p-1.5 shadow-lg cursor-crosshair">
                       <canvas
                         ref={canvas2Ref}
                         className="h-full w-full object-contain rounded-xl image-rendering-pixelated"
@@ -466,8 +509,8 @@ export default function ObservationTimelineComparator({
                         onMouseLeave={onCanvasMouseLeave}
                       />
                     </div>
-                    <span className="mt-1.5 text-xs text-slate-300 font-mono">
-                      Epoch 2: {obs2?.obs_id || obs2?.obsId}
+                    <span className="mt-2 text-xs text-slate-200 font-mono">
+                      Epoch 2: <strong className="text-amber-300">{obs2Id}</strong> (MJD {formattedMjd2})
                     </span>
                   </div>
                 </div>
@@ -477,12 +520,12 @@ export default function ObservationTimelineComparator({
         </div>
 
         {/* BOTTOM: TIME SCRUBBER CONTROLLER */}
-        <div className="shrink-0 pt-3 border-t border-slate-800/80 space-y-2">
-          <div className="flex items-center justify-between text-xs">
+        <div className="shrink-0 pt-4 border-t border-slate-800/80 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-200">Time-Domain Scrubber</span>
+              <span className="font-semibold text-slate-100">Time-Domain Scrubber</span>
               <span className="text-slate-500">·</span>
-              <span className="text-amber-400 font-mono">
+              <span className="text-amber-400 font-mono font-medium">
                 {obsCount === 0
                   ? "0 Scans Available"
                   : obsCount === 1
@@ -490,14 +533,14 @@ export default function ObservationTimelineComparator({
                   : `Scan #${currentIndex + 1} of ${obsCount} (${currentObs.obs_id || currentObs.obsId || "QR2"})`}
               </span>
             </div>
-            <div className="text-[11px] font-mono text-slate-400">
+            <div className="text-xs font-mono text-slate-300">
               {hoverPixel && hoverPixel.val !== null ? (
                 <span>
-                  Hover Pixel [{hoverPixel.x}, {hoverPixel.y}] ={" "}
+                  Pixel [{hoverPixel.x}, {hoverPixel.y}] ={" "}
                   <strong className="text-sky-300">{hoverPixel.val.toFixed(2)} MJy/sr</strong>
                 </span>
               ) : (
-                <span>Hover over cutout to inspect surface brightness (MJy/sr)</span>
+                <span className="text-slate-400">Hover over cutout to inspect surface brightness (MJy/sr)</span>
               )}
             </div>
           </div>
@@ -514,7 +557,7 @@ export default function ObservationTimelineComparator({
             />
           </div>
 
-          <div className="flex items-center justify-between pt-1">
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
             <div className="flex items-center gap-2">
               <button
                 disabled={!hasMultipleEpochs}
@@ -526,29 +569,29 @@ export default function ObservationTimelineComparator({
               <button
                 disabled={!hasMultipleEpochs}
                 onClick={() => setCurrentIndex((c) => Math.max(1, c - 1))}
-                className="rounded-lg bg-slate-800 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-700 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                className="rounded-lg bg-slate-800 px-3.5 py-1.5 text-xs text-slate-200 hover:bg-slate-700 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 ◄ Prev Scan
               </button>
               <button
                 disabled={!hasMultipleEpochs}
                 onClick={() => setCurrentIndex((c) => Math.min(obsCount - 1, c + 1))}
-                className="rounded-lg bg-slate-800 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-700 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                className="rounded-lg bg-slate-800 px-3.5 py-1.5 text-xs text-slate-200 hover:bg-slate-700 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Next Scan ►
               </button>
             </div>
 
-            <div className="flex items-center gap-1 text-xs">
-              <span className="text-slate-500 text-[11px] mr-1">Speed:</span>
+            <div className="flex items-center gap-1.5 text-xs">
+              <span className="text-slate-400 mr-1">Speed:</span>
               {[0.5, 1, 2].map((s) => (
                 <button
                   key={s}
                   disabled={!hasMultipleEpochs}
                   onClick={() => setPlaybackSpeed(s)}
                   className={cn(
-                    "px-2 py-0.5 rounded font-mono text-[11px] cursor-pointer disabled:opacity-40",
-                    playbackSpeed === s ? "bg-slate-700 text-amber-300 font-bold" : "text-slate-400 hover:text-slate-200"
+                    "px-2.5 py-1 rounded-md font-mono text-xs cursor-pointer disabled:opacity-40",
+                    playbackSpeed === s ? "bg-slate-700 text-amber-300 font-bold" : "text-slate-300 hover:text-white"
                   )}
                 >
                   {s}x
@@ -560,90 +603,130 @@ export default function ObservationTimelineComparator({
       </div>
 
       {/* ═════════════════════════════════════════════════════════════════════
-          RIGHT AREA (SCIENTIFIC TARGET DOSSIER & DIAGNOSTICS - 32% WIDTH)
+          RIGHT AREA (SCIENTIFIC TARGET DOSSIER & PRIORITIZED METRICS - 4 COLUMNS)
       ═════════════════════════════════════════════════════════════════════ */}
-      <div className="w-full xl:w-96 flex flex-col justify-between rounded-2xl border border-slate-800 bg-[#0d1322] p-4 shadow-xl space-y-3 shrink-0">
+      <div className="xl:col-span-4 flex flex-col justify-between rounded-2xl border border-slate-800 bg-[#0d1322] p-5 sm:p-6 shadow-xl space-y-5">
         {/* SECTION 1: Verified Target Identity & Classification */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-2">
             <span className="text-xs uppercase font-mono tracking-wider text-amber-400 font-semibold">
               {activeTarget.type}
             </span>
-            <span className="rounded-full bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-[10px] text-amber-300 font-mono">
+            <span className="rounded-full bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 text-xs text-amber-300 font-mono font-semibold">
               {activeTarget.spectralType}
             </span>
           </div>
 
-          <div className="flex items-baseline justify-between gap-2">
-            <h3 className="text-lg font-bold text-slate-100">{activeTarget.name}</h3>
-            <span className="text-[11px] font-mono text-slate-400">
-              {activeTarget.raSexagesimal} · {activeTarget.decSexagesimal}
-            </span>
+          <div>
+            <h3 className="text-xl font-bold text-slate-100">{activeTarget.name}</h3>
+            <p className="mt-1 text-xs font-mono text-slate-300">
+              ICRS J2000: {activeTarget.raSexagesimal} · {activeTarget.decSexagesimal} ({activeTarget.raDeg}°, {activeTarget.decDeg}°)
+            </p>
           </div>
 
-          <p className="text-xs text-slate-300 leading-relaxed bg-[#090e1a] p-3 rounded-xl border border-slate-800/80">
+          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed bg-[#090e1a] p-3.5 rounded-xl border border-slate-800/80">
             {activeTarget.scienceDescription}
           </p>
+
+          {activeTarget.components && activeTarget.components.length > 0 && (
+            <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-xs font-mono space-y-1.5">
+              <div className="text-xs uppercase tracking-wider text-amber-300 font-semibold">
+                Resolved Binary Brown Dwarf Components
+              </div>
+              {activeTarget.components.map((comp: any, idx: number) => (
+                <div key={idx} className="flex items-center justify-between text-slate-200">
+                  <span>
+                    {comp.designation}: <strong className="text-amber-300">{comp.spectralType}</strong>
+                  </span>
+                  <span className="text-slate-300">
+                    T_eff ≈ {comp.effectiveTempK} K · ~{comp.massJupiter} M_Jup
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* SECTION 2: Verified Key Findings */}
-        <div className="space-y-2">
-          <h4 className="text-xs uppercase font-mono tracking-wider text-slate-400">
-            Verified Target & Epoch Metrics
-          </h4>
+        {/* SECTION 2: 4 Core Prioritized Astrometric & Epoch Metrics */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs uppercase font-mono tracking-wider text-slate-300 font-semibold">
+              Key Astrometric & Baseline Metrics
+            </h4>
+            <span className="text-xs font-mono text-sky-300">
+              {activeTarget.id === "wise-0855" ? "Spitzer / WISE" : "ESA Gaia DR3"}
+            </span>
+          </div>
 
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-2.5 space-y-1">
-              <span className="text-[10px] text-slate-400 block">Primary Phenomenon</span>
-              <span className={cn("font-bold flex items-center gap-1 text-[11px]", isProperMotionTarget ? "text-emerald-400" : "text-sky-300")}>
-                <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", isProperMotionTarget ? "bg-emerald-400" : "bg-sky-400")} />
-                {isProperMotionTarget
-                  ? `PM ${activeTarget.totalProperMotionArcsecYr}"/yr`
-                  : activeTarget.periodDays
-                  ? `Mira P=${activeTarget.periodDays}d`
-                  : "Irregular CTTS Var"}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-3.5 space-y-1">
+              <span className="text-xs text-slate-400 block">Distance (d)</span>
+              <span className="text-sky-300 font-bold font-mono text-sm sm:text-base block">
+                {activeTarget.distancePc} pc
+              </span>
+              <span className="text-xs font-mono text-slate-400 block">
+                {activeTarget.distanceLy} light-years
               </span>
             </div>
 
-            <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-2.5 space-y-1">
-              <span className="text-[10px] text-slate-400 block">Selected Baseline Shift</span>
-              <span className="text-slate-100 font-bold font-mono text-[11px]">
-                {diffAnalysis
-                  ? `${diffAnalysis.trueDisplacementArcsec}" (${diffAnalysis.trueDisplacementPixels} px)`
-                  : "N/A"}
+            <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-3.5 space-y-1">
+              <span className="text-xs text-slate-400 block">Proper Motion (μ)</span>
+              <span className={cn("font-bold font-mono text-sm sm:text-base block", isProperMotionTarget ? "text-emerald-400" : "text-sky-300")}>
+                {activeTarget.totalProperMotionArcsecYr}″/yr
+              </span>
+              <span className="text-xs font-mono text-slate-400 block">
+                PA {activeTarget.positionAngleDeg}° (E of N)
               </span>
             </div>
 
-            <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-2.5 space-y-1">
-              <span className="text-[10px] text-slate-400 block">IRSA QR2 Coverage</span>
-              <span className="text-amber-400 font-bold font-mono text-[11px]">
-                {obsCount} Sampled ({activeTarget.spherexContext?.coverageEpochCount || obsCount} Total)
+            <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-3.5 space-y-1">
+              <span className="text-xs text-slate-400 block">Parallax (π)</span>
+              <span className="text-slate-100 font-bold font-mono text-sm sm:text-base block">
+                {activeTarget.parallaxMas} mas
+              </span>
+              <span className="text-xs font-mono text-slate-400 block">
+                ± {activeTarget.parallaxErrorMas ?? 0.04} mas (1σ)
               </span>
             </div>
 
-            <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-2.5 space-y-1">
-              <span className="text-[10px] text-slate-400 block">Catalog Reference</span>
-              <span className="text-sky-300 font-bold text-[11px] truncate block" title={activeTarget.astrometricCatalog}>
-                {activeTarget.id === "wise-0855" ? "Spitzer / WISE" : "ESA Gaia DR3"}
+            <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-3.5 space-y-1">
+              <span className="text-xs text-slate-400 block">Selected Baseline Shift</span>
+              <span className="text-amber-300 font-bold font-mono text-sm sm:text-base block">
+                {diffAnalysis ? `${diffAnalysis.trueDisplacementArcsec}″` : "N/A"}
+              </span>
+              <span className="text-xs font-mono text-slate-400 block">
+                {diffAnalysis ? `${diffAnalysis.trueDisplacementPixels} px (${formattedDeltaDays} d)` : "Single epoch"}
               </span>
             </div>
           </div>
         </div>
 
-        {/* SECTION 3: Collapsible Technical Diagnostics & FITS */}
-        <div className="border-t border-slate-800/80 pt-2">
+        {/* SECTION 3: Collapsible Secondary Technical Telemetry & FITS */}
+        <div className="border-t border-slate-800/80 pt-3">
           <button
             onClick={() => setShowTechnicalDetails(!showTechnicalDetails)}
-            className="w-full flex items-center justify-between text-xs text-slate-400 hover:text-slate-200 transition-colors py-1 cursor-pointer"
+            className="w-full flex items-center justify-between rounded-xl bg-[#090e1a] border border-slate-800 px-3.5 py-2.5 text-xs text-slate-300 hover:text-white hover:border-slate-700 transition-colors cursor-pointer"
           >
-            <span className="font-mono text-[11px]">
-              {showTechnicalDetails ? "▼ Hide Technical Telemetry" : "► Show Technical Telemetry & FITS"}
+            <span className="font-mono font-medium">
+              {showTechnicalDetails ? "▼ Hide Secondary Telemetry & FITS" : "► View Secondary Telemetry & FITS Link"}
             </span>
-            <span className="text-[10px] text-amber-400/80">Level-2 MEF</span>
+            <span className="text-xs font-mono text-amber-400">
+              {obsCount} QR2 Epochs
+            </span>
           </button>
 
           {showTechnicalDetails && (
-            <div className="mt-2 space-y-1.5 bg-[#090e1a] p-2.5 rounded-xl border border-slate-800 text-[11px] font-mono">
+            <div className="mt-2.5 space-y-2 bg-[#090e1a] p-3.5 rounded-xl border border-slate-800 text-xs font-mono">
+              <div className="flex justify-between text-slate-400">
+                <span>IRSA QR2 Coverage:</span>
+                <span className="text-amber-300">
+                  {obsCount} Sampled ({activeTarget.spherexContext?.coverageEpochCount || obsCount} Total)
+                </span>
+              </div>
+              <div className="flex justify-between text-slate-400">
+                <span>Catalog Source ID:</span>
+                <span className="text-sky-300">{activeTarget.astrometricCatalogId}</span>
+              </div>
               <div className="flex justify-between text-slate-400">
                 <span>Residual Summary:</span>
                 <span className="text-amber-300 text-right">{diffAnalysis?.statusSummary || "N/A"}</span>
@@ -653,16 +736,16 @@ export default function ObservationTimelineComparator({
                 <span className="text-slate-200">{diffAnalysis?.rmsResidualMJyPerSr ?? "N/A"} MJy/sr</span>
               </div>
               <div className="flex justify-between text-slate-400">
-                <span> Pixels &gt; 3σ:</span>
+                <span>Significant Pixels (&gt;3σ):</span>
                 <span className="text-amber-400 font-bold">{diffAnalysis?.significantPixelsCount ?? 0} px</span>
               </div>
               {(currentObs.accessUrl || currentObs.access_url) && (
-                <div className="pt-1 border-t border-slate-800">
+                <div className="pt-2 border-t border-slate-800">
                   <a
                     href={currentObs.accessUrl || currentObs.access_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[10px] text-sky-400 hover:underline break-all"
+                    className="text-xs text-sky-400 hover:underline break-all"
                   >
                     Download IRSA Level-2 FITS ({currentObs.obs_id || currentObs.obsId}) ↗
                   </a>

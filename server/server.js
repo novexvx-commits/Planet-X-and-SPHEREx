@@ -42,9 +42,11 @@ app.use((req, res, next) => {
 // API Routes
 app.use('/api', apiRouter);
 
-// Serve production static frontend if dist/ exists
+// Serve production static frontend if dist/ exists, plus public/ assets (such as /vendor/aladin.js)
 const distPath = path.resolve(__dirname, '../dist');
+const publicPath = path.resolve(__dirname, '../public');
 app.use(express.static(distPath));
+app.use(express.static(publicPath));
 
 // Single-page application fallback (Express 5 compatible)
 app.use((req, res) => {

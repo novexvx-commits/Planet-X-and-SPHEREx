@@ -7,7 +7,7 @@
 
 import { generateScientificCutout } from './fitsProcessor.js';
 import { AUTHORITATIVE_TARGETS } from '../data/authoritativeTargets.js';
-import { angularSeparationArcsec, mjdToUtc } from '../utils/astronomy.js';
+import { angularSeparationArcsec, mjdToUtc, roundMjd, formatMjd, calculateElapsedDays, formatElapsedDays } from '../utils/astronomy.js';
 
 /**
  * Compare two SPHEREx observations of an astronomical target
@@ -28,9 +28,11 @@ export function compareObservations({ targetId, obs1, obs2, cutoutSize = 32 }) {
     totalProperMotionArcsecYr: 0
   };
 
-  const mjd1 = parseFloat(obs1.mjd) || 60850;
-  const mjd2 = parseFloat(obs2.mjd) || 61160;
-  const dtDays = Math.abs(mjd2 - mjd1);
+  const rawMjd1 = parseFloat(obs1.mjd) || 60850;
+  const rawMjd2 = parseFloat(obs2.mjd) || 61160;
+  const mjd1 = roundMjd(rawMjd1, 1);
+  const mjd2 = roundMjd(rawMjd2, 1);
+  const dtDays = calculateElapsedDays(rawMjd1, rawMjd2, 1);
   const dtYears = dtDays / 365.25;
 
   // Determine flux level according to target astrophysics and bandpass
@@ -187,7 +189,8 @@ export function compareObservations({ targetId, obs1, obs2, cutoutSize = 32 }) {
   );
 
   return {
-    dataClassification: 'SIMULATED — CLEARLY LABELED (WCS Cutout Reconstruction Anchored to Real IRSA QR2 Timestamps & Verified Catalog Astrometry/Photometry)',
+    dataClassification: 'MODEL / SIMULATION',
+    dataClassificationDetail: 'MODEL / SIMULATION (32×32 WCS PSF Cutouts) · REAL OBSERVATION (IRSA SPHEREx QR2 Timestamps) · DERIVED FROM REAL DATA (Gaia DR3 / WISE Proper Motion Shift)',
     target: {
       id: target.id,
       name: target.name,
@@ -208,20 +211,25 @@ export function compareObservations({ targetId, obs1, obs2, cutoutSize = 32 }) {
       obsId: obs1.obsId,
       bandpass: obs1.bandpass,
       mjd: mjd1,
-      utcDate: obs1.utcDate || mjdToUtc(mjd1),
+      mjdFormatted: formatMjd(rawMjd1, 1),
+      rawMjd: rawMjd1,
+      utcDate: obs1.utcDate || mjdToUtc(rawMjd1),
       frame: frame1
     },
     epoch2: {
       obsId: obs2.obsId,
       bandpass: obs2.bandpass,
       mjd: mjd2,
-      utcDate: obs2.utcDate || mjdToUtc(mjd2),
+      mjdFormatted: formatMjd(rawMjd2, 1),
+      rawMjd: rawMjd2,
+      utcDate: obs2.utcDate || mjdToUtc(rawMjd2),
       frame: frame2
     },
     differenceAnalysis: {
       method: 'Background-Subtracted WCS Residual Map D = (I2 - B2) - (I1 - B1)',
       phenomenonType,
-      baselineDays: parseFloat(dtDays.toFixed(2)),
+      baselineDays: dtDays,
+      baselineDaysFormatted: formatElapsedDays(rawMjd1, rawMjd2, 1),
       baselineYears: parseFloat(dtYears.toFixed(3)),
       trueDisplacementArcsec: parseFloat(trueDisplacementArcsec.toFixed(3)),
       trueDisplacementPixels: parseFloat(trueDisplacementPixels.toFixed(3)),
@@ -229,8 +237,8 @@ export function compareObservations({ targetId, obs1, obs2, cutoutSize = 32 }) {
       hasSignificantProperMotion,
       statusSummary: phenomenonType === 'proper-motion'
         ? (hasSignificantProperMotion
-          ? `Proper Motion Shift: ${trueDisplacementArcsec.toFixed(2)}" (${trueDisplacementPixels.toFixed(2)} px over ${dtDays.toFixed(0)}d)`
-          : `Short Baseline (${dtDays.toFixed(0)}d): Shift ${trueDisplacementArcsec.toFixed(2)}" (<3σ)`)
+          ? `Proper Motion Shift: ${trueDisplacementArcsec.toFixed(2)}" (${trueDisplacementPixels.toFixed(2)} px over ${dtDays.toFixed(1)}d)`
+          : `Short Baseline (${dtDays.toFixed(1)}d): Shift ${trueDisplacementArcsec.toFixed(2)}" (<3σ)`)
         : `Stationary Centroid (PM ${(target.totalProperMotionArcsecYr || 0).toFixed(3)}"/yr) · Flux Variability Residual`,
       rmsResidualMJyPerSr: parseFloat(rmsDiff.toFixed(4)),
       detectionThreshold3Sigma: parseFloat(threshold3Sigma.toFixed(4)),

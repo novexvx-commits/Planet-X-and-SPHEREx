@@ -13,6 +13,7 @@ import { getSpectralBandsCatalog, getTargetSpectra } from '../services/spectralS
 import { queryMovingObjectSearch } from '../services/mostMovingObjectService.js';
 import { resolveAstronomicalTarget } from '../services/simbadService.js';
 import { CACHED_SPHEREX_OBSERVATIONS } from '../data/cachedObservations.js';
+import { mjdToUtc } from '../utils/astronomy.js';
 
 const router = express.Router();
 
@@ -46,18 +47,8 @@ router.get('/targets', (req, res) => {
   const targets = AUTHORITATIVE_TARGETS.map(t => {
     const cached = CACHED_SPHEREX_OBSERVATIONS[t.id];
     return {
-      id: t.id,
-      name: t.name,
-      type: t.type,
-      spectralType: t.spectralType,
-      raDeg: t.raDeg,
-      decDeg: t.decDeg,
-      raSexagesimal: t.raSexagesimal,
-      decSexagesimal: t.decSexagesimal,
-      distanceLy: t.distanceLy,
-      primaryPhenomenon: t.primaryPhenomenon,
-      observationCount: cached ? cached.count : 0,
-      spherexContext: t.spherexContext
+      ...t,
+      observationCount: cached ? cached.count : 0
     };
   });
 
@@ -139,25 +130,35 @@ router.get('/timeline/:targetId', async (req, res) => {
     return res.status(404).json({ error: `No observations found for ${target.name}.` });
   }
 
-  const timelineEntries = cached.observations.map((obs, idx) => ({
-    id: `tl_${idx + 1}`,
-    obsId: obs.obs_id,
-    bandpass: obs.energy_bandpassname,
-    detector: (obs.energy_bandpassname || '').replace('SPHEREx-', ''),
-    mjd: parseFloat(obs.t_min) || 0,
-    utcDate: obs.obs_release_date || '2026-04-21',
-    exposureTimeSec: parseFloat(obs.t_exptime) || 113.58,
-    accessUrl: obs.access_url,
-    pixelScaleArcsec: parseFloat(obs.s_pixel_scale) || 6.15,
-    provenance: {
-      archive: 'NASA/IPAC IRSA',
-      collection: 'spherex_qr2',
-      quality: 'Calibrated Level 2 Science Exposure'
-    }
-  }));
+  const sortedObs = [...cached.observations].sort(
+    (a, b) => (parseFloat(a.t_min) || 0) - (parseFloat(b.t_min) || 0)
+  );
 
-  // Sort timeline chronologically
-  timelineEntries.sort((a, b) => a.mjd - b.mjd);
+  const timelineEntries = sortedObs.map((obs, idx) => {
+    const mjd = parseFloat(obs.t_min) || 0;
+    return {
+      id: `tl_${idx + 1}`,
+      obsId: obs.obs_id,
+      obs_id: obs.obs_id,
+      bandpass: obs.energy_bandpassname,
+      energy_bandpassname: obs.energy_bandpassname,
+      em_band: obs.energy_bandpassname,
+      detector: (obs.energy_bandpassname || '').replace('SPHEREx-', ''),
+      mjd,
+      t_min: obs.t_min,
+      utcDate: mjdToUtc(mjd),
+      releaseDate: obs.obs_release_date || '2025-10-17',
+      exposureTimeSec: parseFloat(obs.t_exptime) || 113.58,
+      accessUrl: obs.access_url,
+      access_url: obs.access_url,
+      pixelScaleArcsec: parseFloat(obs.s_pixel_scale) || 6.15,
+      provenance: {
+        archive: 'NASA/IPAC IRSA',
+        collection: 'spherex_qr2',
+        quality: 'Calibrated Level 2 Science Exposure'
+      }
+    };
+  });
 
   res.json({
     target: {
@@ -185,7 +186,9 @@ router.get('/image-compare', (req, res) => {
   }
 
   const cached = CACHED_SPHEREX_OBSERVATIONS[target.id];
-  const obsList = cached ? cached.observations : [];
+  const obsList = cached
+    ? [...cached.observations].sort((a, b) => (parseFloat(a.t_min) || 0) - (parseFloat(b.t_min) || 0))
+    : [];
 
   const obs1 = (obsId1 ? obsList.find(o => o.obs_id === obsId1) : null) || obsList[0] || {
     obs_id: 'SPHEREx-EP1',
@@ -280,9 +283,9 @@ router.get('/spectra/:targetId', (req, res) => {
 
 // Moving Object Search Tool (MOST)
 router.get('/most', async (req, res) => {
-  const { target = 'Ceres', catalog = 'spherex' } = req.query;
+  const { target = 'Ceres', catalog = 'spherex', startDate = null } = req.query;
   try {
-    const result = await queryMovingObjectSearch(target, catalog);
+    const result = await queryMovingObjectSearch(target, catalog, startDate);
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });

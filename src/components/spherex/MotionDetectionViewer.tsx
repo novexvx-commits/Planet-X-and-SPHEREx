@@ -9,6 +9,7 @@ interface MotionViewerProps {
 export default function MotionDetectionViewer({ targetId }: MotionViewerProps) {
   const [data, setData] = useState<any>(() => analyzeTargetMotion(targetId));
   const [loading, setLoading] = useState(false);
+  const [showVectorDetails, setShowVectorDetails] = useState(true);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -38,8 +39,8 @@ export default function MotionDetectionViewer({ targetId }: MotionViewerProps) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const width = (canvas.width = canvas.parentElement?.clientWidth || 520);
-    const height = (canvas.height = 360);
+    const width = (canvas.width = canvas.parentElement?.clientWidth || 540);
+    const height = (canvas.height = 370);
 
     ctx.fillStyle = "#05060a";
     ctx.fillRect(0, 0, width, height);
@@ -86,7 +87,7 @@ export default function MotionDetectionViewer({ targetId }: MotionViewerProps) {
       const pixelBoxSize = 6.15 * pixelScale;
 
       // Draw SPHEREx 6.15"/px detector pixel scale reference box
-      ctx.strokeStyle = "rgba(255, 138, 61, 0.32)";
+      ctx.strokeStyle = "rgba(255, 138, 61, 0.35)";
       ctx.setLineDash([4, 4]);
       ctx.strokeRect(
         centerX - pixelBoxSize / 2,
@@ -95,26 +96,26 @@ export default function MotionDetectionViewer({ targetId }: MotionViewerProps) {
         pixelBoxSize
       );
       ctx.setLineDash([]);
-      ctx.fillStyle = "rgba(255, 138, 61, 0.65)";
-      ctx.font = "9.5px 'JetBrains Mono', monospace";
+      ctx.fillStyle = "rgba(255, 192, 138, 0.85)";
+      ctx.font = "11px 'JetBrains Mono', monospace";
       ctx.fillText(
         "1 SPHEREx Pixel (6.15\" × 6.15\")",
         centerX - pixelBoxSize / 2,
-        Math.max(16, centerY - pixelBoxSize / 2 - 8)
+        Math.max(18, centerY - pixelBoxSize / 2 - 8)
       );
 
       // Compass axes (N / E)
-      ctx.strokeStyle = "rgba(255,255,255,0.18)";
+      ctx.strokeStyle = "rgba(255,255,255,0.22)";
       ctx.beginPath();
-      ctx.moveTo(32, height - 24);
-      ctx.lineTo(32, height - 56);
-      ctx.moveTo(32, height - 24);
-      ctx.lineTo(64, height - 24);
+      ctx.moveTo(36, height - 26);
+      ctx.lineTo(36, height - 60);
+      ctx.moveTo(36, height - 26);
+      ctx.lineTo(70, height - 26);
       ctx.stroke();
-      ctx.fillStyle = "#8d93a1";
-      ctx.font = "9px 'JetBrains Mono', monospace";
-      ctx.fillText("N (+Dec)", 18, height - 60);
-      ctx.fillText("+RA", 68, height - 21);
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "10.5px 'JetBrains Mono', monospace";
+      ctx.fillText("N (+Dec)", 20, height - 64);
+      ctx.fillText("+RA", 74, height - 22);
 
       // Center trajectory around midpoint so full path stays inside canvas
       const midRa = displacements[displacements.length - 1].dRaArcsec / 2;
@@ -123,7 +124,7 @@ export default function MotionDetectionViewer({ targetId }: MotionViewerProps) {
       const originY = centerY + midDec * pixelScale;
 
       ctx.strokeStyle = "#ff8a3d";
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 2.25;
       ctx.beginPath();
 
       const screenCoords: { x: number; y: number; ep: any; dRaArcsec: number; dDecArcsec: number }[] = [];
@@ -151,7 +152,7 @@ export default function MotionDetectionViewer({ targetId }: MotionViewerProps) {
         const endY = start.y - predDecShift * pixelScale;
 
         ctx.strokeStyle = "rgba(155, 123, 255, 0.85)";
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 1.75;
         ctx.setLineDash([5, 5]);
         ctx.beginPath();
         ctx.moveTo(start.x, start.y);
@@ -177,16 +178,16 @@ export default function MotionDetectionViewer({ targetId }: MotionViewerProps) {
             ? "#ff8a3d"
             : "#ffffff";
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
         ctx.fill();
 
         // Stagger epoch labels cleanly so low-PM stars don't overlap text
-        const labelOffsetY = maxDisp < 0.5 ? (idx - 1) * 16 - 8 : idx % 2 === 0 ? -8 : 14;
-        ctx.fillStyle = "#ece8e1";
-        ctx.font = "10px 'JetBrains Mono', monospace";
+        const labelOffsetY = maxDisp < 0.5 ? (idx - 1) * 18 - 8 : idx % 2 === 0 ? -9 : 16;
+        ctx.fillStyle = "#f1f5f9";
+        ctx.font = "11px 'JetBrains Mono', monospace";
         ctx.fillText(
           `${p.ep.epochId} (${p.ep.yearDecimal})`,
-          Math.min(width - 135, Math.max(12, p.x + 10)),
+          Math.min(width - 145, Math.max(12, p.x + 12)),
           Math.min(height - 12, Math.max(18, p.y + labelOffsetY))
         );
       });
@@ -195,38 +196,46 @@ export default function MotionDetectionViewer({ targetId }: MotionViewerProps) {
 
   if (!data || !data.centroidHistory) {
     return (
-      <div className="rounded-xl border border-white/10 bg-ink-2 p-8 text-center text-mist">
-        No motion detection data available for target.
+      <div className="rounded-2xl border border-slate-800 bg-[#0d1322] p-8 text-center text-slate-300">
+        <span className="inline-block rounded-md bg-rose-500/15 border border-rose-500/40 px-2.5 py-1 text-xs font-mono text-rose-300 font-bold mb-2">
+          UNAVAILABLE
+        </span>
+        <p className="text-sm">No motion detection data available for target.</p>
       </div>
     );
   }
 
   const catalogName = data.gaiaReferenceAstrometry?.catalog || "ESA Gaia DR3";
+  const netShiftArcsec =
+    data.overallAssessment?.netDisplacementArcsec ??
+    data.overallAssessment?.totalBaselineDisplacementArcsec ??
+    0;
+  const totalBaselineYears = data.overallAssessment?.totalBaselineYears ?? 0;
 
   return (
-    <div className="rounded-xl border border-white/10 bg-ink-2 p-6 shadow-2xl">
+    <div className="rounded-2xl border border-slate-800 bg-[#0d1322] p-5 sm:p-6 shadow-2xl space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-ember-soft">
+          <span className="font-mono text-xs uppercase tracking-widest text-amber-400 font-semibold">
             Astrometric Vector Engine · {catalogName}
           </span>
-          <h3 className="mt-1 font-serif text-2xl text-bone">
+          <h3 className="mt-1 font-serif text-2xl sm:text-3xl text-slate-100">
             Multi-Epoch Motion Detection & Proper Motion
           </h3>
         </div>
 
         {/* Status Badge */}
-        <div className="flex items-center gap-2 rounded-full border border-white/10 bg-ink px-3.5 py-1.5 font-mono text-xs">
+        <div className="flex items-center gap-2.5 rounded-full border border-slate-700 bg-[#070b14] px-4 py-2 font-mono text-xs">
           <span
             className={cn(
-              "h-2 w-2 rounded-full",
+              "h-2.5 w-2.5 rounded-full",
               data.overallAssessment?.hasDetectedMotion
-                ? "bg-ember shadow-[0_0_8px_#ff8a3d]"
-                : "bg-ion"
+                ? "bg-amber-400 shadow-[0_0_8px_#ff8a3d]"
+                : "bg-sky-400"
             )}
           />
-          <span className="text-bone">
+          <span className="text-slate-100 font-medium">
             {data.overallAssessment?.statusLabel ||
               (data.overallAssessment?.hasDetectedMotion
                 ? "Catalog Proper Motion Resolvable across SPHEREx Epochs"
@@ -235,116 +244,163 @@ export default function MotionDetectionViewer({ targetId }: MotionViewerProps) {
         </div>
       </div>
 
-      {/* Explicit Data Classification Banner */}
-      <div className="mt-4 rounded-lg border border-ion/25 bg-ion/5 px-3.5 py-2 font-mono text-[11px] text-mist flex flex-wrap items-center justify-between gap-2">
-        <span>
-          <strong className="text-ion">Methodology:</strong>{" "}
-          {data.dataClassification ||
-            `Spherical-coordinate trajectory propagated from verified ${catalogName} astrometry across SPHEREx QR2 observation epochs.`}
-        </span>
-        {loading && <span className="text-[10px] text-ember-soft">Syncing...</span>}
+      {/* Canonical Data Classification Banner */}
+      <div className="rounded-xl border border-slate-800 bg-[#090e1a] px-4 py-3 font-mono text-xs text-slate-300 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-md bg-amber-500/15 border border-amber-500/40 px-2.5 py-0.5 text-amber-300 font-bold">
+            DERIVED FROM REAL DATA
+          </span>
+          <span>Spherical-coordinate trajectory propagated from</span>
+          <span className="rounded-md bg-sky-500/15 border border-sky-500/40 px-2.5 py-0.5 text-sky-300 font-bold">
+            REAL OBSERVATION
+          </span>
+          <span>verified {catalogName} astrometry across SPHEREx QR2 observation epochs.</span>
+        </div>
+        {loading && <span className="text-xs text-amber-300">Syncing...</span>}
       </div>
 
-      <div className="mt-5 grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* 4 Prioritized High-Contrast Astrometric Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-4">
+          <p className="font-mono text-xs uppercase text-slate-400">Total Proper Motion (μ)</p>
+          <p className="mt-1.5 font-mono text-lg sm:text-xl font-bold text-amber-400">
+            {data.gaiaReferenceAstrometry?.totalProperMotionArcsecYr}″ / yr
+          </p>
+          <p className="mt-1 font-mono text-xs text-slate-300">
+            PA θ = {data.gaiaReferenceAstrometry?.positionAngleDeg}° (E of N)
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-4">
+          <p className="font-mono text-xs uppercase text-slate-400">Distance (d)</p>
+          <p className="mt-1.5 font-mono text-lg sm:text-xl font-bold text-sky-300">
+            {data.gaiaReferenceAstrometry?.distancePc} pc
+          </p>
+          <p className="mt-1 font-mono text-xs text-slate-300">
+            {data.gaiaReferenceAstrometry?.distanceLy} light-years
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-4">
+          <p className="font-mono text-xs uppercase text-slate-400">Trigonometric Parallax (π)</p>
+          <p className="mt-1.5 font-mono text-lg sm:text-xl font-bold text-slate-100">
+            {data.gaiaReferenceAstrometry?.parallaxMas} mas
+          </p>
+          <p className="mt-1 font-mono text-xs text-slate-300">
+            ± {data.gaiaReferenceAstrometry?.parallaxErrorMas ?? 0.04} mas ({catalogName})
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-4">
+          <p className="font-mono text-xs uppercase text-slate-400">Net Baseline Shift (Δθ)</p>
+          <p className="mt-1.5 font-mono text-lg sm:text-xl font-bold text-emerald-400">
+            {netShiftArcsec}″
+          </p>
+          <p className="mt-1 font-mono text-xs text-slate-300">
+            {(netShiftArcsec / 6.15).toFixed(3)} SPHEREx px over {totalBaselineYears} yr
+          </p>
+        </div>
+      </div>
+
+      {/* Main Grid: Trajectory Canvas Plot + Catalog & Epoch Breakdown */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Trajectory Canvas Plot */}
-        <div className="lg:col-span-7 rounded-lg border border-white/10 bg-ink p-4 flex flex-col items-center">
-          <div className="w-full flex justify-between font-mono text-[10px] text-mist mb-2">
-            <span>Spherical ICRS Displacement Trajectory (ΔRA cos Dec, ΔDec)</span>
-            <span className="text-ember-soft">
-              Net Shift: {data.overallAssessment?.netDisplacementArcsec ?? 0}″ over{" "}
-              {data.overallAssessment?.totalBaselineYears ?? 0} yr
+        <div className="lg:col-span-7 rounded-xl border border-slate-800 bg-[#070b14] p-4 sm:p-5 flex flex-col items-center">
+          <div className="w-full flex flex-wrap items-center justify-between gap-2 font-mono text-xs text-slate-300 mb-3">
+            <span className="font-semibold text-slate-200">
+              Spherical ICRS Displacement Trajectory (ΔRA cos Dec, ΔDec)
+            </span>
+            <span className="text-amber-300">
+              Net Shift: {netShiftArcsec}″ over {totalBaselineYears} yr ({data.overallAssessment?.totalBaselineDays ?? 262.0} d)
             </span>
           </div>
-          <canvas ref={canvasRef} className="h-[340px] w-full block" />
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-4 text-[10px] font-mono">
-            <span className="flex items-center gap-1.5 text-ion">
-              <span className="h-2 w-2 rounded-full bg-ion" /> Propagated Epoch Centroids (±0.35″ SPHEREx 1σ)
+          <canvas ref={canvasRef} className="h-[360px] w-full block rounded-lg" />
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-6 text-xs font-mono">
+            <span className="flex items-center gap-2 text-sky-300">
+              <span className="h-2.5 w-2.5 rounded-full bg-sky-400" /> Propagated Epoch Centroids (±0.35″ SPHEREx 1σ)
             </span>
-            <span className="flex items-center gap-1.5 text-nebula">
-              <span className="h-2 w-2 rounded-full bg-nebula" /> {catalogName} Proper Motion Vector
+            <span className="flex items-center gap-2 text-purple-300">
+              <span className="h-2.5 w-2.5 rounded-full bg-purple-400" /> {catalogName} Proper Motion Vector
             </span>
           </div>
         </div>
 
-        {/* Quantitative Astrometric Measurements Table */}
-        <div className="lg:col-span-5 flex flex-col justify-between rounded-lg border border-white/10 bg-ink-3 p-5">
-          <div>
-            <h4 className="font-mono text-[11px] uppercase tracking-wider text-ember-soft font-semibold">
-              Verified Astrometric Catalog & Multi-Epoch Metrics
-            </h4>
+        {/* Quantitative Astrometric Components & Collapsible Epoch Breakdown */}
+        <div className="lg:col-span-5 flex flex-col justify-between rounded-xl border border-slate-800 bg-[#090e1a] p-5 space-y-4">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="font-mono text-xs uppercase tracking-wider text-amber-400 font-semibold">
+                Catalog Vector Components
+              </h4>
+              <span className="font-mono text-xs text-sky-300 truncate max-w-[200px]" title={data.gaiaReferenceAstrometry?.sourceId || data.gaiaReferenceAstrometry?.catalogId}>
+                {data.gaiaReferenceAstrometry?.sourceId || data.gaiaReferenceAstrometry?.catalogId}
+              </span>
+            </div>
 
-            {/* Reference Catalog Stats */}
-            <div className="mt-3 rounded border border-white/5 bg-ink/70 p-3 font-mono text-xs space-y-1.5">
-              <div className="flex justify-between items-center">
-                <p className="text-[10px] uppercase text-mist">{catalogName}</p>
-                <span className="text-[10px] text-ion">{data.gaiaReferenceAstrometry?.sourceId}</span>
-              </div>
-              <div className="flex justify-between text-bone">
-                <span>Total Proper Motion (μ):</span>
-                <span className="text-ember font-semibold">
-                  {data.gaiaReferenceAstrometry?.totalProperMotionArcsecYr}″ / yr
-                </span>
-              </div>
-              <div className="flex justify-between text-mist text-[11px]">
-                <span>μ_α cos(δ):</span>
-                <span className="text-bone">
+            <div className="rounded-xl border border-slate-800 bg-[#070b14] p-3.5 font-mono text-xs space-y-2">
+              <div className="flex justify-between text-slate-300">
+                <span>Right Ascension PM (μ_α cos δ):</span>
+                <span className="text-slate-100 font-semibold">
                   {data.gaiaReferenceAstrometry?.properMotionRaMasYr} mas/yr
                 </span>
               </div>
-              <div className="flex justify-between text-mist text-[11px]">
-                <span>μ_δ:</span>
-                <span className="text-bone">
+              <div className="flex justify-between text-slate-300">
+                <span>Declination PM (μ_δ):</span>
+                <span className="text-slate-100 font-semibold">
                   {data.gaiaReferenceAstrometry?.properMotionDecMasYr} mas/yr
                 </span>
               </div>
-              <div className="flex justify-between text-mist text-[11px]">
-                <span>Position Angle (θ):</span>
-                <span className="text-bone">
-                  {data.gaiaReferenceAstrometry?.positionAngleDeg}° (E of N)
-                </span>
-              </div>
-              <div className="flex justify-between text-mist text-[11px]">
-                <span>Parallax (π):</span>
-                <span className="text-bone">
-                  {data.gaiaReferenceAstrometry?.parallaxMas} mas
-                </span>
+              <div className="flex justify-between text-slate-300">
+                <span>SPHEREx Detector Scale:</span>
+                <span className="text-amber-300">6.15″ / pixel</span>
               </div>
             </div>
+          </div>
 
-            {/* SPHEREx Multi-Epoch Vector Breakdown */}
-            <div className="mt-4">
-              <p className="font-mono text-[10px] uppercase text-mist mb-2">
-                Epoch-to-Epoch Displacement Breakdown
-              </p>
-              <div className="space-y-2">
+          {/* Collapsible Epoch-to-Epoch Vector Breakdown */}
+          <div className="pt-2 border-t border-slate-800">
+            <button
+              onClick={() => setShowVectorDetails(!showVectorDetails)}
+              className="w-full flex items-center justify-between text-xs font-mono text-slate-200 hover:text-amber-300 py-1.5 cursor-pointer"
+            >
+              <span className="font-semibold uppercase tracking-wider">
+                {showVectorDetails ? "▼ Pairwise Epoch-to-Epoch Vectors" : "► Pairwise Epoch-to-Epoch Vectors"}
+              </span>
+              <span className="text-slate-400">{data.motionVectors?.length || 0} pairs</span>
+            </button>
+
+            {showVectorDetails && (
+              <div className="mt-2.5 space-y-2.5">
                 {data.motionVectors?.map((v: any, idx: number) => (
                   <div
                     key={idx}
-                    className="rounded border border-white/10 bg-ink p-2.5 font-mono text-xs"
+                    className="rounded-xl border border-slate-800 bg-[#070b14] p-3.5 font-mono text-xs space-y-1.5"
                   >
-                    <div className="flex justify-between items-center text-bone">
-                      <span className="text-ember-soft font-semibold">
+                    <div className="flex justify-between items-center">
+                      <span className="text-amber-300 font-bold">
                         {v.fromEpoch} → {v.toEpoch}
                       </span>
-                      <span className="text-[10px] text-mist">Δt = {v.dtYears} yr</span>
+                      <span className="text-xs text-slate-400">
+                        Δt = {v.dtDays ?? (v.dtYears * 365.25).toFixed(1)} d ({v.dtYears} yr)
+                      </span>
                     </div>
-                    <div className="mt-1 flex justify-between text-[11px] text-mist">
+                    <div className="flex justify-between text-slate-300">
                       <span>Angular Shift:</span>
-                      <span className="text-bone">
+                      <span className="text-slate-100 font-semibold">
                         {v.measuredDisplacementArcsec}″ ({v.pixelShiftSPHEREx ?? (v.measuredDisplacementArcsec / 6.15).toFixed(3)} px)
                       </span>
                     </div>
-                    <div className="flex justify-between text-[11px] text-mist">
-                      <span>Catalog Velocity:</span>
-                      <span className="text-ember font-medium">
+                    <div className="flex justify-between text-slate-300">
+                      <span>Propagated Velocity:</span>
+                      <span className="text-amber-400 font-medium">
                         {v.measuredVelocityArcsecYr}″ / yr
                       </span>
                     </div>
-                    <div className="flex justify-between text-[11px] text-mist">
-                      <span>SPHEREx Centroid SNR:</span>
+                    <div className="flex justify-between text-slate-300">
+                      <span>Centroid Significance:</span>
                       <span
                         className={cn(
-                          v.significanceSigma >= 3 ? "text-ember font-bold" : "text-mist"
+                          v.significanceSigma >= 3 ? "text-emerald-400 font-bold" : "text-slate-400"
                         )}
                       >
                         {v.significanceSigma}σ ({v.confidenceDescription.split(" (")[0]})
@@ -353,10 +409,10 @@ export default function MotionDetectionViewer({ targetId }: MotionViewerProps) {
                   </div>
                 ))}
               </div>
-            </div>
+            )}
           </div>
 
-          <p className="mt-4 pt-3 border-t border-white/10 font-mono text-[9.5px] text-mist leading-relaxed">
+          <p className="pt-3 border-t border-slate-800 font-mono text-xs text-slate-400 leading-relaxed">
             {data.overallAssessment?.instrumentResolutionConstraint}
           </p>
         </div>

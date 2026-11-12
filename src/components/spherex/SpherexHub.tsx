@@ -89,14 +89,38 @@ export default function SpherexHub() {
   const [loading, setLoading] = useState(false);
   const [tourStep, setTourStep] = useState<number | null>(null);
 
-  // Update URL query params when target or tab changes
+  // Update URL query params when target or tab changes, and support browser Back/Forward (popstate)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    params.set("target", selectedTargetId);
-    params.set("tab", activeTab);
-    const newUrl = `${window.location.pathname}?${params.toString()}`;
-    window.history.replaceState({}, "", newUrl);
+    const currentT = params.get("target");
+    const currentTab = params.get("tab");
+    if (currentT !== selectedTargetId || currentTab !== activeTab) {
+      params.set("target", selectedTargetId);
+      params.set("tab", activeTab);
+      const newUrl = `${window.location.pathname}?${params.toString()}`;
+      if (!currentT && !currentTab) {
+        window.history.replaceState({ target: selectedTargetId, tab: activeTab }, "", newUrl);
+      } else {
+        window.history.pushState({ target: selectedTargetId, tab: activeTab }, "", newUrl);
+      }
+    }
   }, [selectedTargetId, activeTab]);
+
+  useEffect(() => {
+    const onPopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const t = params.get("target");
+      const tab = params.get("tab") as TabKey | null;
+      if (t && AUTHORITATIVE_TARGETS.some((x: any) => x.id === t)) {
+        setSelectedTargetId(t);
+      }
+      if (tab && ["sky", "timeline", "motion", "variable", "spectra", "most", "provenance"].includes(tab)) {
+        setActiveTab(tab);
+      }
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
 
   // Fetch target list from API (with local authoritative fallback)
   useEffect(() => {
@@ -201,92 +225,121 @@ export default function SpherexHub() {
 
   return (
     <section id="spherex-hub" className="min-h-screen w-full flex flex-col bg-[#070b14] text-slate-100">
-      {/* ── UNIFIED MINIMALIST TOP BAR (Height: 52px) ── */}
-      <header className="h-13 shrink-0 border-b border-slate-800/80 bg-[#0b1120] px-4 flex items-center justify-between gap-4 z-30">
-        {/* Left: Brand Mark */}
-        <div className="flex items-center gap-2.5 shrink-0">
-          <LogoMark className="h-6 w-6 text-amber-500" />
-          <span className="font-mono text-xs uppercase tracking-[0.25em] text-slate-100 font-bold">
-            MARSAD <span className="text-amber-400 font-normal">Station</span>
-          </span>
-        </div>
+      {/* ──ORGANIZED SCIENTIFIC OBSERVATORY HEADER ── */}
+      <header className="shrink-0 border-b border-slate-800/80 bg-[#0b1120] px-4 sm:px-6 py-3 z-30">
+        <div className="max-w-[1600px] mx-auto flex flex-col gap-3">
+          {/* Top Row: Brand Identity, Active Target Quick Summary & Back to Home */}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3 shrink-0">
+              <LogoMark className="h-7 w-7 text-amber-500" />
+              <div>
+                <span className="font-mono text-sm uppercase tracking-[0.22em] text-slate-100 font-bold">
+                  MARSAD <span className="text-amber-400 font-normal">Observatory</span>
+                </span>
+                <span className="hidden md:inline-block ml-3 text-xs font-mono text-slate-400 border-l border-slate-800 pl-3">
+                  NASA SPHEREx All-Sky Spectral Survey Analysis Station
+                </span>
+              </div>
+            </div>
 
-        {/* Center: Clean Targets & Workflow Tabs */}
-        <div className="flex items-center gap-3 overflow-x-auto scrollbar-none py-1">
-          {/* Target Selector Group */}
-          <div className="flex items-center gap-1 rounded-lg bg-[#070b14] p-0.5 border border-slate-800 shrink-0">
-            {[
-              { id: "barnards-star", name: "Barnard's Star" },
-              { id: "epsilon-indi-b", name: "Epsilon Indi B" },
-              { id: "wise-0855", name: "WISE 0855" },
-              { id: "rw-aurigae", name: "RW Aurigae" },
-              { id: "r-draconis", name: "R Draconis" }
-            ].map((t) => (
+            {/* Active Target Concise Summary Strip */}
+            <div className="hidden xl:flex items-center gap-4 rounded-xl bg-[#070b14] border border-slate-800/90 px-4 py-1.5 text-xs font-mono">
+              <span className="text-slate-400">
+                Active Target: <strong className="text-slate-100">{currentTarget.name}</strong>
+              </span>
+              <span className="text-slate-700">|</span>
+              <span className="text-amber-300">{currentTarget.spectralType}</span>
+              <span className="text-slate-700">|</span>
+              <span className="text-sky-300">
+                d = {currentTarget.distancePc} pc ({currentTarget.distanceLy} ly)
+              </span>
+              <span className="text-slate-700">|</span>
+              <span className="text-slate-300">
+                μ = {currentTarget.totalProperMotionArcsecYr}″/yr
+              </span>
+            </div>
+
+            {/* Right: Back to Home Button */}
+            <div className="shrink-0 flex items-center gap-2">
               <button
-                key={t.id}
-                data-target-id={t.id}
-                onClick={() => setSelectedTargetId(t.id)}
-                className={cn(
-                  "px-2.5 py-1 rounded-md font-mono text-[11px] transition-all cursor-pointer whitespace-nowrap",
-                  selectedTargetId === t.id
-                    ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-                )}
+                type="button"
+                onClick={() => navigate("/")}
+                className="group inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 font-mono text-xs font-semibold text-amber-300 transition-all hover:bg-amber-500 hover:text-slate-950 cursor-pointer shadow-xs"
+                aria-label="Back to Home"
               >
-                {t.name}
+                <Arrow className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-1" dir="left" />
+                <span>Back to Home</span>
               </button>
-            ))}
+            </div>
           </div>
 
-          <div className="h-4 w-px bg-slate-800 shrink-0" />
+          {/* Second Row: Well-Spaced Target Selector & Scientific Workflow Tabs */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/60">
+            {/* Target Selector Group */}
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+              <span className="text-xs font-mono uppercase tracking-wider text-slate-400 mr-1.5 shrink-0">
+                Target:
+              </span>
+              <div className="flex items-center gap-1 rounded-xl bg-[#070b14] p-1 border border-slate-800 shrink-0">
+                {[
+                  { id: "barnards-star", name: "Barnard's Star" },
+                  { id: "epsilon-indi-b", name: "Epsilon Indi B" },
+                  { id: "wise-0855", name: "WISE 0855" },
+                  { id: "rw-aurigae", name: "RW Aurigae" },
+                  { id: "r-draconis", name: "R Draconis" }
+                ].map((t) => (
+                  <button
+                    key={t.id}
+                    data-target-id={t.id}
+                    onClick={() => setSelectedTargetId(t.id)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg font-mono text-xs transition-all cursor-pointer whitespace-nowrap",
+                      selectedTargetId === t.id
+                        ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                        : "text-slate-300 hover:text-white hover:bg-slate-800/70"
+                    )}
+                  >
+                    {t.name}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-          {/* Workflow Tabs */}
-          <div className="flex items-center gap-1 shrink-0">
-            {[
-              { key: "timeline", label: "Timeline" },
-              { key: "sky", label: "Sky Map" },
-              { key: "motion", label: "Motion" },
-              { key: "variable", label: "Light Curve" },
-              { key: "spectra", label: "Spectra" },
-              { key: "most", label: "Asteroids" },
-              { key: "provenance", label: "Data Lineage" }
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                data-tab={tab.key}
-                onClick={() => setActiveTab(tab.key as TabKey)}
-                className={cn(
-                  "px-2.5 py-1 rounded-md text-[11.5px] font-medium transition-all cursor-pointer whitespace-nowrap",
-                  activeTab === tab.key
-                    ? "bg-slate-800 text-amber-300 font-semibold"
-                    : "text-slate-400 hover:text-slate-200"
-                )}
-              >
-                {tab.label}
-              </button>
-            ))}
+            {/* Workflow Tabs */}
+            <div className="flex items-center gap-1 rounded-xl bg-[#070b14] p-1 border border-slate-800 overflow-x-auto scrollbar-none shrink-0">
+              {[
+                { key: "timeline", label: "Timeline" },
+                { key: "sky", label: "Sky Map" },
+                { key: "motion", label: "Motion" },
+                { key: "variable", label: "Light Curve" },
+                { key: "spectra", label: "Spectra" },
+                { key: "most", label: "Asteroids" },
+                { key: "provenance", label: "Data Lineage" }
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  data-tab={tab.key}
+                  onClick={() => setActiveTab(tab.key as TabKey)}
+                  className={cn(
+                    "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap",
+                    activeTab === tab.key
+                      ? "bg-slate-800 text-amber-300 font-semibold border border-amber-500/30 shadow-xs"
+                      : "text-slate-300 hover:text-white hover:bg-slate-800/40"
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-
-        {/* Right: Back to Home Button */}
-        <div className="shrink-0 flex items-center">
-          <button
-            type="button"
-            onClick={() => navigate("/")}
-            className="group inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1.5 font-mono text-xs font-semibold text-amber-300 transition-all hover:bg-amber-500 hover:text-slate-950 cursor-pointer shadow-xs"
-            aria-label="Back to Home"
-          >
-            <Arrow className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-1" dir="left" />
-            <span>Back to Home</span>
-          </button>
         </div>
       </header>
 
       {/* Guided Tour Compact Banner (When Active) */}
       {tourStep !== null && (
-        <div className="shrink-0 border-b border-ember/40 bg-linear-to-r from-ember/15 via-ink-2 to-ion/10 px-4 py-2 flex items-center justify-between gap-4 z-20">
+        <div className="shrink-0 border-b border-ember/40 bg-linear-to-r from-ember/15 via-ink-2 to-ion/10 px-4 py-2.5 flex items-center justify-between gap-4 z-20">
           <div className="flex items-center gap-3 overflow-hidden">
-            <span className="rounded-full bg-ember px-2 py-0.5 font-mono text-[9px] font-bold text-ink uppercase shrink-0">
+            <span className="rounded-full bg-ember px-2.5 py-0.5 font-mono text-xs font-bold text-ink uppercase shrink-0">
               Step {tourStep + 1} of {TOUR_STEPS.length}
             </span>
             <span className="font-serif text-sm text-bone font-medium truncate">
@@ -297,25 +350,25 @@ export default function SpherexHub() {
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={prevTourStep}
-              className="rounded bg-white/10 px-2 py-0.5 font-mono text-[10px] text-bone hover:bg-white/20 cursor-pointer"
+              className="rounded bg-white/10 px-2.5 py-1 font-mono text-xs text-bone hover:bg-white/20 cursor-pointer"
             >
               ← Prev
             </button>
             <button
               type="button"
               onClick={nextTourStep}
-              className="rounded bg-ember px-2.5 py-0.5 font-mono text-[10px] font-bold text-ink hover:bg-ember-soft cursor-pointer shadow-sm"
+              className="rounded bg-ember px-3 py-1 font-mono text-xs font-bold text-ink hover:bg-ember-soft cursor-pointer shadow-sm"
             >
               {tourStep === TOUR_STEPS.length - 1 ? "Finish ↺" : "Next →"}
             </button>
             <button
               type="button"
               onClick={exitTour}
-              className="text-mist hover:text-bone text-xs px-1 cursor-pointer"
+              className="text-mist hover:text-bone text-xs px-1.5 cursor-pointer"
               title="Close tour"
             >
               ✕
@@ -325,7 +378,10 @@ export default function SpherexHub() {
       )}
 
       {/* ── WORKSTATION VIEWPORT (ROW 2, flex-1) ── */}
-      <main className="flex-1 p-3 sm:p-4 relative" data-loading={loading ? "true" : "false"}>
+      <main
+        className="flex-1 max-w-[1600px] w-full mx-auto p-4 sm:p-6 relative"
+        data-loading={loading ? "true" : "false"}
+      >
         {activeTab === "timeline" && (
           <ObservationTimelineComparator
             targetId={selectedTargetId}
@@ -343,33 +399,23 @@ export default function SpherexHub() {
         )}
 
         {activeTab === "motion" && (
-          <div className="h-full overflow-y-auto">
-            <MotionDetectionViewer targetId={selectedTargetId} />
-          </div>
+          <MotionDetectionViewer targetId={selectedTargetId} />
         )}
 
         {activeTab === "variable" && (
-          <div className="h-full overflow-y-auto">
-            <VariableStarLightCurve targetId={selectedTargetId} />
-          </div>
+          <VariableStarLightCurve targetId={selectedTargetId} />
         )}
 
         {activeTab === "spectra" && (
-          <div className="h-full overflow-y-auto">
-            <SpectralBandExplorer targetId={selectedTargetId} />
-          </div>
+          <SpectralBandExplorer targetId={selectedTargetId} />
         )}
 
         {activeTab === "most" && (
-          <div className="h-full overflow-y-auto">
-            <MostSolarSystemExplorer />
-          </div>
+          <MostSolarSystemExplorer />
         )}
 
         {activeTab === "provenance" && (
-          <div className="h-full overflow-y-auto">
-            <ProvenanceInspector target={currentTarget} observations={observations} />
-          </div>
+          <ProvenanceInspector target={currentTarget} observations={observations} />
         )}
       </main>
     </section>

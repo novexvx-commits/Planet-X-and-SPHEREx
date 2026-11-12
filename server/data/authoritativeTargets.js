@@ -9,6 +9,7 @@ export const AUTHORITATIVE_TARGETS = [
   {
     id: "barnards-star",
     name: "Barnard's Star",
+    designation: "GJ 699 / HIP 87937",
     aliases: [
       "GJ 699",
       "Gliese 699",
@@ -77,6 +78,7 @@ export const AUTHORITATIVE_TARGETS = [
   {
     id: "epsilon-indi-b",
     name: "Epsilon Indi B",
+    designation: "eps Ind Ba+Bb / HD 209100B",
     aliases: [
       "eps Ind Ba+Bb",
       "HD 209100B",
@@ -113,6 +115,25 @@ export const AUTHORITATIVE_TARGETS = [
     effectiveTempK: 1300,
     secondaryTempK: 810,
     massJupiter: 68.0,
+    secondaryMassJupiter: 50.0,
+    components: [
+      {
+        designation: "Epsilon Indi Ba (HD 209100 Ba)",
+        spectralType: "T1.5V",
+        effectiveTempK: 1300,
+        massJupiter: 68.0,
+        separationArcsec: 0.73,
+        role: "Primary Early-T Brown Dwarf"
+      },
+      {
+        designation: "Epsilon Indi Bb (HD 209100 Bb)",
+        spectralType: "T6V",
+        effectiveTempK: 810,
+        massJupiter: 50.0,
+        separationArcsec: 0.73,
+        role: "Secondary Late-T Brown Dwarf"
+      }
+    ],
     periodDays: null,
     variabilityType: "Composite T1.5V + T6V substellar atmosphere (non-periodic)",
     primaryPhenomenon: "brown-dwarf-spectra",
@@ -144,6 +165,7 @@ export const AUTHORITATIVE_TARGETS = [
   {
     id: "wise-0855",
     name: "WISE 0855",
+    designation: "WISE J085510.83-071442.5",
     aliases: [
       "WISE J085510.83-071442.5",
       "WISEA J085510.74-071442.5",
@@ -205,6 +227,7 @@ export const AUTHORITATIVE_TARGETS = [
   {
     id: "rw-aurigae",
     name: "RW Aurigae",
+    designation: "RW Aur / HD 240764",
     aliases: [
       "RW Aur",
       "HD 240764",
@@ -270,6 +293,7 @@ export const AUTHORITATIVE_TARGETS = [
   {
     id: "r-draconis",
     name: "R Draconis",
+    designation: "R Dra / HD 150077",
     aliases: [
       "R Dra",
       "HD 150077",
@@ -341,6 +365,8 @@ export const BENCHMARK_SOLAR_SYSTEM_TARGETS = [
   {
     id: "ceres",
     name: "1 Ceres",
+    mpcNumber: 1,
+    spectralClass: "C/G",
     jplId: "1;",
     type: "Dwarf Planet / Main Belt Asteroid (C/G-type)",
     diameterKm: 939.4,
@@ -359,6 +385,8 @@ export const BENCHMARK_SOLAR_SYSTEM_TARGETS = [
   {
     id: "vesta",
     name: "4 Vesta",
+    mpcNumber: 4,
+    spectralClass: "V",
     jplId: "4;",
     type: "Main Belt Asteroid (V-type Differentiated Protoplanet)",
     diameterKm: 525.4,
@@ -377,6 +405,8 @@ export const BENCHMARK_SOLAR_SYSTEM_TARGETS = [
   {
     id: "victoria",
     name: "12 Victoria",
+    mpcNumber: 12,
+    spectralClass: "L/S",
     jplId: "12;",
     type: "Main Belt Asteroid (L/S-type)",
     diameterKm: 112.8,
@@ -395,6 +425,8 @@ export const BENCHMARK_SOLAR_SYSTEM_TARGETS = [
   {
     id: "eros",
     name: "433 Eros",
+    mpcNumber: 433,
+    spectralClass: "S",
     jplId: "433;",
     type: "Near-Earth Asteroid (S-type Amor Group)",
     diameterKm: 16.84,

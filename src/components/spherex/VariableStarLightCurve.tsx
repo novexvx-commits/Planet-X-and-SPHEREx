@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Arrow } from "../ui";
 import { cn } from "../../utils/cn";
-import { getTargetLightCurve, generateLightCurveCsv } from "../../lib/scientificFallback";
+import { getTargetLightCurve, generateLightCurveCsv, formatMjd } from "../../lib/scientificFallback";
 
 interface VariableStarProps {
   targetId: string;
@@ -67,12 +67,12 @@ export default function VariableStarLightCurve({ targetId }: VariableStarProps) 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const width = (canvas.width = canvas.parentElement?.clientWidth || 700);
-    const height = (canvas.height = 340);
-    const padLeft = 65;
-    const padRight = 30;
-    const padTop = 32;
-    const padBottom = 45;
+    const width = (canvas.width = canvas.parentElement?.clientWidth || 720);
+    const height = (canvas.height = 360);
+    const padLeft = 68;
+    const padRight = 32;
+    const padTop = 36;
+    const padBottom = 48;
 
     ctx.fillStyle = "#05060a";
     ctx.fillRect(0, 0, width, height);
@@ -113,8 +113,8 @@ export default function VariableStarLightCurve({ targetId }: VariableStarProps) 
     ctx.lineWidth = 1;
 
     const yTicks = 5;
-    ctx.fillStyle = "#8d93a1";
-    ctx.font = "10px 'JetBrains Mono', monospace";
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "11px 'JetBrains Mono', monospace";
     ctx.textAlign = "right";
 
     for (let i = 0; i <= yTicks; i++) {
@@ -141,7 +141,7 @@ export default function VariableStarLightCurve({ targetId }: VariableStarProps) 
       ctx.moveTo(x, padTop);
       ctx.lineTo(x, height - padBottom);
       ctx.stroke();
-      ctx.fillText(mjd.toFixed(0), x, height - padBottom + 16);
+      ctx.fillText(mjd.toFixed(1), x, height - padBottom + 18);
     }
 
     // Axis Labels
@@ -163,8 +163,8 @@ export default function VariableStarLightCurve({ targetId }: VariableStarProps) 
       const color = BAND_COLORS[b] || "#ff8a3d";
 
       ctx.strokeStyle = color;
-      ctx.lineWidth = 1.75;
-      ctx.globalAlpha = 0.75;
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.8;
       ctx.beginPath();
       bandPoints.forEach((p: any, idx: number) => {
         const val = metric === "flux" ? p.fluxDensityMjy : p.abMagnitude;
@@ -201,7 +201,7 @@ export default function VariableStarLightCurve({ targetId }: VariableStarProps) 
 
         ctx.fillStyle = color;
         ctx.beginPath();
-        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.arc(x, y, 4.5, 0, Math.PI * 2);
         ctx.fill();
       });
     });
@@ -217,10 +217,10 @@ export default function VariableStarLightCurve({ targetId }: VariableStarProps) 
 
     const width = canvas.width;
     const height = canvas.height;
-    const padLeft = 65;
-    const padRight = 30;
-    const padTop = 32;
-    const padBottom = 45;
+    const padLeft = 68;
+    const padRight = 32;
+    const padTop = 36;
+    const padBottom = 48;
 
     const measurements = data.measurements;
     const mjds = measurements.map((m: any) => m.mjd);
@@ -271,35 +271,35 @@ export default function VariableStarLightCurve({ targetId }: VariableStarProps) 
   };
 
   return (
-    <div className="rounded-xl border border-white/10 bg-ink-2 p-6 shadow-2xl">
+    <div className="rounded-2xl border border-slate-800 bg-[#0d1322] p-5 sm:p-6 shadow-2xl space-y-6">
       {/* Header & Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-ember-soft">
+          <span className="font-mono text-xs uppercase tracking-widest text-amber-400 font-semibold">
             Spectrophotometric Variability Analyzer · {data?.targetType || "Stellar Photometry"}
           </span>
-          <h3 className="mt-1 font-serif text-2xl text-bone">
+          <h3 className="mt-1 font-serif text-2xl sm:text-3xl text-slate-100">
             Multi-Band Light Curves & Photometric Time-Series
           </h3>
         </div>
 
         {/* Metric and CSV Buttons */}
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex rounded border border-white/10 bg-ink p-0.5 text-xs">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex rounded-xl border border-slate-800 bg-[#070b14] p-1 text-xs">
             <button
               onClick={() => setMetric("flux")}
               className={cn(
-                "rounded px-2.5 py-1 font-mono text-[11px] transition-colors",
-                metric === "flux" ? "bg-ember text-ink font-semibold" : "text-mist hover:text-bone"
+                "rounded-lg px-3 py-1.5 font-mono text-xs transition-colors cursor-pointer",
+                metric === "flux" ? "bg-amber-500 text-slate-950 font-bold" : "text-slate-300 hover:text-white"
               )}
             >
-              Flux (mJy)
+              Flux Density (mJy)
             </button>
             <button
               onClick={() => setMetric("magnitude")}
               className={cn(
-                "rounded px-2.5 py-1 font-mono text-[11px] transition-colors",
-                metric === "magnitude" ? "bg-ember text-ink font-semibold" : "text-mist hover:text-bone"
+                "rounded-lg px-3 py-1.5 font-mono text-xs transition-colors cursor-pointer",
+                metric === "magnitude" ? "bg-amber-500 text-slate-950 font-bold" : "text-slate-300 hover:text-white"
               )}
             >
               AB Magnitude
@@ -308,76 +308,130 @@ export default function VariableStarLightCurve({ targetId }: VariableStarProps) 
 
           <button
             onClick={handleDownloadCsv}
-            className="flex items-center gap-1.5 rounded border border-ember/40 bg-ember/10 px-3 py-1 font-mono text-xs text-ember hover:bg-ember/20 transition-colors cursor-pointer"
+            className="flex items-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-2 font-mono text-xs font-semibold text-amber-300 hover:bg-amber-500/20 transition-colors cursor-pointer"
           >
             <span>Download CSV</span>
-            <Arrow className="h-3 w-3" dir="down" />
+            <Arrow className="h-3.5 w-3.5" dir="down" />
           </button>
         </div>
       </div>
 
-      {/* Provenance & Period Status Banner */}
-      <div className="mt-4 rounded-lg border border-white/10 bg-ink-3 px-4 py-2.5 font-mono text-xs flex flex-wrap items-center justify-between gap-3">
-        <div className="text-mist text-[11px]">
-          <strong className="text-ember-soft">Data Classification:</strong>{" "}
-          {data?.dataClassification ||
-            "Multi-band spectrophotometric time-series anchored to verified 2MASS/AllWISE/Spitzer archival photometry."}
+      {/* Canonical Data Classification & Period Status Banner */}
+      <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-4 font-mono text-xs flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2 text-slate-300">
+          <span className="rounded-md bg-purple-500/15 border border-purple-500/40 px-2.5 py-0.5 text-purple-300 font-bold">
+            MODEL / SIMULATION
+          </span>
+          <span>Synthetic multi-band light curve evaluated at</span>
+          <span className="rounded-md bg-sky-500/15 border border-sky-500/40 px-2.5 py-0.5 text-sky-300 font-bold">
+            REAL OBSERVATION
+          </span>
+          <span>IRSA QR2 timestamps & anchored to verified 2MASS/AllWISE/Spitzer fluxes (not extracted from SPHEREx FITS pixel cutouts).</span>
         </div>
-        <div className="flex items-center gap-2 text-[11px]">
-          <span className="text-mist">Period Analysis:</span>
+
+        <div className="flex items-center gap-2 text-xs shrink-0">
+          <span className="text-slate-400">Period Analysis:</span>
           {(data?.variabilityMetadata?.periodDays ?? data?.target?.periodDays) ? (
-            <span className="rounded bg-ember/20 border border-ember/40 px-2 py-0.5 text-ember font-semibold">
+            <span className="rounded-lg bg-amber-500/15 border border-amber-500/40 px-3 py-1 text-amber-300 font-bold">
               Verified GCVS/AAVSO Period: {data?.variabilityMetadata?.periodDays ?? data?.target?.periodDays} days
             </span>
           ) : (data?.variabilityMetadata?.isVariable ?? (targetId === "rw-aurigae")) ? (
-            <span className="rounded bg-nebula/20 border border-nebula/40 px-2 py-0.5 text-nebula font-semibold">
-              Irregular / Aperiodic (No fixed period — CTTS dust occultation)
+            <span className="rounded-lg bg-purple-500/15 border border-purple-500/40 px-3 py-1 text-purple-300 font-bold">
+              Irregular / Aperiodic (CTTS dust occultation)
             </span>
           ) : (
-            <span className="rounded bg-white/5 border border-white/10 px-2 py-0.5 text-bone">
-              Non-Variable Photometric Baseline (Constant Flux Benchmark)
+            <span className="rounded-lg bg-slate-800 border border-slate-700 px-3 py-1 text-slate-200 font-medium">
+              Non-Variable Photometric Baseline (Constant Flux)
             </span>
           )}
         </div>
       </div>
 
+      {/* 4 Prioritized Summary Metrics */}
+      {data?.statistics && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-4 font-mono">
+            <p className="text-xs uppercase text-slate-400">Epoch Baseline (Δt)</p>
+            <p className="text-lg sm:text-xl text-slate-100 font-bold mt-1.5">
+              {data.statistics.timeSpanMjdFormatted || Number(data.statistics.timeSpanMjd).toFixed(1)} days
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
+              SPHEREx QR2 Survey Window
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-4 font-mono">
+            <p className="text-xs uppercase text-slate-400">Flux Range (Min – Max)</p>
+            <p className="text-lg sm:text-xl text-sky-300 font-bold mt-1.5">
+              {data.statistics.minFluxDensityMjy} – {data.statistics.maxFluxDensityMjy} mJy
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
+              Across Selected Detector Array(s)
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-4 font-mono">
+            <p className="text-xs uppercase text-slate-400">Variability Amplitude Ratio</p>
+            <p className="text-lg sm:text-xl text-amber-400 font-bold mt-1.5">
+              {data.statistics.variabilityRatio ? `×${data.statistics.variabilityRatio}` : "1.00×"}
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
+              Max / Min Flux Ratio
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-4 font-mono">
+            <p className="text-xs uppercase text-slate-400">Catalog Period & Reference</p>
+            <p className="text-lg sm:text-xl text-purple-300 font-bold mt-1.5">
+              {data.variabilityMetadata?.periodDays
+                ? `${data.variabilityMetadata.periodDays} d (GCVS)`
+                : data.variabilityMetadata?.isVariable
+                ? "Aperiodic"
+                : "Constant"}
+            </p>
+            <p className="text-xs text-slate-400 mt-1 truncate" title={data.variabilityMetadata?.referenceSource}>
+              {data.variabilityMetadata?.referenceSource || "2MASS / AllWISE"}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Bandpass Selector Filter */}
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <span className="font-mono text-xs text-mist mr-1">Detector Array:</span>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="font-mono text-xs uppercase tracking-wider text-slate-400 mr-1">
+          Detector Array:
+        </span>
         {["all", "D1", "D2", "D3", "D4", "D5", "D6"].map((b) => (
           <button
             key={b}
             onClick={() => setSelectedBand(b)}
             className={cn(
-              "rounded px-2.5 py-1 font-mono text-[11px] transition-colors",
+              "rounded-lg px-3 py-1.5 font-mono text-xs transition-colors cursor-pointer",
               selectedBand === b
-                ? "bg-white/20 text-bone font-bold border border-white/40"
-                : "bg-white/5 text-mist hover:text-bone border border-transparent"
+                ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                : "bg-[#090e1a] text-slate-300 hover:text-white border border-slate-800"
             )}
           >
             {b === "all"
               ? "All Bands (D1–D6)"
               : `${b} (${
                   b === "D1"
-                    ? "0.93µm"
+                    ? "0.93 µm"
                     : b === "D2"
-                    ? "1.38µm"
+                    ? "1.38 µm"
                     : b === "D3"
-                    ? "2.03µm"
+                    ? "2.03 µm"
                     : b === "D4"
-                    ? "3.12µm"
+                    ? "3.12 µm"
                     : b === "D5"
-                    ? "4.12µm"
-                    : "4.71µm"
+                    ? "4.12 µm"
+                    : "4.71 µm"
                 })`}
           </button>
         ))}
       </div>
 
       {/* Main Canvas Chart Stage */}
-      <div className="relative mt-4 rounded-lg border border-white/10 bg-ink p-4">
+      <div className="relative rounded-xl border border-slate-800 bg-[#070b14] p-4 sm:p-5">
         {loading && (
-          <div className="absolute top-3 right-4 z-20 font-mono text-[10px] text-ember-soft">
+          <div className="absolute top-3 right-4 z-20 font-mono text-xs text-amber-300">
             Syncing photometry...
           </div>
         )}
@@ -386,88 +440,48 @@ export default function VariableStarLightCurve({ targetId }: VariableStarProps) 
           ref={canvasRef}
           onMouseMove={onCanvasMouseMove}
           onMouseLeave={() => setHoveredPoint(null)}
-          className="block h-[340px] w-full cursor-crosshair"
+          className="block h-[360px] w-full cursor-crosshair rounded-lg"
         />
 
         {/* Point Inspection Tooltip */}
         {hoveredPoint && (
           <div
-            className="pointer-events-none absolute z-30 rounded-md border border-white/20 bg-ink-2/95 p-3 shadow-xl backdrop-blur-md text-xs font-mono"
+            className="pointer-events-none absolute z-30 rounded-xl border border-slate-700 bg-slate-950/95 p-3.5 shadow-xl backdrop-blur-md text-xs font-mono space-y-1"
             style={{
               left: Math.min(
                 hoveredPoint.px + 12,
-                canvasRef.current ? canvasRef.current.width - 230 : 300
+                canvasRef.current ? canvasRef.current.width - 240 : 300
               ),
-              top: Math.max(10, hoveredPoint.py - 70)
+              top: Math.max(10, hoveredPoint.py - 75)
             }}
           >
-            <div className="font-semibold text-ember-soft">{hoveredPoint.obsId}</div>
-            <div className="mt-1 text-bone">
-              MJD: <span className="text-white">{hoveredPoint.mjd}</span> ({hoveredPoint.utcDate})
+            <div className="font-bold text-amber-300">{hoveredPoint.obsId}</div>
+            <div className="text-slate-200">
+              MJD: <span className="text-white font-semibold">{formatMjd(hoveredPoint.mjd, 1)}</span> ({hoveredPoint.utcDate})
             </div>
-            <div className="mt-1 text-ion">{hoveredPoint.bandpass}</div>
-            <div className="text-bone">
+            <div className="text-sky-300">{hoveredPoint.bandpass}</div>
+            <div className="text-slate-200">
               Flux:{" "}
-              <span className="text-ember font-medium">
+              <span className="text-amber-400 font-semibold">
                 {hoveredPoint.fluxDensityMjy} ± {(hoveredPoint.fluxErrorUJy / 1000).toFixed(3)} mJy
               </span>
             </div>
             {hoveredPoint.abMagnitude !== null && (
-              <div className="text-bone">
+              <div className="text-slate-200">
                 AB Mag: {hoveredPoint.abMagnitude} ± {hoveredPoint.magError} mag
               </div>
             )}
             {hoveredPoint.pulsationPhase !== null && hoveredPoint.pulsationPhase !== undefined && (
-              <div className="text-nebula">
+              <div className="text-purple-300">
                 Mira Phase (P=245.6d): φ = {hoveredPoint.pulsationPhase}
               </div>
             )}
-            <div className="text-[10px] text-mist mt-0.5">
-              SNR: {hoveredPoint.snr}σ · Quality: GOOD
+            <div className="text-xs text-slate-400 pt-0.5">
+              SNR: {hoveredPoint.snr}σ · Modeled at QR2 Timestamp
             </div>
           </div>
         )}
       </div>
-
-      {/* Summary Statistics Bar */}
-      {data?.statistics && (
-        <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-3">
-          <div className="rounded border border-white/5 bg-ink p-3 font-mono">
-            <p className="text-[9px] uppercase text-mist">Epoch Baseline</p>
-            <p className="text-sm text-bone font-medium mt-1">
-              {data.statistics.timeSpanMjd} days
-            </p>
-          </div>
-          <div className="rounded border border-white/5 bg-ink p-3 font-mono">
-            <p className="text-[9px] uppercase text-mist">Flux Range (Min – Max)</p>
-            <p className="text-sm text-bone font-medium mt-1">
-              {data.statistics.minFluxDensityMjy} – {data.statistics.maxFluxDensityMjy} mJy
-            </p>
-          </div>
-          <div className="rounded border border-white/5 bg-ink p-3 font-mono">
-            <p className="text-[9px] uppercase text-mist">Variability Ratio</p>
-            <p className="text-sm text-ember-soft font-semibold mt-1">
-              {data.statistics.variabilityRatio ? `×${data.statistics.variabilityRatio}` : "1.00×"}
-            </p>
-          </div>
-          <div className="rounded border border-white/5 bg-ink p-3 font-mono">
-            <p className="text-[9px] uppercase text-mist">Catalog Period</p>
-            <p className="text-sm text-nebula font-medium mt-1">
-              {data.variabilityMetadata?.periodDays
-                ? `${data.variabilityMetadata.periodDays} d (GCVS)`
-                : data.variabilityMetadata?.isVariable
-                ? "Aperiodic"
-                : "Constant"}
-            </p>
-          </div>
-          <div className="rounded border border-white/5 bg-ink p-3 font-mono">
-            <p className="text-[9px] uppercase text-mist">Reference Source</p>
-            <p className="text-[11px] text-ion font-medium mt-1 truncate" title={data.variabilityMetadata?.referenceSource}>
-              {data.variabilityMetadata?.referenceSource || "2MASS / AllWISE"}
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

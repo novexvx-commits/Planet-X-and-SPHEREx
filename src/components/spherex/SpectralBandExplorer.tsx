@@ -13,6 +13,7 @@ export default function SpectralBandExplorer({ targetId }: SpectralExplorerProps
   const [selectedDetector, setSelectedDetector] = useState<string>("all");
   const [selectedBandIndex, setSelectedBandIndex] = useState<number>(1);
   const [hoveredPoint, setHoveredPoint] = useState<any>(null);
+  const [showChannelDetails, setShowChannelDetails] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Sync with backend API while keeping immediate fallback
@@ -52,12 +53,12 @@ export default function SpectralBandExplorer({ targetId }: SpectralExplorerProps
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const width = (canvas.width = canvas.parentElement?.clientWidth || 700);
-    const height = (canvas.height = 350);
-    const padLeft = 65;
-    const padRight = 30;
-    const padTop = 32;
-    const padBottom = 45;
+    const width = (canvas.width = canvas.parentElement?.clientWidth || 720);
+    const height = (canvas.height = 360);
+    const padLeft = 68;
+    const padRight = 32;
+    const padTop = 36;
+    const padBottom = 48;
 
     ctx.fillStyle = "#05060a";
     ctx.fillRect(0, 0, width, height);
@@ -104,10 +105,10 @@ export default function SpectralBandExplorer({ targetId }: SpectralExplorerProps
         ctx.strokeRect(x1, padTop, x2 - x1, height - padTop - padBottom);
       }
 
-      ctx.fillStyle = isSelectedDet ? "#ffc08a" : "rgba(255, 255, 255, 0.35)";
-      ctx.font = "9px 'JetBrains Mono', monospace";
+      ctx.fillStyle = isSelectedDet ? "#ffc08a" : "rgba(255, 255, 255, 0.45)";
+      ctx.font = "10.5px 'JetBrains Mono', monospace";
       ctx.textAlign = "center";
-      ctx.fillText(`${d.id} (${d.r})`, (x1 + x2) / 2, padTop + 14);
+      ctx.fillText(`${d.id} (${d.r})`, (x1 + x2) / 2, padTop + 16);
     });
 
     // Draw Grid & Axes
@@ -116,8 +117,8 @@ export default function SpectralBandExplorer({ targetId }: SpectralExplorerProps
 
     // Horizontal Y Grid (Flux)
     const yTicks = 5;
-    ctx.fillStyle = "#8d93a1";
-    ctx.font = "10px 'JetBrains Mono', monospace";
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "11px 'JetBrains Mono', monospace";
     ctx.textAlign = "right";
 
     for (let i = 0; i <= yTicks; i++) {
@@ -140,7 +141,7 @@ export default function SpectralBandExplorer({ targetId }: SpectralExplorerProps
       ctx.moveTo(x, padTop);
       ctx.lineTo(x, height - padBottom);
       ctx.stroke();
-      ctx.fillText(`${wl}µm`, x, height - padBottom + 16);
+      ctx.fillText(`${wl} µm`, x, height - padBottom + 18);
     });
 
     // Labels
@@ -156,7 +157,7 @@ export default function SpectralBandExplorer({ targetId }: SpectralExplorerProps
 
     // Draw Continuous 102-Channel Spectrum Line
     ctx.strokeStyle = "#ff8a3d";
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.25;
     ctx.beginPath();
     points.forEach((p: any, idx: number) => {
       const x = getX(p.centerWavelengthUm);
@@ -190,14 +191,14 @@ export default function SpectralBandExplorer({ targetId }: SpectralExplorerProps
 
       ctx.fillStyle = isSelected ? "#ffffff" : "#ff8a3d";
       ctx.beginPath();
-      ctx.arc(x, y, isSelected ? 5 : 2.5, 0, Math.PI * 2);
+      ctx.arc(x, y, isSelected ? 5.5 : 2.75, 0, Math.PI * 2);
       ctx.fill();
 
       if (isSelected) {
         ctx.strokeStyle = "#ff8a3d";
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(x, y, 9, 0, Math.PI * 2);
+        ctx.arc(x, y, 9.5, 0, Math.PI * 2);
         ctx.stroke();
       }
       ctx.globalAlpha = 1.0;
@@ -223,7 +224,7 @@ export default function SpectralBandExplorer({ targetId }: SpectralExplorerProps
       }
 
       // Draw Cyan Diamond
-      const size = 5.5;
+      const size = 6;
       ctx.fillStyle = "#6ce5ff";
       ctx.strokeStyle = "#05060a";
       ctx.lineWidth = 1.5;
@@ -238,9 +239,9 @@ export default function SpectralBandExplorer({ targetId }: SpectralExplorerProps
 
       // Band Label
       ctx.fillStyle = "#6ce5ff";
-      ctx.font = "9px 'JetBrains Mono', monospace";
+      ctx.font = "10.5px 'JetBrains Mono', monospace";
       ctx.textAlign = "center";
-      ctx.fillText(a.band.split(" ")[1] || a.band, x, Math.max(padTop + 24, y - 9));
+      ctx.fillText(a.band.split(" ")[1] || a.band, x, Math.max(padTop + 26, y - 10));
     });
   }, [targetSpectra, selectedBandIndex, selectedDetector]);
 
@@ -254,10 +255,10 @@ export default function SpectralBandExplorer({ targetId }: SpectralExplorerProps
 
     const width = canvas.width;
     const height = canvas.height;
-    const padLeft = 65;
-    const padRight = 30;
-    const padTop = 32;
-    const padBottom = 45;
+    const padLeft = 68;
+    const padRight = 32;
+    const padTop = 36;
+    const padBottom = 48;
 
     const points = targetSpectra.sedPoints;
     const archival = targetSpectra.archivalPhotometry || [];
@@ -304,29 +305,29 @@ export default function SpectralBandExplorer({ targetId }: SpectralExplorerProps
     {};
 
   return (
-    <div className="rounded-xl border border-white/10 bg-ink-2 p-6 shadow-2xl">
+    <div className="rounded-2xl border border-slate-800 bg-[#0d1322] p-5 sm:p-6 shadow-2xl space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-ember-soft">
+          <span className="font-mono text-xs uppercase tracking-widest text-amber-400 font-semibold">
             102-Channel Spectroscopic Analyzer · 6 Detector Arrays (D1–D6)
           </span>
-          <h3 className="mt-1 font-serif text-2xl text-bone">
+          <h3 className="mt-1 font-serif text-2xl sm:text-3xl text-slate-100">
             SPHEREx Near-Infrared Spectral Explorer ({targetSpectra?.spectralType || targetSpectra?.target?.spectralType || "SED"})
           </h3>
         </div>
 
         {/* Detector Array Quick Tabs */}
-        <div className="flex flex-wrap rounded-lg border border-white/10 bg-ink p-1 text-xs">
+        <div className="flex flex-wrap rounded-xl border border-slate-800 bg-[#070b14] p-1 text-xs">
           {["all", "D1", "D2", "D3", "D4", "D5", "D6"].map((d) => (
             <button
               key={d}
               onClick={() => handleSelectDetector(d)}
               className={cn(
-                "rounded px-2.5 py-1 font-mono text-[11px] transition-colors",
+                "rounded-lg px-3 py-1.5 font-mono text-xs transition-colors cursor-pointer",
                 selectedDetector === d
-                  ? "bg-ember text-ink font-bold"
-                  : "text-mist hover:text-bone"
+                  ? "bg-amber-500 text-slate-950 font-bold"
+                  : "text-slate-300 hover:text-white"
               )}
             >
               {d === "all" ? "Full Spectrum (102 Ch)" : d}
@@ -335,22 +336,27 @@ export default function SpectralBandExplorer({ targetId }: SpectralExplorerProps
         </div>
       </div>
 
-      {/* Provenance & Resolving Power Banner */}
-      <div className="mt-4 rounded-lg border border-white/10 bg-ink-3 px-4 py-2.5 font-mono text-[11px] text-mist flex flex-wrap items-center justify-between gap-2">
-        <span>
-          <strong className="text-ember-soft">Spectral Model & Anchors:</strong>{" "}
-          {targetSpectra?.dataClassification ||
-            "102-channel SPHEREx LVF spectrophotometric model anchored to verified 2MASS, AllWISE, and Spitzer archival broadband photometry."}
-        </span>
-        <span className="text-ion">
+      {/* Canonical Data Classification & Resolving Power Banner */}
+      <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-4 font-mono text-xs text-slate-300 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-md bg-purple-500/15 border border-purple-500/40 px-2.5 py-0.5 text-purple-300 font-bold">
+            MODEL / SIMULATION
+          </span>
+          <span>Continuous 102-channel SPHEREx LVF spectral model anchored to</span>
+          <span className="rounded-md bg-sky-500/15 border border-sky-500/40 px-2.5 py-0.5 text-sky-300 font-bold">
+            REAL OBSERVATION
+          </span>
+          <span>verified 2MASS, AllWISE & Spitzer archival broadband photometry (not 102 individually retrieved SPHEREx spectra).</span>
+        </div>
+        <span className="text-sky-300 font-semibold shrink-0">
           Resolving Power: D1–D3 (R≈41) · D4 (R≈35) · D5 (R≈110) · D6 (R≈130)
         </span>
       </div>
 
       {/* Main Canvas Spectrum Display */}
-      <div className="relative mt-4 rounded-lg border border-white/10 bg-ink p-4">
+      <div className="relative rounded-xl border border-slate-800 bg-[#070b14] p-4 sm:p-5">
         {loading && (
-          <div className="absolute top-3 right-4 z-20 font-mono text-[10px] text-ember-soft">
+          <div className="absolute top-3 right-4 z-20 font-mono text-xs text-amber-300">
             Syncing 102-channel SED...
           </div>
         )}
@@ -362,114 +368,56 @@ export default function SpectralBandExplorer({ targetId }: SpectralExplorerProps
           onClick={() => {
             if (hoveredPoint) setSelectedBandIndex(hoveredPoint.bandIndex);
           }}
-          className="block h-[350px] w-full cursor-pointer"
+          className="block h-[360px] w-full cursor-pointer rounded-lg"
         />
 
         {/* Legend */}
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-4 text-[10px] font-mono text-mist">
-          <div className="flex flex-wrap items-center gap-4">
-            <span className="flex items-center gap-1.5 text-ember">
-              <span className="h-2 w-2 rounded-full bg-ember" /> 102-Channel SPHEREx LVF Spectral Model (±1σ)
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-slate-300">
+          <div className="flex flex-wrap items-center gap-6">
+            <span className="flex items-center gap-2 text-amber-400">
+              <span className="h-2.5 w-2.5 rounded-full bg-amber-400" /> 102-Channel SPHEREx LVF Spectral Model (±1σ)
             </span>
-            <span className="flex items-center gap-1.5 text-ion">
-              <span className="h-2 w-2 rotate-45 bg-ion inline-block" /> Verified Archival Photometry (2MASS / AllWISE / Spitzer)
+            <span className="flex items-center gap-2 text-sky-300">
+              <span className="h-2.5 w-2.5 rotate-45 bg-sky-400 inline-block" /> Verified Archival Photometry (2MASS / AllWISE / Spitzer)
             </span>
           </div>
-          <span>Click any channel or scrub below to inspect channel telemetry</span>
+          <span className="text-slate-400">Click any channel or scrub slider below to inspect channel telemetry</span>
         </div>
 
         {/* Hover Tooltip */}
         {hoveredPoint && (
           <div
-            className="pointer-events-none absolute z-30 rounded-md border border-white/20 bg-ink-2/95 p-3 shadow-xl backdrop-blur-md text-xs font-mono"
+            className="pointer-events-none absolute z-30 rounded-xl border border-slate-700 bg-slate-950/95 p-3.5 shadow-xl backdrop-blur-md text-xs font-mono space-y-1"
             style={{
               left: Math.min(
                 hoveredPoint.px + 12,
-                canvasRef.current ? canvasRef.current.width - 240 : 300
+                canvasRef.current ? canvasRef.current.width - 250 : 300
               ),
-              top: Math.max(10, hoveredPoint.py - 75)
+              top: Math.max(10, hoveredPoint.py - 80)
             }}
           >
-            <div className="font-semibold text-ember-soft">
+            <div className="font-bold text-amber-300">
               {hoveredPoint.bandName} (Channel #{hoveredPoint.bandIndex}/102)
             </div>
-            <div className="text-white mt-1">λ = {hoveredPoint.centerWavelengthUm} µm</div>
-            <div className="text-mist">Resolving Power: R = {hoveredPoint.resolvingPower}</div>
-            <div className="text-ember font-medium mt-1">
-              Flux: {hoveredPoint.fluxDensityMjy} ± {hoveredPoint.fluxErrorMjy ?? 0.01} mJy
+            <div className="text-white font-semibold">λ = {hoveredPoint.centerWavelengthUm} µm</div>
+            <div className="text-slate-300">Resolving Power: R = {hoveredPoint.resolvingPower}</div>
+            <div className="text-amber-400 font-semibold">
+              Model Flux: {hoveredPoint.fluxDensityMjy} ± {hoveredPoint.fluxErrorMjy ?? 0.01} mJy
             </div>
-            <div className="text-[10px] text-bone mt-0.5">
-              Quality Flag: <span className="text-ion">{hoveredPoint.qualityFlag || "GOOD"}</span>
-            </div>
-            <div className="text-[10px] text-ion mt-1">{hoveredPoint.diagnosticFeature}</div>
+            <div className="text-xs text-sky-300 pt-0.5">{hoveredPoint.diagnosticFeature}</div>
           </div>
         )}
       </div>
 
-      {/* Selected Bandpass Detail Card */}
+      {/* Selected Bandpass Prioritized 4-Metric Card & Scrubber */}
       {selectedBandObj && (
-        <div className="mt-5 rounded-lg border border-white/10 bg-ink-3 p-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <span className="font-mono text-[10px] uppercase text-mist">
-                Selected Spectral Channel #{selectedBandObj.index} of 102
-              </span>
-              <h4 className="mt-1 font-mono text-lg text-ember font-bold">
-                {selectedBandObj.bandName} · λ = {selectedBandObj.centerWavelengthUm} µm ·{" "}
-                {selectedSedPoint.fluxDensityMjy} ± {selectedSedPoint.fluxErrorMjy ?? 0.01} mJy
-              </h4>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-mist">
-              <div>
-                Bandwidth: <span className="text-bone">{selectedBandObj.bandwidthUm} µm</span>
-              </div>
-              <div>
-                Resolving Power: <span className="text-bone">R = {selectedBandObj.resolvingPower}</span>
-              </div>
-              <div>
-                Quality Flag:{" "}
-                <span className="text-ion font-semibold">
-                  {selectedSedPoint.qualityFlag || "GOOD"}
-                </span>
-              </div>
-              <div>
-                Detector:{" "}
-                <span className="text-ember-soft font-semibold">{selectedBandObj.detectorName}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 pt-3 border-t border-white/5 text-xs font-mono">
-            <div>
-              <p className="text-mist text-[10px] uppercase">Primary Diagnostic Features</p>
-              <p className="mt-1 text-bone font-medium">
-                {selectedBandObj.primaryFeatures || "Continuum mapping"}
-              </p>
-            </div>
-            <div>
-              <p className="text-mist text-[10px] uppercase">Channel Wavelength Window</p>
-              <p className="mt-1 text-ion">
-                {selectedBandObj.minWavelengthUm} µm – {selectedBandObj.maxWavelengthUm} µm
-              </p>
-            </div>
-            <div>
-              <p className="text-mist text-[10px] uppercase">Archival Calibration Anchor</p>
-              <p className="mt-1 text-bone">
-                {targetSpectra?.archivalPhotometry
-                  ?.map((a: any) => `${a.band}: ${a.fluxMjy ?? a.fluxDensityMjy} mJy`)
-                  .slice(0, 2)
-                  .join(" · ") || "2MASS / AllWISE"}
-              </p>
-            </div>
-          </div>
-
+        <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-5 space-y-5">
           {/* Scrubber slider for all 102 bands */}
-          <div className="mt-5 pt-3 border-t border-white/10">
-            <div className="flex justify-between font-mono text-[10px] text-mist mb-1">
+          <div>
+            <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-xs text-slate-300 mb-2">
               <span>Ch 1 · 0.75 µm (D1, R≈41)</span>
-              <span className="text-ember font-bold">
-                Scrub 102 SPHEREx LVF Channels (Current: #{selectedBandIndex})
+              <span className="text-amber-300 font-bold">
+                Scrub 102 SPHEREx LVF Channels — Active: #{selectedBandIndex} ({selectedBandObj.bandName})
               </span>
               <span>Ch 102 · 5.00 µm (D6, R≈130)</span>
             </div>
@@ -479,8 +427,82 @@ export default function SpectralBandExplorer({ targetId }: SpectralExplorerProps
               max="102"
               value={selectedBandIndex}
               onChange={(e) => setSelectedBandIndex(parseInt(e.target.value, 10))}
-              className="w-full accent-ember cursor-pointer"
+              className="w-full accent-amber-500 cursor-pointer h-2 bg-slate-800 rounded-lg"
             />
+          </div>
+
+          {/* 4 Prioritized Channel Metrics */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-mono">
+            <div className="rounded-xl border border-slate-800 bg-[#070b14] p-4">
+              <p className="text-xs uppercase text-slate-400">Channel Wavelength (λ)</p>
+              <p className="mt-1.5 text-lg sm:text-xl font-bold text-slate-100">
+                {selectedBandObj.centerWavelengthUm} µm
+              </p>
+              <p className="mt-1 text-xs text-slate-400">
+                Window: {selectedBandObj.minWavelengthUm}–{selectedBandObj.maxWavelengthUm} µm
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-800 bg-[#070b14] p-4">
+              <p className="text-xs uppercase text-slate-400">LVF Model Flux Density</p>
+              <p className="mt-1.5 text-lg sm:text-xl font-bold text-amber-400">
+                {selectedSedPoint.fluxDensityMjy} mJy
+              </p>
+              <p className="mt-1 text-xs text-slate-400">
+                ± {selectedSedPoint.fluxErrorMjy ?? 0.01} mJy (1σ model)
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-800 bg-[#070b14] p-4">
+              <p className="text-xs uppercase text-slate-400">Resolving Power & Array</p>
+              <p className="mt-1.5 text-lg sm:text-xl font-bold text-sky-300">
+                R = {selectedBandObj.resolvingPower}
+              </p>
+              <p className="mt-1 text-xs text-slate-400">
+                {selectedBandObj.detectorName} (Δλ = {selectedBandObj.bandwidthUm} µm)
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-800 bg-[#070b14] p-4">
+              <p className="text-xs uppercase text-slate-400">Primary Diagnostic Feature</p>
+              <p className="mt-1.5 text-sm sm:text-base font-bold text-slate-100">
+                {selectedBandObj.primaryFeatures || "Continuum Mapping"}
+              </p>
+              <p className="mt-1 text-xs text-emerald-400">
+                Quality Flag: {selectedSedPoint.qualityFlag || "GOOD"}
+              </p>
+            </div>
+          </div>
+
+          {/* Collapsible Archival Photometry Calibration Anchor Details */}
+          <div className="pt-2 border-t border-slate-800">
+            <button
+              onClick={() => setShowChannelDetails(!showChannelDetails)}
+              className="w-full flex items-center justify-between text-xs font-mono text-slate-300 hover:text-amber-300 py-1 cursor-pointer"
+            >
+              <span>
+                {showChannelDetails
+                  ? "▼ Hide Archival Broadband Calibration Anchors"
+                  : "► View Archival Broadband Calibration Anchors (2MASS / AllWISE / Spitzer)"}
+              </span>
+              <span className="text-sky-300">
+                {targetSpectra?.archivalPhotometry?.length || 0} Catalog Anchors
+              </span>
+            </button>
+
+            {showChannelDetails && (
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 font-mono text-xs">
+                {targetSpectra?.archivalPhotometry?.map((a: any, idx: number) => (
+                  <div key={idx} className="rounded-xl border border-slate-800 bg-[#070b14] p-3">
+                    <span className="text-sky-300 font-bold block">{a.band}</span>
+                    <span className="text-slate-400 block mt-0.5">λ = {a.wavelengthUm} µm</span>
+                    <span className="text-slate-100 font-semibold block mt-1">
+                      {a.fluxMjy ?? a.fluxDensityMjy} ± {a.fluxErrorMjy} mJy
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
