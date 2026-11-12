@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
-import { Arrow, Kicker, LogoMark, SplitText } from "../ui";
+import { Arrow, LogoMark } from "../ui";
 import { useRouter } from "../../lib/router";
 import { cn } from "../../utils/cn";
+import {
+  AUTHORITATIVE_TARGETS,
+  getLocalTargetById,
+  getLocalObservationsForTarget
+} from "../../lib/scientificFallback";
 import AladinSkyExplorer from "./AladinSkyExplorer";
 import ObservationTimelineComparator from "./ObservationTimelineComparator";
 import MotionDetectionViewer from "./MotionDetectionViewer";
@@ -16,77 +21,73 @@ const TOUR_STEPS: { targetId: string; tab: TabKey; title: string; subtitle: stri
   {
     targetId: "barnards-star",
     tab: "timeline",
-    title: "1. Multi-Epoch Timeline & Astrometric Difference Imaging",
-    subtitle: "Observation Scrubber · Difference Image D = (I2 - B2) - α(I1 - B1) · 1-4 Hz Blink",
-    desc: "Revisit coordinates across 6-month survey passes. Notice how difference imaging isolates true flux changes (>3σ) and eliminates static background stars."
+    title: "1. Multi-Epoch Timeline & WCS Residual Map",
+    subtitle: "IRSA QR2 Epoch Scrubber · Difference Residual D = (I2 - B2) - (I1 - B1) · 1–4 Hz Blink",
+    desc: "Compare SPHEREx QR2 survey passes across time. Difference imaging subtracts stationary background field stars and isolates proper-motion or flux residuals."
   },
   {
     targetId: "barnards-star",
     tab: "sky",
     title: "2. Real Astronomical Sky Explorer & Detector Footprint",
     subtitle: "CDS Strasbourg Aladin Lite v3 WebGL · 2MASS / AllWISE / DSS2 Surveys · SPHEREx FOV",
-    desc: "Interactive celestial sphere with authentic all-sky surveys, J2000 coordinate grid, and SPHEREx's 3.5° × 11.3° focal plane array footprint."
+    desc: "Interactive celestial sphere with real all-sky surveys, ICRS J2000 coordinates, and SPHEREx's 3.5° × 11.3° focal plane footprint."
   },
   {
     targetId: "barnards-star",
     tab: "motion",
-    title: "3. Astrometric Proper Motion Tracking (>5σ Confidence)",
-    subtitle: "Centroid Coordinates · Displacement Vectors · Gaia DR3 Validation",
-    desc: "Barnard's Star moving at 10.39″/yr across multi-epoch scans. Centroid displacement vectors cross-matched against Gaia DR3 astrometric predictions."
+    title: "3. Astrometric Proper Motion & Catalog Comparison",
+    subtitle: "Gaia DR3 / Spitzer-WISE Vectors · Spherical Coordinate Trajectory · 6.15″/px Scale Check",
+    desc: "Barnard's Star moving at 10.393″/yr in Gaia DR3 across SPHEREx QR2 epochs, comparing catalog proper motion against SPHEREx pixel resolution."
   },
   {
-    targetId: "rw-aurigae",
+    targetId: "r-draconis",
     tab: "variable",
     title: "4. Variable Star Multi-Band Light Curves & CSV Export",
-    subtitle: "T Tauri Occultation · Phase-Folded Analysis · Calibrated Photometry",
-    desc: "Classical T Tauri young star showing circumstellar dust occultation events across 6 detector arrays. Toggle flux/magnitude and export CSV data."
+    subtitle: "Mira Pulsation (245.6d GCVS Period) & CTTS Dust Occultations · Archival Flux Calibration",
+    desc: "Inspect R Draconis (verified 245.6-day Mira period) and RW Aurigae (irregular dust occultations) across D1–D6 with one-click CSV export."
   },
   {
     targetId: "wise-0855",
     tab: "spectra",
-    title: "5. 102 Near-IR Spectral Channels & Interstellar Ices",
-    subtitle: "6 Linear Variable Filter Arrays (0.75 – 5.0 µm) · Resolving Power R = 35–130 · SED",
-    desc: "Coldest brown dwarf WISE 0855 (Teff ≈ 250 K) revealing water ice clouds in Array 6. Interactive wavelength slider and biogenic ice line markers."
+    title: "5. 102 Near-IR Spectral Channels & Archival Photometry",
+    subtitle: "6 Linear Variable Filter Arrays (0.75 – 5.0 µm, R = 35–130) · 2MASS/WISE/Spitzer Anchor",
+    desc: "Ultra-cold Y4 brown dwarf WISE 0855 (Teff ≈ 250 K) showing thermal emergence in Array D6 (4.42–5.00 µm, R ~ 130) anchored to Spitzer & WISE photometry."
   },
   {
     targetId: "barnards-star",
     tab: "most",
-    title: "6. Solar System Minor Planets via IRSA MOST",
-    subtitle: "Asteroid Ephemerides (Ceres, Vesta, Victoria, Eros) · Keplerian Orbit Matcher",
-    desc: "Programmatic integration with NASA/IPAC IRSA MOST to match solar system asteroid orbits against SPHEREx survey scan intersections."
+    title: "6. Solar System Minor Planets (JPL Horizons / IRSA MOST)",
+    subtitle: "Computed Orbital Ephemerides (1 Ceres, 4 Vesta, 12 Victoria, 433 Eros) · Elongation Check",
+    desc: "3D Keplerian orbital ephemerides from JPL J2000 osculating elements evaluated against SPHEREx's solar-elongation visibility zone."
   },
   {
     targetId: "barnards-star",
     tab: "provenance",
     title: "7. Scientific Provenance & Open Data Lineage",
-    subtitle: "NASA/IPAC IRSA SIAv2 · Caltech Pipelines · Level-2 Products · JSON Dossier",
-    desc: "Complete transparency tracing raw multi-extension FITS cubes, NASA/IPAC IRSA SIAv2 endpoints, Caltech pipelines, and one-click JSON export."
+    subtitle: "NASA/IPAC IRSA SIAv2 · ESA Gaia DR3 · 2MASS/AllWISE · AAVSO VSX · JSON Dossier",
+    desc: "Complete provenance tracing archive sources, dataset IDs, calibration levels, units, retrieval timestamps, and mathematical transformations."
   }
 ];
 
 export default function SpherexHub() {
   const { navigate } = useRouter();
-  const [targets, setTargets] = useState<any[]>([]);
-  const [selectedTargetId, setSelectedTargetId] = useState<string>("barnards-star");
-  const [activeTab, setActiveTab] = useState<TabKey>("timeline");
-  const [targetDetails, setTargetDetails] = useState<any>(null);
-  const [observations, setObservations] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchError, setSearchError] = useState<string | null>(null);
-  const [tourStep, setTourStep] = useState<number | null>(null);
-
-  // Read URL query params on mount
-  useEffect(() => {
+  const [targets, setTargets] = useState<any[]>(AUTHORITATIVE_TARGETS);
+  const [selectedTargetId, setSelectedTargetId] = useState<string>(() => {
     const params = new URLSearchParams(window.location.search);
-    const urlTarget = params.get("target");
-    const urlTab = params.get("tab") as TabKey | null;
-
-    if (urlTarget) setSelectedTargetId(urlTarget);
-    if (urlTab && ["sky", "timeline", "motion", "variable", "spectra", "most", "provenance"].includes(urlTab)) {
-      setActiveTab(urlTab);
-    }
-  }, []);
+    const t = params.get("target");
+    return t && AUTHORITATIVE_TARGETS.some((x: any) => x.id === t) ? t : "barnards-star";
+  });
+  const [activeTab, setActiveTab] = useState<TabKey>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab") as TabKey | null;
+    return tab && ["sky", "timeline", "motion", "variable", "spectra", "most", "provenance"].includes(tab)
+      ? tab
+      : "timeline";
+  });
+  const [targetDetails, setTargetDetails] = useState<any>(() => getLocalTargetById(selectedTargetId));
+  const [observations, setObservations] = useState<any[]>(() => getLocalObservationsForTarget(selectedTargetId));
+  const [loading, setLoading] = useState(false);
+  const [tourStep, setTourStep] = useState<number | null>(null);
 
   // Update URL query params when target or tab changes
   useEffect(() => {
@@ -97,87 +98,54 @@ export default function SpherexHub() {
     window.history.replaceState({}, "", newUrl);
   }, [selectedTargetId, activeTab]);
 
-  // Fetch target list
+  // Fetch target list from API (with local authoritative fallback)
   useEffect(() => {
     fetch("/api/targets")
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
       .then((d) => {
-        if (d.targets) setTargets(d.targets);
+        if (d.targets && d.targets.length > 0) setTargets(d.targets);
       })
-      .catch((err) => console.error("Failed to load targets list:", err));
+      .catch(() => {
+        setTargets(AUTHORITATIVE_TARGETS);
+      });
   }, []);
 
-  // Fetch detailed dossier and observations for selected target
+  // Update target dossier and observations immediately from verified local dataset, then sync with API
   useEffect(() => {
+    const localTarget = getLocalTargetById(selectedTargetId);
+    const localObs = getLocalObservationsForTarget(selectedTargetId);
+    setTargetDetails(localTarget);
+    setObservations(localObs);
     setLoading(true);
-    setSearchError(null);
+
+    let active = true;
     Promise.all([
-      fetch(`/api/target/${selectedTargetId}`).then((r) => r.json()),
-      fetch(`/api/observations?targetId=${selectedTargetId}`).then((r) => r.json())
+      fetch(`/api/target/${selectedTargetId}`).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch(`/api/observations?targetId=${selectedTargetId}`).then((r) => (r.ok ? r.json() : null)).catch(() => null)
     ])
       .then(([detailRes, obsRes]) => {
-        if (detailRes.target) {
+        if (!active) return;
+        if (detailRes && detailRes.target && detailRes.target.id === selectedTargetId) {
           setTargetDetails(detailRes.target);
         }
-        if (obsRes.observations) {
+        if (obsRes && Array.isArray(obsRes.observations) && obsRes.observations.length > 0) {
           setObservations(obsRes.observations);
         }
         setLoading(false);
       })
-      .catch((err) => {
-        console.error("Failed to load target data:", err);
-        setLoading(false);
+      .catch(() => {
+        if (active) setLoading(false);
       });
+
+    return () => {
+      active = false;
+    };
   }, [selectedTargetId]);
 
-  // Handle Search Input (Target name or RA/Dec)
-  const onSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-    setLoading(true);
-    setSearchError(null);
-
-    fetch(`/api/search?q=${encodeURIComponent(searchQuery.trim())}`)
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.error) {
-          setSearchError(d.error);
-          setLoading(false);
-        } else if (d.result) {
-          setTargetDetails(d.result);
-          setSelectedTargetId(d.result.id);
-          // Query observations for resolved coordinates
-          fetch(`/api/observations?ra=${d.result.raDeg}&dec=${d.result.decDeg}`)
-            .then((res) => res.json())
-            .then((obsData) => {
-              setObservations(obsData.observations || []);
-              setLoading(false);
-            });
-        }
-      })
-      .catch((err) => {
-        setSearchError(err.message);
-        setLoading(false);
-      });
-  };
-
-  const currentTarget = targetDetails || targets.find((t) => t.id === selectedTargetId) || {
-    id: "barnards-star",
-    name: "Barnard's Star",
-    raDeg: 269.45208,
-    decDeg: 4.69339,
-    raSexagesimal: "17h 57m 48.50s",
-    decSexagesimal: "+04° 41' 36.2\"",
-    type: "High Proper Motion M-Dwarf Star",
-    spectralType: "M4.0V",
-    scienceDescription: "Barnard's Star has the fastest proper motion of any known star (~10.39 arcsec/yr)."
-  };
-
-  const startTour = () => {
-    setTourStep(0);
-    setSelectedTargetId(TOUR_STEPS[0].targetId);
-    setActiveTab(TOUR_STEPS[0].tab);
-  };
+  const currentTarget =
+    (targetDetails && targetDetails.id === selectedTargetId ? targetDetails : null) ||
+    targets.find((t) => t.id === selectedTargetId) ||
+    getLocalTargetById(selectedTargetId);
 
   const nextTourStep = () => {
     if (tourStep === null) return;
@@ -199,7 +167,7 @@ export default function SpherexHub() {
     setTourStep(null);
   };
 
-  // Keyboard navigation for power users and judges (1-7 for tabs, arrows for tour)
+  // Keyboard navigation for power users (1-7 for tabs, arrows for tour)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const activeEl = document.activeElement;
@@ -235,7 +203,6 @@ export default function SpherexHub() {
     <section id="spherex-hub" className="min-h-screen w-full flex flex-col bg-[#070b14] text-slate-100">
       {/* ── UNIFIED MINIMALIST TOP BAR (Height: 52px) ── */}
       <header className="h-13 shrink-0 border-b border-slate-800/80 bg-[#0b1120] px-4 flex items-center justify-between gap-4 z-30">
-        
         {/* Left: Brand Mark */}
         <div className="flex items-center gap-2.5 shrink-0">
           <LogoMark className="h-6 w-6 text-amber-500" />
@@ -313,7 +280,6 @@ export default function SpherexHub() {
             <span>Back to Home</span>
           </button>
         </div>
-
       </header>
 
       {/* Guided Tour Compact Banner (When Active) */}
@@ -359,11 +325,12 @@ export default function SpherexHub() {
       )}
 
       {/* ── WORKSTATION VIEWPORT (ROW 2, flex-1) ── */}
-      <main className="flex-1 p-3 sm:p-4 relative">
+      <main className="flex-1 p-3 sm:p-4 relative" data-loading={loading ? "true" : "false"}>
         {activeTab === "timeline" && (
           <ObservationTimelineComparator
             targetId={selectedTargetId}
             targetName={currentTarget.name}
+            target={currentTarget}
             observations={observations}
           />
         )}
@@ -408,4 +375,3 @@ export default function SpherexHub() {
     </section>
   );
 }
-

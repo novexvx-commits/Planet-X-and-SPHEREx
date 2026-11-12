@@ -5,10 +5,10 @@ import { useScrollProgress } from "../hooks/useScrollProgress";
 import { CountUp, dv } from "../components/ui";
 
 const STATS = [
-  { to: 102, d: 0, suf: " Bands", label: "Spectral Bands per All-Sky Point", group: true },
-  { to: 6.2, d: 1, suf: "″", label: "Astrometric Pixel Scale", group: true },
-  { to: 450, d: 0, suf: "M+", label: "Galaxies with 3D Spectra", group: true },
-  { to: 2026, d: 0, suf: "", label: "NASA Space Apps Exploration Year", group: false },
+  { to: 102, d: 0, suf: " Channels", label: "Nominal Spectral Channels (0.75–5.0 µm)", group: true },
+  { to: 6, d: 0, suf: " Arrays", label: "Instrument Detector Bands (D1–D6)", group: true },
+  { to: 20, d: 0, suf: " cm", label: "Telescope Aperture (3.5° × 11.3° FOV)", group: true },
+  { to: 4, d: 0, suf: " Maps", label: "Planned Full-Sky Maps (6-mo Cadence)", group: false },
 ];
 
 /** Scene 6 — Wide-angle milestone: a pinned, letterboxed panorama that "opens its eye" */
@@ -98,8 +98,8 @@ export default function FirstLight() {
                 </div>
               </div>
               <div className="flex justify-between">
-                <div className="hidden sm:block">Exposure 113.58 s · λ 0.75 – 5.00 µm</div>
-                <div className="text-right sm:ml-auto">FOV 3.5° × 11.3° · 6.2"/pixel</div>
+                <div className="hidden sm:block">λ 0.75 – 5.00 µm · R = 35–130 (D1–D6)</div>
+                <div className="text-right sm:ml-auto">FOV 3.5° × 11.3° · 20 cm Aperture</div>
               </div>
             </div>
           </div>

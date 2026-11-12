@@ -6,14 +6,14 @@ import { CountUp, Kicker, SplitText, dv } from "../components/ui";
 
 // positions mapped onto the telescope plate (21:10 crop of a 16:9 frame)
 const NOTES = [
-  { x: "60%", y: "21%", label: "Three-Mirror Anastigmat", value: "20 cm aperture · f/3.0 optics", side: "right", c: "#6ce5ff" },
-  { x: "33%", y: "62%", label: "Cryogenic V-Groove Shield", value: "< 80 Kelvin passive cooling", side: "left", c: "#9b7bff" },
-  { x: "72%", y: "47%", label: "Linear Variable Filter Arrays", value: "6 Arrays · 2048×2048 pixels each", side: "right", c: "#ff8a3d" },
+  { x: "60%", y: "21%", label: "Three-Mirror Anastigmat", value: "20 cm aperture · 3.5° × 11.3° FOV", side: "right", c: "#6ce5ff" },
+  { x: "33%", y: "62%", label: "V-Groove Thermal Shield", value: "Passive radiative orbital cooling", side: "left", c: "#9b7bff" },
+  { x: "72%", y: "47%", label: "Linear Variable Filter Arrays", value: "6 Arrays (D1–D6) · R = 35–130", side: "right", c: "#ff8a3d" },
 ];
 
 const SPECS = [
-  { to: 102, d: 0, suf: " Bands", label: "Continuous Spectral Channels (0.75 – 5.0 µm)" },
-  { to: 80, d: 0, suf: " K", label: "Cryogenic Detector Temperature" },
+  { to: 102, d: 0, suf: " Channels", label: "Nominal Spectral Channels (0.75 – 5.0 µm)" },
+  { to: 6, d: 0, suf: " Arrays", label: "Detector Arrays / Instrument Bands (D1–D6)" },
   { to: 20, d: 0, suf: " cm", label: "Telescope Primary Aperture" },
 ];
 
@@ -44,7 +44,7 @@ export default function Spotlight() {
             className="mt-7 font-serif text-[clamp(3rem,8.4vw,8.8rem)] leading-[0.9] tracking-[-0.015em]"
           />
           <p data-reveal="up" style={dv({ "--d": "250ms" })} className="mx-auto mt-8 max-w-xl text-[16px] leading-[1.75] text-bone/60 md:text-[17px]">
-            At the heart of the SPHEREx spacecraft is a 20-centimeter aluminum three-mirror anastigmat telescope. Cooled passively below 80 Kelvin by conical thermal radiation shields, it feeds six Linear Variable Filter (LVF) detector arrays without requiring moving parts.
+            At the heart of the SPHEREx spacecraft is a 20-centimeter all-aluminum three-mirror anastigmat telescope with a 3.5° × 11.3° field of view. Cooled passively by conical V-groove thermal radiation shields, it feeds six Linear Variable Filter (LVF) detector arrays (D1–D6) without moving optical parts.
           </p>
         </div>
 

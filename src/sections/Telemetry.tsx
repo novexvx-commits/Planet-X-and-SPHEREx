@@ -13,11 +13,11 @@ const LOOKBACK_GYR = [2.45, 5.18, 7.93, 10.08, 11.16, 11.98, 12.52, 12.88];
 const HEIGHTS = LOOKBACK_GYR.map((t, i) => Number((0.20 + 0.80 * (t / 12.88)).toFixed(3)));
 
 const MESSAGES: [number, string][] = [
-  [0, "SPHEREx Sun-synchronous polar orbit nominal at 700 km. Cryogenic sensors <80 K."],
-  [0.22, "Local Universe survey (z < 0.5): 102-band galaxy SEDs calibrated against 2MASS."],
-  [0.45, "Large-Scale Structure mapping (0.5 < z < 2.0): measuring 3D galaxy clustering."],
-  [0.68, "Cosmic Inflation constraints: testing primordial non-Gaussianity f_NL to < 1."],
-  [0.92, "Cosmic Dawn threshold (z ~ 6.2): detecting diffuse infrared background fluctuations."],
+  [0, "SPHEREx Sun-synchronous polar orbit nominal. 20 cm telescope & 6 LVF arrays (D1–D6) active."],
+  [0.22, "Short-wavelength arrays D1–D3 (0.75–2.42 µm, R ~ 41): 102-channel all-sky survey calibrated."],
+  [0.45, "Mid-wavelength array D4 (2.42–3.82 µm, R ~ 35): mapping H2O ice and extragalactic clustering."],
+  [0.68, "Long-wavelength arrays D5–D6 (3.82–5.00 µm, R ~ 110–130): resolving CO2 and CO ice bands."],
+  [0.92, "Cosmic Dawn threshold: measuring extragalactic background fluctuations across 4 planned sky maps."],
 ];
 
 const fmtLookback = (progress: number) => {
@@ -114,7 +114,7 @@ export default function Telemetry() {
             <Kicker>Chapter VIII — Cosmic Epochs & Telemetry</Kicker>
             <SplitText text="Mapping the light of | *Cosmic Dawn.*" className="mt-5 font-serif text-[clamp(2.5rem,5.8vw,6rem)] leading-[0.92]" />
             <p data-reveal="up" style={dv({ "--d": "200ms" })} className="mt-6 hidden max-w-sm text-[15px] leading-[1.75] text-bone/60 sm:block">
-              SPHEREx measures 3D galaxy clustering across 450+ million galaxies, testing models of inflation and tracing large-scale structure back 12.8 billion years.
+              SPHEREx maps 3D large-scale galaxy clustering across 102 near-infrared channels (0.75–5.0 µm) with a 3.5° × 11.3° field of view, testing models of cosmic inflation across cosmic time.
             </p>
             <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.08] lg:mt-10">
               <Kpi label="Lookback Time" refEl={altRef} init="2.45 Gyr" />

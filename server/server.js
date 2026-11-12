@@ -107,8 +107,9 @@ const isDirectRun = process.argv[1] && (
   process.argv[1].endsWith('index.js')
 );
 
-if (isDirectRun && process.env.NODE_ENV !== 'test') {
+if (isDirectRun && process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   startServer();
 }
 
 export { app };
+export default app;

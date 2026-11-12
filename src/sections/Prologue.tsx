@@ -4,10 +4,10 @@ import { useScrollProgress } from "../hooks/useScrollProgress";
 import { CountUp, Kicker, SplitText, dv } from "../components/ui";
 
 const STATS = [
-  { to: 102, decimals: 0, suffix: "", label: "Near-IR Spectral Bands" },
-  { to: 5.0, decimals: 1, suffix: " µm", label: "Spectral Reach (0.75 – 5.0 µm)" },
-  { to: 6, decimals: 0, suffix: " mo", label: "All-Sky Survey Cadence" },
-  { to: 6.2, decimals: 1, suffix: "″", label: "Spatial Pixel Scale (arcsec)" },
+  { to: 102, decimals: 0, prefix: "", suffix: "", label: "Nominal Spectral Channels" },
+  { to: 5.0, decimals: 1, prefix: "0.75–", suffix: " µm", label: "Wavelength Coverage" },
+  { to: 6, decimals: 0, prefix: "", suffix: " mo", label: "Full-Sky Survey Cadence" },
+  { to: 4, decimals: 0, prefix: "", suffix: " Maps", label: "Planned Full-Sky Maps" },
 ];
 
 /** Scene 2 — Asymmetric editorial split with delayed, staggered reveals */
@@ -89,7 +89,7 @@ export default function Prologue() {
             {STATS.map((s, i) => (
               <div key={s.label} data-reveal="fade" style={dv({ "--d": `${400 + i * 120}ms` })} className="bg-ink p-5 md:p-7">
                 <p className="font-serif text-4xl tabular-nums md:text-5xl">
-                  <CountUp to={s.to} decimals={s.decimals} suffix={s.suffix} />
+                  <CountUp to={s.to} decimals={s.decimals} prefix={s.prefix} suffix={s.suffix} />
                 </p>
                 <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-bone/45">{s.label}</p>
               </div>

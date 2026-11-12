@@ -17,9 +17,9 @@ const ACTS = [
     rgb: "108,229,255",
     text: "SPHEREx measures 3D large-scale structure across hundreds of millions of galaxies and traces spatial fluctuations in the Cosmic Infrared Background (CIB), testing cosmic inflation models and uncovering the epoch of first star formation.",
     meta: [
-      ["Redshift Reach", "z ≈ 0.1 → 5.0"],
-      ["Galaxies Mapped", "450+ Million"],
-      ["Cosmic Era", "Reionization Epoch"],
+      ["Wavelengths", "0.75 – 5.0 µm"],
+      ["Field of View", "3.5° × 11.3°"],
+      ["Prime Survey", "4 Full-Sky Maps"],
     ],
   },
   {

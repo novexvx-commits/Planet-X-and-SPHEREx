@@ -13,7 +13,7 @@ const VISIONS = [
     title: "Origins | of the cosmos",
     img: cities,
     alt: "Cosmic web and large-scale galaxy distribution traced across infrared wavelengths",
-    text: "How did the universe begin? By measuring 3D clustering in 450+ million galaxies across 102 near-infrared bands, SPHEREx tests inflation theories and maps primordial non-Gaussianity from the first cosmic moments.",
+    text: "How did the universe begin? By mapping 3D large-scale galaxy clustering across 102 near-infrared spectral channels (0.75–5.0 µm) over four planned all-sky maps, SPHEREx tests inflation theories and probes primordial non-Gaussianity.",
   },
   {
     n: "02",

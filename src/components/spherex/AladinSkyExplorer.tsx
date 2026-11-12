@@ -22,9 +22,9 @@ interface SkyExplorerProps {
 }
 
 const SURVEYS = [
-  { id: "P/2MASS/color", name: "2MASS Near-IR (J+H+Ks)", band: "NIR 1.2-2.2 µm", desc: "Authentic near-infrared all-sky survey matching SPHEREx primary spectral bands." },
-  { id: "P/allWISE/color", name: "AllWISE (W1+W2+W3+W4)", band: "MIR 3.4-22 µm", desc: "NASA Wide-field Infrared Survey Explorer mid-infrared all-sky atlas." },
-  { id: "P/DSS2/color", name: "DSS2 Optical Color", band: "Optical 0.4-0.9 µm", desc: "Digitized Sky Survey optical baseline from Palomar & UK Schmidt plates." },
+  { id: "P/2MASS/color", name: "2MASS Near-IR (J+H+Ks)", band: "NIR 1.2–2.2 µm", desc: "Authentic near-infrared all-sky survey matching SPHEREx D2/D3 spectral bands." },
+  { id: "P/allWISE/color", name: "AllWISE (W1+W2+W3+W4)", band: "MIR 3.4–22 µm", desc: "NASA Wide-field Infrared Survey Explorer mid-infrared all-sky atlas matching SPHEREx D4–D6." },
+  { id: "P/DSS2/color", name: "DSS2 Optical Color", band: "Optical 0.4–0.9 µm", desc: "Digitized Sky Survey optical baseline from Palomar & UK Schmidt plates." },
   { id: "P/PanSTARRS/DR1/color-z-zg-g", name: "Pan-STARRS DR1", band: "Optical/NIR g-r-i-z-y", desc: "Panoramic Survey Telescope and Rapid Response System DR1." }
 ];
 
@@ -35,19 +35,28 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
   const targetMarkerRef = useRef<any>(null);
 
   const [aladinReady, setAladinReady] = useState(false);
+  const [initializing, setInitializing] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [activeSurvey, setActiveSurvey] = useState("P/2MASS/color");
   const [showFootprint, setShowFootprint] = useState(true);
-  const [showCatalog, setShowCatalog] = useState(true);
   const [currentCoords, setCurrentCoords] = useState<{ ra: string; dec: string }>({
     ra: target.raSexagesimal,
     dec: target.decSexagesimal
   });
   const [fovDegrees, setFovDegrees] = useState(0.25); // 15 arcminutes
 
+  // Keep coordinate display synced when target changes
+  useEffect(() => {
+    setCurrentCoords({
+      ra: target.raSexagesimal,
+      dec: target.decSexagesimal
+    });
+  }, [target.id, target.raSexagesimal, target.decSexagesimal]);
+
   // Dynamically load Aladin Lite v3 if not yet on window
   useEffect(() => {
     let isMounted = true;
+    setInitializing(true);
 
     const loadAladinScript = () => {
       if (window.A) {
@@ -55,14 +64,16 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
         return;
       }
 
-      // Check if script tag already exists
       const existingScript = document.querySelector('script[src*="aladin.js"]');
       if (existingScript) {
         existingScript.addEventListener("load", () => {
           if (isMounted) initAladin();
         });
         existingScript.addEventListener("error", () => {
-          if (isMounted) setLoadError("Unable to reach CDS Strasbourg Aladin Lite CDN. Using authenticated fallback survey viewer.");
+          if (isMounted) {
+            setInitializing(false);
+            setLoadError("Unable to reach CDS Strasbourg Aladin Lite CDN. External HiPS survey tiles unavailable.");
+          }
         });
         return;
       }
@@ -75,7 +86,10 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
         if (isMounted) initAladin();
       };
       script.onerror = () => {
-        if (isMounted) setLoadError("Aladin Lite CDN unreachable. Operating in offline astronomical imagery mode.");
+        if (isMounted) {
+          setInitializing(false);
+          setLoadError("Aladin Lite v3 CDN unreachable. Operating in explicit archival telemetry mode.");
+        }
       };
       document.head.appendChild(script);
     };
@@ -90,14 +104,13 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
           if (!isMounted || !aladinContainerRef.current) return;
 
           try {
-            // Clean container if re-initializing
             aladinContainerRef.current.innerHTML = "";
 
             const aladin = window.A.aladin(aladinContainerRef.current, {
               survey: activeSurvey,
               fov: fovDegrees,
               target: `${target.raDeg} ${target.decDeg}`,
-              cooFrame: "J2000",
+              cooFrame: "ICRS",
               showLayersControl: true,
               showGotoControl: true,
               showZoomControl: true,
@@ -107,30 +120,31 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
 
             aladinInstanceRef.current = aladin;
             setAladinReady(true);
+            setInitializing(false);
             setLoadError(null);
 
-            // Add SPHEREx Footprint Overlay
-            updateOverlays(aladin);
-
-            // Track coordinate hover if supported
             if (typeof aladin.on === "function") {
               aladin.on("positionChanged", (pos: any) => {
-                if (pos && pos.ra && pos.dec) {
+                if (pos && typeof pos.ra === "number" && typeof pos.dec === "number") {
                   setCurrentCoords({
-                    ra: `${pos.ra.toFixed(4)}°`,
-                    dec: `${pos.dec.toFixed(4)}°`
+                    ra: `${pos.ra.toFixed(5)}°`,
+                    dec: `${pos.dec.toFixed(5)}°`
                   });
                 }
               });
             }
           } catch (err: any) {
             console.error("Aladin initialization error:", err);
-            setLoadError(err.message || "Failed to initialize WebGL Aladin viewport");
+            setInitializing(false);
+            setLoadError(err.message || "Failed to initialize WebGL Aladin v3 viewport.");
           }
         })
         .catch((err: any) => {
           console.error("Aladin init promise error:", err);
-          if (isMounted) setLoadError("Failed to initialize CDS astronomical libraries.");
+          if (isMounted) {
+            setInitializing(false);
+            setLoadError("Failed to initialize CDS Strasbourg Aladin Lite v3 WebGL engine.");
+          }
         });
     };
 
@@ -141,7 +155,7 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
     };
   }, []);
 
-  // Update center position when target prop changes
+  // Update center position and overlays when target or footprint toggle changes
   useEffect(() => {
     if (!aladinInstanceRef.current || !aladinReady) return;
     try {
@@ -151,37 +165,39 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
       } else if (typeof aladin.gotoObject === "function") {
         aladin.gotoObject(`${target.raDeg} ${target.decDeg}`);
       }
-      updateOverlays(aladin);
+      updateOverlays(aladin, showFootprint);
     } catch (e) {
       console.warn("Aladin goto target exception:", e);
     }
-  }, [target.id, aladinReady]);
+  }, [target.id, target.raDeg, target.decDeg, aladinReady, showFootprint]);
 
   // Update SPHEREx Footprint and Target Marker overlays
-  const updateOverlays = (aladin: any) => {
-    if (!aladin) return;
+  const updateOverlays = (aladin: any, footprintVisible: boolean) => {
+    if (!aladin || !window.A) return;
     try {
       // 1. Target Marker
-      if (window.A && window.A.marker) {
+      if (window.A.marker) {
         if (targetMarkerRef.current && typeof aladin.removeOverlay === "function") {
           aladin.removeOverlay(targetMarkerRef.current);
         }
-        const markerLayer = window.A.graphicOverlay({ name: `${target.name} Dossier`, color: "#ff8a3d", lineWidth: 2 });
+        const markerLayer = window.A.graphicOverlay({ name: `${target.name} ICRS Target`, color: "#ff8a3d", lineWidth: 2 });
         const marker = window.A.marker(target.raDeg, target.decDeg, {
           popupTitle: `🔭 ${target.name}`,
-          popupDesc: `<strong>${target.type}</strong> (${target.spectralType})<br/>RA: ${target.raSexagesimal} (${target.raDeg.toFixed(5)}°)<br/>Dec: ${target.decSexagesimal} (${target.decDeg.toFixed(5)}°)<br/>NASA SPHEREx Priority Science Target`
+          popupDesc: `<strong>${target.type}</strong> (${target.spectralType})<br/>RA (ICRS): ${target.raSexagesimal} (${target.raDeg.toFixed(5)}°)<br/>Dec (ICRS): ${target.decSexagesimal} (${target.decDeg.toFixed(5)}°)<br/>NASA SPHEREx All-Sky Survey Benchmark`
         });
         markerLayer.add(marker);
         aladin.addOverlay(markerLayer);
         targetMarkerRef.current = markerLayer;
       }
 
-      // 2. SPHEREx 2048x2048 LVF Array Footprint (3.5° x 3.5° FPA detector with 6.2"/pixel)
-      if (showFootprint && window.A && window.A.polygon) {
-        if (footprintOverlayRef.current && typeof aladin.removeOverlay === "function") {
-          aladin.removeOverlay(footprintOverlayRef.current);
-        }
-        const halfFov = 0.12; // 0.24 deg zoomed footprint box for target inspection
+      // 2. SPHEREx Sub-Array Inspection Box
+      if (footprintOverlayRef.current && typeof aladin.removeOverlay === "function") {
+        aladin.removeOverlay(footprintOverlayRef.current);
+        footprintOverlayRef.current = null;
+      }
+
+      if (footprintVisible && window.A.polygon) {
+        const halfFov = 0.08; // ~9.6 arcmin inspection reticle inside the 0.25 deg view
         const cosDec = Math.cos((target.decDeg * Math.PI) / 180);
         const dRa = halfFov / (cosDec || 1);
         const dDec = halfFov;
@@ -193,7 +209,7 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
           [target.raDeg - dRa, target.decDeg + dDec]
         ];
 
-        const fovLayer = window.A.graphicOverlay({ name: "SPHEREx Detector Footprint", color: "#ff8a3d", lineWidth: 1.5 });
+        const fovLayer = window.A.graphicOverlay({ name: "SPHEREx Sub-Array Reticle", color: "#ff8a3d", lineWidth: 1.5 });
         const fovPoly = window.A.polygon(polyCoords, {
           color: "#ff8a3d",
           fill: true,
@@ -230,12 +246,12 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
     if (!aladinInstanceRef.current) return;
     try {
       const aladin = aladinInstanceRef.current;
-      if (typeof aladin.zoom === "function") {
-        aladin.zoom(factor);
-      } else if (typeof aladin.setFov === "function") {
-        const nextFov = factor > 1 ? fovDegrees * 0.75 : fovDegrees * 1.35;
-        setFovDegrees(nextFov);
+      const nextFov = Math.max(0.02, Math.min(12, factor > 1 ? fovDegrees * 0.7 : fovDegrees * 1.4));
+      setFovDegrees(nextFov);
+      if (typeof aladin.setFov === "function") {
         aladin.setFov(nextFov);
+      } else if (typeof aladin.zoom === "function") {
+        aladin.zoom(factor);
       }
     } catch (e) {
       console.warn("Zoom exception:", e);
@@ -249,7 +265,7 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
         <div className="flex items-center gap-3">
           <span className="flex h-2.5 w-2.5 rounded-full bg-ember shadow-[0_0_8px_#ff8a3d] animate-pulse" />
           <span className="font-mono text-xs uppercase tracking-wider text-bone font-semibold">
-            Aladin Lite v3 Celestial Sky Map
+            Aladin Lite v3 Celestial Sky Map (ICRS)
           </span>
           <span className="text-mist">·</span>
           <span className="rounded bg-ember/10 border border-ember/30 px-2 py-0.5 font-mono text-[10px] text-ember-soft">
@@ -280,17 +296,13 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
         {/* Action Toggles & Zoom */}
         <div className="flex items-center gap-2">
           <button
-            onClick={() => {
-              const next = !showFootprint;
-              setShowFootprint(next);
-              if (aladinInstanceRef.current) updateOverlays(aladinInstanceRef.current);
-            }}
+            onClick={() => setShowFootprint((prev) => !prev)}
             className={cn(
               "rounded px-2.5 py-1 font-mono text-[10px] transition-colors",
               showFootprint ? "bg-ember/20 text-ember border border-ember/40" : "bg-white/5 text-mist"
             )}
           >
-            SPHEREx Footprint
+            SPHEREx Reticle
           </button>
           <div className="h-4 w-px bg-white/10" />
           <button
@@ -309,9 +321,14 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
           </button>
           <button
             onClick={() => {
+              setFovDegrees(0.25);
               if (aladinInstanceRef.current) {
-                aladinInstanceRef.current.gotoRaDec(target.raDeg, target.decDeg);
-                aladinInstanceRef.current.setFov(0.25);
+                if (typeof aladinInstanceRef.current.gotoRaDec === "function") {
+                  aladinInstanceRef.current.gotoRaDec(target.raDeg, target.decDeg);
+                }
+                if (typeof aladinInstanceRef.current.setFov === "function") {
+                  aladinInstanceRef.current.setFov(0.25);
+                }
               }
             }}
             className="rounded bg-white/5 px-2.5 py-1 font-mono text-[10px] text-mist hover:text-bone"
@@ -324,7 +341,6 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
 
       {/* Main Aladin Lite Viewport Canvas */}
       <div className="relative h-[540px] w-full bg-[#05060a]">
-        {/* Aladin Div Container */}
         <div
           ref={aladinContainerRef}
           id="aladin-lite-div"
@@ -332,27 +348,36 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
           style={{ width: "100%", height: "100%" }}
         />
 
-        {/* Fallback Viewport if Aladin CDN fails or is offline */}
+        {/* Initializing Overlay */}
+        {initializing && !loadError && (
+          <div className="absolute inset-0 flex items-center justify-center bg-ink/80 backdrop-blur-xs z-20 pointer-events-none">
+            <div className="rounded-lg border border-white/10 bg-ink-2 px-5 py-3 font-mono text-xs text-ember-soft animate-pulse">
+              Initializing CDS Aladin Lite v3 HiPS Sky Survey Engine...
+            </div>
+          </div>
+        )}
+
+        {/* Explicit Unavailable / Error Viewport if Aladin CDN fails */}
         {loadError && (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-ink/95 backdrop-blur-xs text-center z-20">
             <div className="max-w-md rounded-xl border border-ember/40 bg-ink-2 p-6 shadow-2xl">
               <span className="font-mono text-xs uppercase tracking-wider text-ember">
-                Archival Survey Mode Active
+                External HiPS Survey Tiles Unavailable
               </span>
               <h4 className="mt-2 font-serif text-xl text-bone">
-                Real All-Sky Survey: 2MASS Near-Infrared
+                {target.name} ({target.spectralType})
               </h4>
               <p className="mt-2 text-xs text-mist leading-relaxed font-sans">
                 {loadError}
               </p>
               <div className="mt-4 rounded border border-white/10 bg-black/60 p-3 font-mono text-[11px] text-left text-mist space-y-1">
-                <div>Target: <span className="text-bone">{target.name}</span></div>
-                <div>Coordinates (J2000): <span className="text-ember">{target.raSexagesimal} {target.decSexagesimal}</span></div>
-                <div>Survey Baseline: <span className="text-bone">2MASS J/H/Ks (1.2 - 2.2 µm)</span></div>
-                <div>SPHEREx Pixel Scale: <span className="text-ion">6.2 arcsec / pixel</span></div>
+                <div>Target: <span className="text-bone">{target.name} ({target.type})</span></div>
+                <div>Coordinates (ICRS): <span className="text-ember">{target.raSexagesimal} {target.decSexagesimal}</span></div>
+                <div>Decimal (J2000): <span className="text-bone">RA {target.raDeg.toFixed(5)}°, Dec {target.decDeg.toFixed(5)}°</span></div>
+                <div>SPHEREx Field of View: <span className="text-ion">3.5° × 11.3° (6.15″/px native scale)</span></div>
               </div>
               <button
-                onClick={() => window.open(`https://aladin.cds.unistra.fr/AladinLite/?target=${encodeURIComponent(target.name)}&survey=${encodeURIComponent(activeSurvey)}`, "_blank")}
+                onClick={() => window.open(`https://aladin.cds.unistra.fr/AladinLite/?target=${encodeURIComponent(`${target.raDeg} ${target.decDeg}`)}&survey=${encodeURIComponent(activeSurvey)}`, "_blank")}
                 className="mt-4 inline-flex items-center gap-2 rounded bg-ember px-4 py-2 font-mono text-xs font-bold text-ink hover:bg-ember-soft transition-colors"
               >
                 Open Full CDS Sky Atlas In New Tab ↗
@@ -365,15 +390,15 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
         <div className="absolute bottom-4 left-4 z-10 rounded-lg border border-white/15 bg-ink/90 px-3.5 py-2 backdrop-blur-md shadow-xl text-xs font-mono">
           <div className="flex items-center gap-2 text-bone font-medium">
             <span className="h-1.5 w-1.5 rounded-full bg-ion" />
-            <span>Target: {target.name}</span>
+            <span>Target: {target.name} ({target.spectralType})</span>
           </div>
           <div className="mt-1 flex items-center gap-3 text-[10px] text-mist">
-            <span>RA: <strong className="text-bone">{target.raSexagesimal}</strong></span>
-            <span>Dec: <strong className="text-bone">{target.decSexagesimal}</strong></span>
+            <span>RA: <strong className="text-bone">{currentCoords.ra}</strong></span>
+            <span>Dec: <strong className="text-bone">{currentCoords.dec}</strong></span>
             <span>FOV: <strong className="text-ember">{fovDegrees.toFixed(3)}°</strong></span>
           </div>
           <div className="mt-1 pt-1 border-t border-white/10 text-[9px] text-ember-soft">
-            Active Layer: {SURVEYS.find(s => s.id === activeSurvey)?.name}
+            Active Layer: {SURVEYS.find((s) => s.id === activeSurvey)?.name}
           </div>
         </div>
 
@@ -407,18 +432,18 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full border border-ember bg-ember/30" />
-            SPHEREx 6.2"/pix Detector Footprint
+            SPHEREx Full FOV: 3.5° × 11.3° (6.15″/px scale)
           </span>
           <span className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-ion" />
-            J2000 Astrometric Center
+            ICRS / J2000 Astrometric Center
           </span>
           <span className="text-bone">
-            Survey Mode: <span className="text-ember-soft font-semibold">{SURVEYS.find(s => s.id === activeSurvey)?.band}</span>
+            Survey Bandpass: <span className="text-ember-soft font-semibold">{SURVEYS.find((s) => s.id === activeSurvey)?.band}</span>
           </span>
         </div>
         <div className="text-[10px] text-mist">
-          Data Engine: <span className="text-bone">CDS Strasbourg Aladin Lite v3 · HiPS All-Sky Multi-Resolution Survey</span>
+          Data Engine: <span className="text-bone">CDS Strasbourg Aladin Lite v3 · Real HiPS Multi-Resolution Survey Imagery</span>
         </div>
       </div>
     </div>

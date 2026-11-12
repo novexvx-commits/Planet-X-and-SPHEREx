@@ -30,13 +30,13 @@ const ROWS: Row[] = [
     alt: "SPHEREx Linear Variable Filter array dissecting incoming near-infrared starlight into 102 continuous bands",
     fig: "Fig. 05 — Linear Variable Filter Array Dispersion",
     body: [
-      "Unlike classical slit spectrographs that observe one target at a time, SPHEREx mounts Linear Variable Filters directly above its focal plane detector arrays. As the spacecraft scans, every point in the sky is observed in 102 distinct wavelengths from 0.75 to 5.00 µm.",
-      "This creates a seamless, three-dimensional spectroscopic atlas of the entire universe, measuring spectral line shifts, molecular absorptions, and continuum slopes for over 450 million celestial sources.",
+      "Unlike classical slit spectrographs that observe one target at a time, SPHEREx mounts Linear Variable Filters directly above its six focal plane detector arrays (D1–D6). As the spacecraft scans, every point in the sky is observed across 102 nominal wavelength channels from 0.75 to 5.00 µm.",
+      "Spectral resolving power varies across the six arrays: R ~ 41 in D1–D3 (0.75–2.42 µm), R ~ 35 in D4 (2.42–3.82 µm), R ~ 110 in D5 (3.82–4.42 µm), and R ~ 130 in D6 (4.42–5.00 µm).",
     ],
     stats: [
-      ["102 Bands", "Spectral Channels"],
-      ["0.75–5.0 µm", "Wavelength Span"],
-      ["R = 35–130", "Resolving Power"],
+      ["102 Channels", "Nominal Spectral Bands"],
+      ["0.75–5.0 µm", "Wavelength Coverage"],
+      ["R = 35–130", "Across Arrays D1–D6"],
     ],
     card: "lvf",
   },

@@ -345,16 +345,14 @@ export default function Hero({ ready }: { ready: boolean }) {
         nebulaRef.current.style.opacity = (1 - smoothstep(0.55, 0.9, p)).toFixed(3);
         nebulaRef.current.style.transform = `scale(${(1 + p * 0.6).toFixed(4)})`;
       }
-      if (distRef.current) distRef.current.textContent = `${(9.6 * (1 - smoothstep(0.02, 0.97, p))).toFixed(2)} ly`;
+      if (distRef.current) distRef.current.textContent = "3.5° × 11.3°";
       if (velRef.current) {
-        const vv = 0.21 * smoothstep(0, 0.3, p) * (1 - 0.85 * smoothstep(0.62, 0.9, p));
-        velRef.current.textContent = `${vv.toFixed(3)}c`;
+        const ch = Math.max(1, Math.min(102, Math.round(1 + p * 101)));
+        velRef.current.textContent = `D1–D6 · Ch ${ch}/102`;
       }
       if (clockRef.current) {
-        const yrs = p * 71;
-        const Y = Math.floor(yrs);
-        const D = Math.min(364, Math.floor((yrs - Y) * 365));
-        clockRef.current.textContent = `T+ ${String(Y).padStart(2, "0")}Y ${String(D).padStart(3, "0")}D`;
+        const wl = (0.75 + p * 4.25).toFixed(2);
+        clockRef.current.textContent = `${wl} µm · QR2`;
       }
       if (markerRef.current) markerRef.current.style.top = `${(p * 100).toFixed(2)}%`;
     };

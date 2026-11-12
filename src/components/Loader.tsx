@@ -113,8 +113,8 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
           <div ref={barRef} className="h-full origin-left bg-linear-to-r from-ion via-nebula to-ember" style={{ transform: "scaleX(0)" }} />
         </div>
         <div className="mt-4 flex justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-bone/40">
-          <span>Beyond the last light</span>
-          <span>Transit · 71 yrs</span>
+          <span>NASA SPHEREx All-Sky Survey</span>
+          <span>0.75 – 5.0 µm · 102 Channels</span>
         </div>
       </div>
     </div>
