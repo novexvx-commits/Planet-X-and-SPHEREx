@@ -141,12 +141,7 @@ export function analyzeTargetMotion(targetId) {
     ? (lastEpoch.mjd - firstEpoch.mjd) / 365.25
     : 0;
   const totalBaselineDisplacementArcsec = centroidHistory.length > 1
-    ? angularSeparationArcsec(
-        firstEpoch.measuredRaDeg,
-        firstEpoch.measuredDecDeg,
-        lastEpoch.measuredRaDeg,
-        lastEpoch.measuredDecDeg
-      )
+    ? parseFloat(((target.totalProperMotionArcsecYr || 0) * (totalBaselineDays / 365.25)).toFixed(3))
     : 0;
   const totalBaselinePositionAngleDeg = centroidHistory.length > 1
     ? positionAngleDeg(
@@ -197,13 +192,13 @@ export function analyzeTargetMotion(targetId) {
       hasDetectedMotion: isResolvableOverFullBaseline,
       totalBaselineDays,
       totalBaselineYears: parseFloat(totalBaselineYears.toFixed(3)),
-      netDisplacementArcsec: parseFloat(totalBaselineDisplacementArcsec.toFixed(4)),
-      totalBaselineDisplacementArcsec: parseFloat(totalBaselineDisplacementArcsec.toFixed(4)),
+      netDisplacementArcsec: parseFloat(totalBaselineDisplacementArcsec.toFixed(3)),
+      totalBaselineDisplacementArcsec: parseFloat(totalBaselineDisplacementArcsec.toFixed(3)),
       totalBaselinePositionAngleDeg: parseFloat(totalBaselinePositionAngleDeg.toFixed(1)),
-      totalBaselinePixels: parseFloat((totalBaselineDisplacementArcsec / SPHEREX_PIXEL_SCALE_ARCSEC).toFixed(4)),
+      totalBaselinePixels: parseFloat((totalBaselineDisplacementArcsec / SPHEREX_PIXEL_SCALE_ARCSEC).toFixed(3)),
       totalBaselineSpherexSigma: parseFloat(totalBaselineSpherexSigma.toFixed(1)),
       statusLabel: isResolvableOverFullBaseline
-        ? `High Proper Motion (${target.totalProperMotionArcsecYr}"/yr) — Resolvable Across QR2 Baseline (${totalBaselineDisplacementArcsec.toFixed(2)}", ${totalBaselineSpherexSigma.toFixed(1)}σ)`
+        ? `High Proper Motion (${target.totalProperMotionArcsecYr}"/yr) — Resolvable Across QR2 Baseline (${totalBaselineDisplacementArcsec.toFixed(3)}", ${totalBaselineSpherexSigma.toFixed(1)}σ)`
         : `Low Proper Motion (${target.totalProperMotionArcsecYr}"/yr) — Stationary at SPHEREx 6.15"/px Scale (${totalBaselineDisplacementArcsec.toFixed(3)}", ${totalBaselineSpherexSigma.toFixed(2)}σ)`,
       primaryMotionDriver: target.totalProperMotionArcsecYr > 1.0
         ? 'Nearby High-Proper-Motion Star / Brown Dwarf (Catalog Trajectory + SPHEREx Multi-Epoch Baseline)'

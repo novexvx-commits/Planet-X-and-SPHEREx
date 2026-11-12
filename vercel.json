@@ -5,7 +5,7 @@
       "destination": "/api/index.js"
     },
     {
-      "source": "/((?!api/).*)",
+      "source": "/((?!api/|vendor/|.*\\.[\\w]+$).*)",
       "destination": "/index.html"
     }
   ]
