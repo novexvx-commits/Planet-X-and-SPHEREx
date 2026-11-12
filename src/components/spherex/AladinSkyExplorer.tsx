@@ -30,32 +30,36 @@ interface SkyExplorerProps {
 
 const SURVEYS = [
   {
-    id: "P/2MASS/color",
-    shortName: "2MASS",
-    name: "2MASS Near-IR (J+H+Ks)",
-    band: "Near-IR 1.2–2.2 µm",
-    desc: "Two Micron All-Sky Survey near-infrared imagery matching SPHEREx D2/D3 bands."
-  },
-  {
-    id: "P/allWISE/color",
-    shortName: "AllWISE",
-    name: "AllWISE (W1+W2+W3+W4)",
-    band: "Mid-IR 3.4–22 µm",
-    desc: "Wide-field Infrared Survey Explorer mid-infrared atlas matching SPHEREx D4–D6."
-  },
-  {
-    id: "P/DSS2/color",
+    id: "https://skies.esac.esa.int/DSSColor",
+    legacyId: "P/DSS2/color",
     shortName: "DSS2",
     name: "DSS2 Optical Color",
     band: "Optical 0.4–0.9 µm",
     desc: "Digitized Sky Survey optical baseline from Palomar & UK Schmidt plates."
   },
   {
-    id: "P/PanSTARRS/DR1/color-z-zg-g",
+    id: "https://skies.esac.esa.int/2MASSColor",
+    legacyId: "P/2MASS/color",
+    shortName: "2MASS",
+    name: "2MASS Near-IR (J+H+Ks)",
+    band: "Near-IR 1.2–2.2 µm",
+    desc: "Two Micron All-Sky Survey near-infrared imagery matching SPHEREx D2/D3 bands."
+  },
+  {
+    id: "https://skies.esac.esa.int/AllWISEColor",
+    legacyId: "P/allWISE/color",
+    shortName: "AllWISE",
+    name: "AllWISE (W1+W2+W3+W4)",
+    band: "Mid-IR 3.4–22 µm",
+    desc: "Wide-field Infrared Survey Explorer mid-infrared atlas matching SPHEREx D4–D6."
+  },
+  {
+    id: "https://skies.esac.esa.int/SDSS9Color",
+    legacyId: "P/PanSTARRS/DR1/color-z-zg-g",
     shortName: "Pan-STARRS",
-    name: "Pan-STARRS DR1",
+    name: "Pan-STARRS / SDSS DR9",
     band: "Optical/NIR g–y",
-    desc: "Panoramic Survey Telescope and Rapid Response System DR1."
+    desc: "High-resolution multi-band optical sky survey."
   }
 ];
 
@@ -70,7 +74,7 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
   const [initializing, setInitializing] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
-  const [activeSurvey, setActiveSurvey] = useState("P/2MASS/color");
+  const [activeSurvey, setActiveSurvey] = useState("https://skies.esac.esa.int/DSSColor");
   const [surveyLoading, setSurveyLoading] = useState(false);
   const [surveyNotice, setSurveyNotice] = useState<string | null>(null);
   const [showFootprint, setShowFootprint] = useState(true);
@@ -312,11 +316,20 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
     if (!aladinInstanceRef.current) return;
     try {
       const aladin = aladinInstanceRef.current;
+      const A = window.A;
       let layerRes: any = null;
+      let surveyTarget: any = surveyId;
+      if (A && typeof A.HiPS === "function" && surveyId.startsWith("http")) {
+        try {
+          surveyTarget = A.HiPS(surveyId);
+        } catch {
+          surveyTarget = surveyId;
+        }
+      }
       if (typeof aladin.setImageSurvey === "function") {
-        layerRes = aladin.setImageSurvey(surveyId);
+        layerRes = aladin.setImageSurvey(surveyTarget);
       } else if (typeof aladin.setBaseImageLayer === "function") {
-        layerRes = aladin.setBaseImageLayer(surveyId);
+        layerRes = aladin.setBaseImageLayer(surveyTarget);
       }
       if (layerRes && typeof layerRes.then === "function") {
         layerRes
@@ -325,7 +338,7 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
           })
           .catch((err: any) => {
             setSurveyLoading(false);
-            setSurveyNotice(`Survey stream for "${surveyId}": ${err?.message || "HiPS tiles require live internet access"}`);
+            setSurveyNotice(`Survey stream: ${err?.message || "HiPS tiles require live internet access"}`);
           });
       } else {
         setTimeout(() => setSurveyLoading(false), 700);
@@ -563,15 +576,24 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
                   onClick={handleRetryAladin}
                   className="rounded-xl bg-ember px-5 py-2.5 font-mono text-xs font-bold text-ink hover:bg-ember-soft transition-colors cursor-pointer"
                 >
-                  Retry Aladin Sky Map Initialization ↻
+                  Retry Sky Map Initialization ↻
+                </button>
+                <button
+                  onClick={() => {
+                    handleRetryAladin();
+                    switchSurvey("https://skies.esac.esa.int/DSSColor");
+                  }}
+                  className="rounded-xl border border-slate-700 bg-slate-800 px-4 py-2.5 font-mono text-xs text-slate-200 hover:bg-slate-700 cursor-pointer"
+                >
+                  Switch to DSS2 HiPS Mirror ↻
                 </button>
                 <a
                   href={`https://aladin.cds.unistra.fr/AladinLite/?target=${encodeURIComponent(
                     `${fullTarget.raDeg} ${fullTarget.decDeg}`
-                  )}&survey=${encodeURIComponent(activeSurvey)}`}
+                  )}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-2.5 font-mono text-xs text-slate-200 hover:bg-slate-700 transition-colors"
+                  className="rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-2.5 font-mono text-xs text-slate-200 hover:bg-slate-700 hover:text-white transition-colors"
                 >
                   Open External CDS Atlas ↗
                 </a>
