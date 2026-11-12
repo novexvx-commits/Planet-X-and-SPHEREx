@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { clearInlineOverflowLocks, scrollToTarget, setScrollLocked } from "./engine";
 
 export type RoutePath = "/" | "/experience";
 
@@ -26,6 +27,8 @@ export function RouterProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const handlePopState = () => {
+      clearInlineOverflowLocks();
+      setScrollLocked(false);
       setRoute(getRoute());
     };
     window.addEventListener("popstate", handlePopState);
@@ -37,14 +40,18 @@ export function RouterProvider({ children }: { children: ReactNode }) {
     const targetPath = path;
 
     if (currentPath !== targetPath || hash) {
+      clearInlineOverflowLocks();
+      setScrollLocked(false);
       const url = targetPath + (hash ? (hash.startsWith("#") ? hash : `#${hash}`) : "");
       window.history.pushState({}, "", url);
       setRoute(targetPath);
       if (!hash) {
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        scrollToTarget(0, { immediate: true });
       } else {
-        const el = document.querySelector(hash);
-        if (el) el.scrollIntoView({ behavior: "smooth" });
+        window.setTimeout(() => {
+          const el = document.querySelector<HTMLElement>(hash);
+          if (el) scrollToTarget(el);
+        }, 60);
       }
     }
   };
@@ -61,4 +68,3 @@ export function RouterProvider({ children }: { children: ReactNode }) {
 export function useRouter() {
   return useContext(RouterContext);
 }
-

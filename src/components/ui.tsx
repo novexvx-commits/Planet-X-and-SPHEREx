@@ -123,8 +123,37 @@ export function CountUp({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    const fmt = (v: number) =>
+      prefix +
+      v.toLocaleString("en-US", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+        useGrouping: group,
+      }) +
+      suffix;
     el.textContent = formattedTarget;
-  }, [formattedTarget, duration]);
+    let raf = 0;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        io.disconnect();
+        const t0 = performance.now();
+        const step = (now: number) => {
+          const t = Math.min(1, (now - t0) / duration);
+          const k = 1 - Math.pow(1 - t, 4);
+          el.textContent = t < 1 ? fmt(to * k) : formattedTarget;
+          if (t < 1) raf = requestAnimationFrame(step);
+        };
+        raf = requestAnimationFrame(step);
+      },
+      { threshold: 0.25 }
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      cancelAnimationFrame(raf);
+    };
+  }, [to, decimals, duration, prefix, suffix, group, formattedTarget]);
 
   return (
     <span ref={ref} className={className}>

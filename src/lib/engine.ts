@@ -32,8 +32,33 @@ export const isCoarse = () =>
 export const prefersReducedMotion = () =>
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+export function clearInlineOverflowLocks() {
+  if (typeof document === "undefined") return;
+  document.documentElement.style.removeProperty("overflow");
+  document.documentElement.style.removeProperty("overflow-y");
+  document.documentElement.style.removeProperty("overflow-x");
+  document.body.style.removeProperty("overflow");
+  document.body.style.removeProperty("overflow-y");
+  document.body.style.removeProperty("overflow-x");
+}
+
+export function refreshEngine() {
+  clearInlineOverflowLocks();
+  dirty = true;
+  lastY = -1;
+  lenis?.resize();
+  if (typeof window !== "undefined") {
+    const frame = { y: window.scrollY, vh: window.innerHeight, vw: window.innerWidth };
+    subscribers.forEach((fn) => fn(frame));
+  }
+}
+
 export function initEngine() {
-  if (started || typeof window === "undefined") return;
+  clearInlineOverflowLocks();
+  if (started || typeof window === "undefined") {
+    refreshEngine();
+    return;
+  }
   started = true;
 
   if (!prefersReducedMotion()) {
@@ -64,6 +89,9 @@ export function initEngine() {
 export function subscribe(fn: Subscriber) {
   subscribers.add(fn);
   dirty = true;
+  if (typeof window !== "undefined") {
+    fn({ y: window.scrollY, vh: window.innerHeight, vw: window.innerWidth });
+  }
   return () => {
     subscribers.delete(fn);
   };
@@ -84,17 +112,30 @@ export function scrollToTarget(
       force: true,
       easing: (t: number) => 1 - Math.pow(1 - t, 4),
     });
+    if (opts.immediate && typeof el === "number") {
+      window.scrollTo(0, el);
+    }
+    dirty = true;
     return;
   }
   const top =
     typeof el === "number" ? el : el.getBoundingClientRect().top + window.scrollY + (opts.offset ?? 0);
   window.scrollTo({ top, behavior: opts.immediate ? "auto" : "smooth" });
+  dirty = true;
 }
 
 export function setScrollLocked(locked: boolean) {
+  clearInlineOverflowLocks();
   if (lenis) {
     if (locked) lenis.stop();
-    else lenis.start();
+    else {
+      lenis.start();
+      lenis.resize();
+    }
   }
   document.documentElement.classList.toggle("scroll-locked", locked);
+  if (!locked) {
+    document.documentElement.classList.remove("lenis-stopped");
+    dirty = true;
+  }
 }

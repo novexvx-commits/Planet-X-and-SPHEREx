@@ -1,13 +1,17 @@
 import { useEffect } from "react";
+import { clearInlineOverflowLocks, setScrollLocked } from "../lib/engine";
 import FluidCursor from "../components/FluidCursor";
 import SpherexHub from "../components/spherex/SpherexHub";
 
 export default function ExperiencePage() {
   useEffect(() => {
-    // Ensure scroll is completely unlocked on document & body
-    document.documentElement.classList.remove("scroll-locked");
-    document.documentElement.style.overflowY = "auto";
-    document.body.style.overflowY = "auto";
+    // Unlock any Lenis/loader scroll locks without setting inline overflow-y on body/html
+    // (inline overflow-y on body breaks CSS position:sticky when returning to HomePage)
+    setScrollLocked(false);
+    clearInlineOverflowLocks();
+    return () => {
+      clearInlineOverflowLocks();
+    };
   }, []);
 
   return (

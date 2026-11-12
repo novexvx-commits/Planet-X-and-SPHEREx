@@ -330,7 +330,7 @@ export default function Hero({ ready }: { ready: boolean }) {
       if (title) {
         const o = 1 - smoothstep(0.015, 0.14, p);
         title.style.opacity = o.toFixed(3);
-        title.style.transform = `translate3d(0, ${(-p * 220).toFixed(1)}px, 0) scale(${(1 + p * 1.8).toFixed(4)})`;
+        title.style.transform = `translate3d(0, ${(-p * 160).toFixed(1)}px, 0) scale(${(1 + p * 0.85).toFixed(4)})`;
         title.style.visibility = o < 0.004 ? "hidden" : "visible";
       }
       if (cueRef.current) cueRef.current.style.opacity = (1 - smoothstep(0, 0.035, p)).toFixed(3);
@@ -453,11 +453,11 @@ export default function Hero({ ready }: { ready: boolean }) {
         </div>
 
         {/* Title */}
-        <div ref={titleRef} className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 text-center will-change-transform">
+        <div ref={titleRef} className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 pb-8 pt-10 text-center will-change-transform">
           <p className="hero-fade kicker text-bone/60" style={dv({ "--d": "250ms" })}>
             NASA SPHEREx Mission · 2026 Space Apps Challenge
           </p>
-          <h1 className="mt-6 font-serif text-[clamp(3.6rem,13.5vw,13.5rem)] leading-[0.84] tracking-[-0.02em]">
+          <h1 className="mt-5 font-serif text-[clamp(3rem,8.6vw,9.4rem)] leading-[0.88] tracking-[-0.02em]">
             <span className="hero-line">
               <span style={{ transitionDelay: "200ms" }}>The Infrared</span>
             </span>
@@ -467,11 +467,11 @@ export default function Hero({ ready }: { ready: boolean }) {
               </span>
             </span>
           </h1>
-          <p className="hero-fade mt-8 max-w-md text-[15px] leading-relaxed text-bone/70 md:text-base" style={dv({ "--d": "900ms" })}>
+          <p className="hero-fade mt-6 max-w-md text-[15px] leading-relaxed text-bone/70 md:text-base" style={dv({ "--d": "900ms" })}>
             MARSAD is an interactive scientific observatory exploring NASA SPHEREx’s all-sky time-domain infrared spectroscopy.
           </p>
 
-          <div className="hero-fade pointer-events-auto mt-8 flex flex-wrap items-center justify-center gap-4" style={dv({ "--d": "1050ms" })}>
+          <div className="hero-fade pointer-events-auto mt-6 flex flex-wrap items-center justify-center gap-4" style={dv({ "--d": "1050ms" })}>
             <Magnetic strength={0.38}>
               <span className="relative inline-block">
                 <span className="cta-halo" aria-hidden="true" />
