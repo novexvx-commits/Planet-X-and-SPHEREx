@@ -2,11 +2,21 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "../../utils/cn";
 import { computeLocalMovingObjectEphemeris } from "../../lib/scientificFallback";
 
-export default function MostSolarSystemExplorer() {
-  const [targetName, setTargetName] = useState("1 Ceres");
+interface MostSolarSystemExplorerProps {
+  selectedAsteroid?: string;
+  onSelectAsteroid?: (name: string) => void;
+}
+
+const BENCHMARK_ASTEROIDS = ["1 Ceres", "4 Vesta", "12 Victoria", "433 Eros"];
+
+export default function MostSolarSystemExplorer({
+  selectedAsteroid = "1 Ceres",
+  onSelectAsteroid
+}: MostSolarSystemExplorerProps) {
+  const [targetName, setTargetName] = useState(selectedAsteroid);
   const [startDate, setStartDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
   const [data, setData] = useState<any>(() =>
-    computeLocalMovingObjectEphemeris("1 Ceres", new Date().toISOString().slice(0, 10))
+    computeLocalMovingObjectEphemeris(selectedAsteroid, new Date().toISOString().slice(0, 10))
   );
   const [loading, setLoading] = useState(false);
   const skyTrackCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -36,6 +46,13 @@ export default function MostSolarSystemExplorer() {
   useEffect(() => {
     fetchMost(targetName, startDate);
   }, []);
+
+  useEffect(() => {
+    if (selectedAsteroid && selectedAsteroid !== targetName) {
+      setTargetName(selectedAsteroid);
+      fetchMost(selectedAsteroid, startDate);
+    }
+  }, [selectedAsteroid]);
 
   // Draw Geocentric ICRS Sky Trajectory & Solar-Elongation Window Canvas
   useEffect(() => {
@@ -176,7 +193,10 @@ export default function MostSolarSystemExplorer() {
 
   const onSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (targetName.trim()) fetchMost(targetName.trim(), startDate);
+    if (targetName.trim()) {
+      fetchMost(targetName.trim(), startDate);
+      onSelectAsteroid?.(targetName.trim());
+    }
   };
 
   return (
@@ -200,6 +220,7 @@ export default function MostSolarSystemExplorer() {
               onClick={() => {
                 setTargetName(name);
                 fetchMost(name, startDate);
+                onSelectAsteroid?.(name);
               }}
               className={cn(
                 "rounded-xl px-3.5 py-1.5 font-mono text-xs transition-colors cursor-pointer",
@@ -242,26 +263,38 @@ export default function MostSolarSystemExplorer() {
         </div>
 
         {/* Explicit Separation of Retrieval Timestamp, Computation Window & Cached Elements Epoch */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-slate-800/80 text-xs text-slate-300">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 border-t border-slate-800/80 text-xs text-slate-300">
           <div>
-            <span className="text-slate-400">Ephemeris Computation Window: </span>
-            <strong className="text-amber-300">
-              {data?.provenance?.requestedWindowUtc || `${startDate} (+180d)`}
+            <span className="text-slate-400 block text-xs">Ephemeris Data Source:</span>
+            <strong className={cn("text-xs font-semibold", data?.provenance?.isLiveHorizons ? "text-emerald-400" : "text-amber-300")}>
+              {data?.provenance?.ephemerisDataSource || (data?.provenance?.isLiveHorizons ? "NASA JPL Horizons API (Live)" : "3D Keplerian Propagation")}
             </strong>
           </div>
           <div>
-            <span className="text-slate-400">Cached Elements Reference Epoch: </span>
-            <strong className="text-sky-300">
-              {data?.provenance?.orbitalElementsEpoch || "MJD 60800.0 (2025-05-05 UTC)"}
+            <span className="text-slate-400 block text-xs">Cached Elements Reference Epoch:</span>
+            <strong className="text-xs text-sky-300 font-semibold">
+              {data?.provenance?.orbitalElementsEpoch || "MJD 60800.0 (2025-05-05 UTC · JPL SBDB J2000)"}
             </strong>
           </div>
           <div>
-            <span className="text-slate-400">Retrieval / Computation Time: </span>
-            <strong className="text-slate-200">
-              {(data?.provenance?.ephemerisComputationTime || new Date().toISOString()).slice(0, 19)}Z
+            <span className="text-slate-400 block text-xs">Ephemeris Computation Window:</span>
+            <strong className="text-xs text-slate-200 font-semibold">
+              {data?.provenance?.requestedWindowUtc || `${startDate} (+210d)`}
+            </strong>
+          </div>
+          <div>
+            <span className="text-slate-400 block text-xs">Retrieval Timestamp:</span>
+            <strong className="text-xs text-slate-200 font-semibold">
+              {(data?.provenance?.retrievalTimestamp || data?.provenance?.ephemerisComputationTime || new Date().toISOString()).slice(0, 19)}Z
             </strong>
           </div>
         </div>
+
+        {data?.provenance?.fallbackNotice && (
+          <p className="pt-2 text-xs text-amber-300/80 leading-relaxed border-t border-slate-800/50">
+            ℹ️ {data.provenance.fallbackNotice}
+          </p>
+        )}
       </div>
 
       {/* Search & Start Date Input Bar */}

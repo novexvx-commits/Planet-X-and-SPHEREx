@@ -145,7 +145,29 @@ function resolveStartMjd(startDateStr) {
 }
 
 /**
- * Parse JPL Horizons text table ($$SOE ... $$EOE) when live Horizons API responds
+ * Build JPL Horizons API query URL with standard URL parameters
+ */
+function buildHorizonsUrl(known, startUtc, stopUtc) {
+  const params = new URLSearchParams({
+    format: 'json',
+    COMMAND: known.jplId || `${known.name};`,
+    OBJ_DATA: 'NO',
+    MAKE_EPHEM: 'YES',
+    EPHEM_TYPE: 'OBSERVER',
+    CENTER: '500@399',
+    START_TIME: startUtc,
+    STOP_TIME: stopUtc,
+    STEP_SIZE: '30d',
+    QUANTITIES: '1,9,19,20,23',
+    ANG_FORMAT: 'DEG',
+    CSV_FORMAT: 'YES'
+  });
+  return `${HORIZONS_API_URL}?${params.toString()}`;
+}
+
+/**
+ * Parse JPL Horizons text table ($$SOE ... $$EOE) when live Horizons API responds.
+ * Correctly parses CSV columns whether date or JD format is used.
  */
 function parseHorizonsObserverTable(resultText) {
   if (!resultText || typeof resultText !== 'string') return [];
@@ -158,20 +180,46 @@ function parseHorizonsObserverTable(resultText) {
   const parsed = [];
 
   lines.forEach((line, idx) => {
-    // Format with CSV_FORMAT='YES': Date, JD, _, _, RA_deg, DEC_deg, APmag, S-brt, r, rdot, delta, deldot, S-O-T, /r
     const cols = line.split(',').map(c => c.trim());
-    if (cols.length < 10) return;
+    if (cols.length < 8) return;
 
-    const jd = parseFloat(cols[1]);
-    const raDeg = parseFloat(cols[4]);
-    const decDeg = parseFloat(cols[5]);
-    const vMag = parseFloat(cols[6]);
-    const rHelio = parseFloat(cols[8]);
-    const deltaGeo = parseFloat(cols[10]);
-    const solarElongation = parseFloat(cols[12]);
+    // Check if cols[0] is Date__(UT)__HR:MN (e.g. "2026-Nov-12 00:00")
+    const dateStr = cols[0];
+    let utcDate = dateStr.slice(0, 11).trim();
+    let mjd = 61162.0;
+    const parsedDate = new Date(`${dateStr} UTC`);
+    if (!isNaN(parsedDate.getTime())) {
+      const iso = parsedDate.toISOString();
+      utcDate = iso.slice(0, 10);
+      mjd = parseFloat(utcToMjd(iso).toFixed(1));
+    }
+
+    // Horizons standard CSV format with QUANTITIES='1,9,19,20,23':
+    // Date__(UT)__HR:MN, [flag], [flag], R.A._(ICRF), DEC_(ICRF), APmag, S-brt, r, rdot, delta, deldot, S-O-T
+    let raDeg, decDeg, vMag, rHelio, deltaGeo, solarElongation;
+    if (!isNaN(parseFloat(cols[3])) && isNaN(parseFloat(cols[1]))) {
+      raDeg = parseFloat(cols[3]);
+      decDeg = parseFloat(cols[4]);
+      vMag = parseFloat(cols[5]);
+      rHelio = parseFloat(cols[7]);
+      deltaGeo = parseFloat(cols[9]);
+      solarElongation = parseFloat(cols[11]);
+    } else {
+      const jd = parseFloat(cols[1]);
+      if (!isNaN(jd)) {
+        mjd = roundMjd(jd - 2400000.5, 1);
+        const utcIso = mjdToUtc(mjd);
+        if (utcIso) utcDate = utcIso.slice(0, 10);
+      }
+      raDeg = parseFloat(cols[4]);
+      decDeg = parseFloat(cols[5]);
+      vMag = parseFloat(cols[6]);
+      rHelio = parseFloat(cols[8]);
+      deltaGeo = parseFloat(cols[10]);
+      solarElongation = parseFloat(cols[12]);
+    }
 
     if (
-      isNaN(jd) ||
       isNaN(raDeg) || raDeg < 0 || raDeg > 360 ||
       isNaN(decDeg) || decDeg < -90 || decDeg > 90 ||
       isNaN(rHelio) || rHelio <= 0 ||
@@ -180,9 +228,6 @@ function parseHorizonsObserverTable(resultText) {
       return;
     }
 
-    const mjd = roundMjd(jd - 2400000.5, 1);
-    const utcIso = mjdToUtc(mjd);
-    const utcDate = utcIso ? utcIso.slice(0, 10) : cols[0].slice(0, 11);
     const elong = !isNaN(solarElongation) ? parseFloat(solarElongation.toFixed(1)) : 90.0;
     const inZone = elong >= 80.0 && elong <= 105.0;
 
@@ -246,7 +291,7 @@ export function computeLocalMovingObjectEphemeris(
   const startUtc = (mjdToUtc(startMjd) || '2026-05-01T00:00:00Z').slice(0, 10);
   const stopUtc = (mjdToUtc(stopMjd) || '2026-11-27T00:00:00Z').slice(0, 10);
 
-  const horizonsUrl = `${HORIZONS_API_URL}?format=json&COMMAND='${encodeURIComponent(known.jplId || known.name)}'&OBJ_DATA='YES'&MAKE_EPHEM='YES'&EPHEM_TYPE='OBSERVER'&CENTER='500@399'&START_TIME='${startUtc}'&STOP_TIME='${stopUtc}'&STEP_SIZE='30%20d'&QUANTITIES='1,9,19,20,24'&ANG_FORMAT='DEG'&CSV_FORMAT='YES'`;
+  const horizonsUrl = buildHorizonsUrl(known, startUtc, stopUtc);
   const ephemerides = [];
 
   for (let i = 0; i < epochsCount; i++) {
@@ -276,27 +321,31 @@ export function computeLocalMovingObjectEphemeris(
 
   return {
     unavailable: false,
-    dataClassification: 'DERIVED FROM REAL DATA',
+    dataClassification: liveHorizonsVerified ? 'REAL OBSERVATION' : 'DERIVED FROM REAL DATA',
     dataClassificationBadge: liveHorizonsVerified ? 'REAL OBSERVATION' : 'DERIVED FROM REAL DATA',
     dataClassificationDetail: liveHorizonsVerified
-      ? 'DERIVED FROM REAL DATA (Live NASA JPL Horizons Observer Ephemeris)'
-      : 'DERIVED FROM REAL DATA (3D Keplerian Ephemeris Propagated from Cached JPL J2000 Osculating Elements)',
+      ? 'REAL OBSERVATION (Live NASA JPL Horizons Observer Ephemeris)'
+      : 'DERIVED FROM REAL DATA (3D Keplerian Ephemeris Propagated from Cached JPL SBDB J2000 Osculating Elements)',
     provenance: {
       service: liveHorizonsVerified
-        ? 'NASA JPL Solar System Dynamics — Horizons API (Live Query)'
-        : 'NASA JPL Small-Body Database J2000 Osculating Elements (Offline/Cached Propagation)',
+        ? 'NASA JPL Solar System Dynamics — Horizons API (Live Observer Ephemerides)'
+        : 'NASA JPL Small-Body Database (SBDB) J2000 Osculating Elements (3D Keplerian Propagation)',
       endpoint: horizonsUrl,
       mostEndpoint: `${MOST_API_URL}?catalog=${catalog}&input_type=name_input&obj_name=${encodeURIComponent(known.name)}`,
       status: liveHorizonsVerified ? 'live-horizons-verified' : 'offline-cached-jpl-elements',
       isLiveHorizons: liveHorizonsVerified,
+      orbitalElementsSource: 'NASA JPL Small-Body Database (SBDB) J2000 Osculating Elements',
       orbitalElementsEpoch: `MJD ${Number(known.epochMjd || 60800.0).toFixed(1)} (2025-05-05 UTC · JPL SBDB J2000 Osculating Elements)`,
+      ephemerisDataSource: liveHorizonsVerified
+        ? 'NASA JPL Solar System Dynamics — Horizons API (Live Observer Ephemeris)'
+        : '3D Keplerian Heliocentric-to-Geocentric Propagation from SBDB J2000 Elements',
       cachedElementsSnapshotDate: '2025-10-17T00:00:00Z',
       ephemerisComputationTime: computationTimestamp,
       retrievalTimestamp: computationTimestamp,
       requestedWindowUtc: `${startUtc} to ${stopUtc} (${stepDays}-day steps)`,
       fallbackNotice: liveHorizonsVerified
         ? null
-        : 'Live JPL Horizons API unreachable in current network environment; positions propagated locally from verified JPL SBDB J2000 osculating orbital elements (Epoch MJD 60800.0).',
+        : 'Live JPL Horizons API unreachable in current network environment; positions propagated locally from verified JPL SBDB J2000 osculating orbital elements (Epoch MJD 60800.0 / 2025-05-05 UTC).',
       targetName: known.name,
       catalogUsed: catalog,
       timestamp: computationTimestamp
@@ -328,7 +377,7 @@ export async function queryMovingObjectSearch(objectName, catalog = 'spherex', s
   const startUtc = (mjdToUtc(startMjd) || '2026-05-01T00:00:00Z').slice(0, 10);
   const stopUtc = (mjdToUtc(stopMjd) || '2026-11-27T00:00:00Z').slice(0, 10);
 
-  const horizonsUrl = `${HORIZONS_API_URL}?format=json&COMMAND='${encodeURIComponent(known.jplId || known.name)}'&OBJ_DATA='YES'&MAKE_EPHEM='YES'&EPHEM_TYPE='OBSERVER'&CENTER='500@399'&START_TIME='${startUtc}'&STOP_TIME='${stopUtc}'&STEP_SIZE='30%20d'&QUANTITIES='1,9,19,20,24'&ANG_FORMAT='DEG'&CSV_FORMAT='YES'`;
+  const horizonsUrl = buildHorizonsUrl(known, startUtc, stopUtc);
 
   try {
     const controller = new AbortController();

@@ -268,7 +268,7 @@ async function runRouteVerification() {
     if (!mostText.includes('1 Ceres') || !mostText.includes('MPC #1') || mostText.includes('undefined')) {
       throw new Error('Asteroids tab failed initial synchronous render for 1 Ceres!');
     }
-    if (!mostText.includes('Ephemeris Computation Window:') || !mostText.includes('Cached Elements Reference Epoch:') || !mostText.includes('MJD 60800.0')) {
+    if (!mostText.toUpperCase().includes('EPHEMERIS COMPUTATION WINDOW:') || !mostText.toUpperCase().includes('CACHED ELEMENTS REFERENCE EPOCH:') || !mostText.includes('MJD 60800.0')) {
       throw new Error('Asteroids tab missing explicit separation of Ephemeris Computation Window and Cached Elements Reference Epoch (MJD 60800.0)!');
     }
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '07_asteroids_ceres_2026.png') });

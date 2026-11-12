@@ -71,6 +71,8 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
   const [loadError, setLoadError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [activeSurvey, setActiveSurvey] = useState("P/2MASS/color");
+  const [surveyLoading, setSurveyLoading] = useState(false);
+  const [surveyNotice, setSurveyNotice] = useState<string | null>(null);
   const [showFootprint, setShowFootprint] = useState(true);
   const [showCatalogMarkers, setShowCatalogMarkers] = useState(true);
   const [currentCoords, setCurrentCoords] = useState<{ ra: string; dec: string }>({
@@ -305,16 +307,32 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
   // Switch active HiPS survey
   const switchSurvey = (surveyId: string) => {
     setActiveSurvey(surveyId);
+    setSurveyLoading(true);
+    setSurveyNotice(null);
     if (!aladinInstanceRef.current) return;
     try {
       const aladin = aladinInstanceRef.current;
+      let layerRes: any = null;
       if (typeof aladin.setImageSurvey === "function") {
-        aladin.setImageSurvey(surveyId);
+        layerRes = aladin.setImageSurvey(surveyId);
       } else if (typeof aladin.setBaseImageLayer === "function") {
-        aladin.setBaseImageLayer(surveyId);
+        layerRes = aladin.setBaseImageLayer(surveyId);
       }
-    } catch (e) {
-      console.warn("Survey switch warning:", e);
+      if (layerRes && typeof layerRes.then === "function") {
+        layerRes
+          .then(() => {
+            setSurveyLoading(false);
+          })
+          .catch((err: any) => {
+            setSurveyLoading(false);
+            setSurveyNotice(`Survey stream for "${surveyId}": ${err?.message || "HiPS tiles require live internet access"}`);
+          });
+      } else {
+        setTimeout(() => setSurveyLoading(false), 700);
+      }
+    } catch (e: any) {
+      setSurveyLoading(false);
+      setSurveyNotice(`Notice switching survey: ${e?.message || "error switching survey"}`);
     }
   };
 
@@ -492,6 +510,23 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
             <div className="rounded-xl border border-slate-700 bg-[#0d1424] px-6 py-4 font-mono text-sm text-amber-300 shadow-2xl">
               Loading Aladin Lite v3 WebGL2 HiPS Survey Imagery...
             </div>
+          </div>
+        )}
+
+        {/* Survey Switching Loading Pill */}
+        {surveyLoading && !initializing && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 rounded-full border border-amber-500/40 bg-[#090e1a]/95 px-4 py-1.5 font-mono text-xs text-amber-300 shadow-xl backdrop-blur-md">
+            <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
+            <span>Loading {currentSurveyMeta.name} HiPS Tiles...</span>
+          </div>
+        )}
+
+        {/* Survey Stream Notice Pill */}
+        {surveyNotice && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 rounded-xl border border-amber-500/50 bg-[#0d1424]/95 px-4 py-2 font-mono text-xs text-amber-200 shadow-2xl backdrop-blur-md max-w-md">
+            <span className="text-amber-400 font-bold">INFO:</span>
+            <span className="truncate">{surveyNotice}</span>
+            <button onClick={() => setSurveyNotice(null)} className="ml-auto text-slate-400 hover:text-white cursor-pointer">✕</button>
           </div>
         )}
 

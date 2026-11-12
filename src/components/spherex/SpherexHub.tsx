@@ -69,6 +69,13 @@ const TOUR_STEPS: { targetId: string; tab: TabKey; title: string; subtitle: stri
   }
 ];
 
+const BENCHMARK_ASTEROIDS = [
+  { id: "ceres", name: "1 Ceres", type: "Dwarf Planet (C-type)", a: "2.767 AU", period: "4.60 yr" },
+  { id: "vesta", name: "4 Vesta", type: "Protoplanet (V-type)", a: "2.361 AU", period: "3.63 yr" },
+  { id: "victoria", name: "12 Victoria", type: "Main Belt (L/S-type)", a: "2.334 AU", period: "3.57 yr" },
+  { id: "eros", name: "433 Eros", type: "Near-Earth (S-type)", a: "1.458 AU", period: "1.76 yr" }
+];
+
 export default function SpherexHub() {
   const { navigate } = useRouter();
   const [targets, setTargets] = useState<any[]>(AUTHORITATIVE_TARGETS);
@@ -77,6 +84,7 @@ export default function SpherexHub() {
     const t = params.get("target");
     return t && AUTHORITATIVE_TARGETS.some((x: any) => x.id === t) ? t : "barnards-star";
   });
+  const [selectedAsteroid, setSelectedAsteroid] = useState<string>("1 Ceres");
   const [activeTab, setActiveTab] = useState<TabKey>(() => {
     const params = new URLSearchParams(window.location.search);
     const tab = params.get("tab") as TabKey | null;
@@ -242,22 +250,42 @@ export default function SpherexHub() {
               </div>
             </div>
 
-            {/* Active Target Concise Summary Strip */}
-            <div className="hidden xl:flex items-center gap-4 rounded-xl bg-[#070b14] border border-slate-800/90 px-4 py-1.5 text-xs font-mono">
-              <span className="text-slate-400">
-                Active Target: <strong className="text-slate-100">{currentTarget.name}</strong>
-              </span>
-              <span className="text-slate-700">|</span>
-              <span className="text-amber-300">{currentTarget.spectralType}</span>
-              <span className="text-slate-700">|</span>
-              <span className="text-sky-300">
-                d = {currentTarget.distancePc} pc ({currentTarget.distanceLy} ly)
-              </span>
-              <span className="text-slate-700">|</span>
-              <span className="text-slate-300">
-                μ = {currentTarget.totalProperMotionArcsecYr}″/yr
-              </span>
-            </div>
+            {/* Active Target / Asteroid Concise Summary Strip */}
+            {activeTab === "most" ? (
+              <div className="hidden xl:flex items-center gap-4 rounded-xl bg-[#070b14] border border-amber-500/30 px-4 py-1.5 text-xs font-mono">
+                <span className="text-amber-400 font-semibold">
+                  Active Asteroid: <strong className="text-slate-100">{selectedAsteroid}</strong>
+                </span>
+                <span className="text-slate-700">|</span>
+                <span className="text-amber-300">
+                  {BENCHMARK_ASTEROIDS.find((a) => a.name === selectedAsteroid)?.type || "Solar System Minor Planet"}
+                </span>
+                <span className="text-slate-700">|</span>
+                <span className="text-sky-300">
+                  Semi-Major Axis a = {BENCHMARK_ASTEROIDS.find((a) => a.name === selectedAsteroid)?.a || "2.767 AU"}
+                </span>
+                <span className="text-slate-700">|</span>
+                <span className="text-emerald-300">
+                  Period = {BENCHMARK_ASTEROIDS.find((a) => a.name === selectedAsteroid)?.period || "4.60 yr"}
+                </span>
+              </div>
+            ) : (
+              <div className="hidden xl:flex items-center gap-4 rounded-xl bg-[#070b14] border border-slate-800/90 px-4 py-1.5 text-xs font-mono">
+                <span className="text-slate-400">
+                  Active Target: <strong className="text-slate-100">{currentTarget.name}</strong>
+                </span>
+                <span className="text-slate-700">|</span>
+                <span className="text-amber-300">{currentTarget.spectralType}</span>
+                <span className="text-slate-700">|</span>
+                <span className="text-sky-300">
+                  d = {currentTarget.distancePc} pc ({currentTarget.distanceLy} ly)
+                </span>
+                <span className="text-slate-700">|</span>
+                <span className="text-slate-300">
+                  μ = {currentTarget.totalProperMotionArcsecYr}″/yr
+                </span>
+              </div>
+            )}
 
             {/* Right: Back to Home Button */}
             <div className="shrink-0 flex items-center gap-2">
@@ -275,59 +303,144 @@ export default function SpherexHub() {
 
           {/* Second Row: Well-Spaced Target Selector & Scientific Workflow Tabs */}
           <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/60">
-            {/* Target Selector Group */}
-            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
-              <span className="text-xs font-mono uppercase tracking-wider text-slate-400 mr-1.5 shrink-0">
-                Target:
-              </span>
-              <div className="flex items-center gap-1 rounded-xl bg-[#070b14] p-1 border border-slate-800 shrink-0">
-                {[
-                  { id: "barnards-star", name: "Barnard's Star" },
-                  { id: "epsilon-indi-b", name: "Epsilon Indi B" },
-                  { id: "wise-0855", name: "WISE 0855" },
-                  { id: "rw-aurigae", name: "RW Aurigae" },
-                  { id: "r-draconis", name: "R Draconis" }
-                ].map((t) => (
-                  <button
-                    key={t.id}
-                    data-target-id={t.id}
-                    onClick={() => setSelectedTargetId(t.id)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-lg font-mono text-xs transition-all cursor-pointer whitespace-nowrap",
-                      selectedTargetId === t.id
-                        ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
-                        : "text-slate-300 hover:text-white hover:bg-slate-800/70"
-                    )}
-                  >
-                    {t.name}
-                  </button>
-                ))}
+            {/* Target / Asteroid Selector Group with generous right padding to prevent R Draconis clipping */}
+            {activeTab === "most" ? (
+              <div className="w-full xl:w-auto flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 pr-6">
+                <span className="text-xs font-mono uppercase tracking-wider text-amber-400 font-semibold mr-1.5 shrink-0">
+                  Asteroid:
+                </span>
+                <div className="flex items-center gap-1 rounded-xl bg-[#070b14] p-1 border border-amber-500/40 shrink-0">
+                  {BENCHMARK_ASTEROIDS.map((a) => (
+                    <button
+                      key={a.id}
+                      data-asteroid-id={a.id}
+                      onClick={() => setSelectedAsteroid(a.name)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg font-mono text-xs transition-all cursor-pointer whitespace-nowrap",
+                        selectedAsteroid === a.name
+                          ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                          : "text-slate-300 hover:text-white hover:bg-slate-800/70"
+                      )}
+                    >
+                      {a.name}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="w-full xl:w-auto flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 pr-6">
+                <span className="text-xs font-mono uppercase tracking-wider text-slate-400 mr-1.5 shrink-0">
+                  Target:
+                </span>
+                <div className="flex items-center gap-1 rounded-xl bg-[#070b14] p-1 border border-slate-800 shrink-0">
+                  {[
+                    { id: "barnards-star", name: "Barnard's Star" },
+                    { id: "epsilon-indi-b", name: "Epsilon Indi B" },
+                    { id: "wise-0855", name: "WISE 0855" },
+                    { id: "rw-aurigae", name: "RW Aurigae" },
+                    { id: "r-draconis", name: "R Draconis" }
+                  ].map((t) => (
+                    <button
+                      key={t.id}
+                      data-target-id={t.id}
+                      onClick={() => setSelectedTargetId(t.id)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg font-mono text-xs transition-all cursor-pointer whitespace-nowrap",
+                        selectedTargetId === t.id
+                          ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                          : "text-slate-300 hover:text-white hover:bg-slate-800/70"
+                      )}
+                    >
+                      {t.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
-            {/* Workflow Tabs */}
-            <div className="flex items-center gap-1 rounded-xl bg-[#070b14] p-1 border border-slate-800 overflow-x-auto scrollbar-none shrink-0">
+            {/* Workflow Tabs — With clear icons and full text labels for Motion and Light Curve */}
+            <div className="w-full xl:w-auto flex items-center gap-1 rounded-xl bg-[#070b14] p-1 border border-slate-800 overflow-x-auto scrollbar-none shrink-0 pb-1 pr-4">
               {[
-                { key: "timeline", label: "Timeline" },
-                { key: "sky", label: "Sky Map" },
-                { key: "motion", label: "Motion" },
-                { key: "variable", label: "Light Curve" },
-                { key: "spectra", label: "Spectra" },
-                { key: "most", label: "Asteroids" },
-                { key: "provenance", label: "Data Lineage" }
+                {
+                  key: "timeline",
+                  label: "Timeline",
+                  icon: (
+                    <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <circle cx="12" cy="12" r="9" strokeWidth="2" />
+                      <path strokeWidth="2" d="M12 7v5l3 3" />
+                    </svg>
+                  )
+                },
+                {
+                  key: "sky",
+                  label: "Sky Map",
+                  icon: (
+                    <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <circle cx="12" cy="12" r="3" strokeWidth="2" />
+                      <path strokeWidth="2" d="M12 2v3m0 14v3M2 12h3m14 0h3" />
+                    </svg>
+                  )
+                },
+                {
+                  key: "motion",
+                  label: "Motion Vectors",
+                  icon: (
+                    <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  )
+                },
+                {
+                  key: "variable",
+                  label: "Light Curve",
+                  icon: (
+                    <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeWidth="2" d="M3 12c3-6 6-6 9 0s6 6 9 0" />
+                    </svg>
+                  )
+                },
+                {
+                  key: "spectra",
+                  label: "102-Band Spectra",
+                  icon: (
+                    <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                  )
+                },
+                {
+                  key: "most",
+                  label: "Asteroids (MOST)",
+                  icon: (
+                    <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <circle cx="12" cy="12" r="7" strokeWidth="2" strokeDasharray="3 3" />
+                      <circle cx="12" cy="5" r="2" fill="currentColor" />
+                    </svg>
+                  )
+                },
+                {
+                  key: "provenance",
+                  label: "Data Lineage",
+                  icon: (
+                    <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  )
+                }
               ].map((tab) => (
                 <button
                   key={tab.key}
                   data-tab={tab.key}
                   onClick={() => setActiveTab(tab.key as TabKey)}
                   className={cn(
-                    "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap",
+                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap",
                     activeTab === tab.key
                       ? "bg-slate-800 text-amber-300 font-semibold border border-amber-500/30 shadow-xs"
                       : "text-slate-300 hover:text-white hover:bg-slate-800/40"
                   )}
                 >
-                  {tab.label}
+                  {tab.icon}
+                  <span className="font-mono">{tab.label}</span>
                 </button>
               ))}
             </div>
@@ -411,7 +524,10 @@ export default function SpherexHub() {
         )}
 
         {activeTab === "most" && (
-          <MostSolarSystemExplorer />
+          <MostSolarSystemExplorer
+            selectedAsteroid={selectedAsteroid}
+            onSelectAsteroid={setSelectedAsteroid}
+          />
         )}
 
         {activeTab === "provenance" && (

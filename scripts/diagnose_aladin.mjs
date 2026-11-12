@@ -4,7 +4,7 @@ import { startServer } from '../server/server.js';
 const CHROME_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 
 async function diagnoseAladin() {
-  const PORT = 5066;
+  const PORT = 5070;
   const server = startServer(PORT, '127.0.0.1', false);
   await new Promise((r) => setTimeout(r, 600));
 
@@ -22,36 +22,21 @@ async function diagnoseAladin() {
   });
 
   const page = await browser.newPage();
-  const logs = [];
-  page.on('console', msg => logs.push(`[${msg.type()}] ${msg.text()}`));
-  page.on('pageerror', err => logs.push(`[PAGE ERROR] ${err.message}`));
-
-  await page.goto(`http://127.0.0.1:${PORT}/experience?tab=sky&target=barnards-star`, { waitUntil: 'domcontentloaded' });
-  await new Promise((r) => setTimeout(r, 3000));
-
-  const inspection = await page.evaluate(() => {
-    const container = document.querySelector('#aladin-lite-div');
-    const canvas = container ? container.querySelector('canvas') : null;
-    const gl = canvas ? (canvas.getContext('webgl2') || canvas.getContext('webgl')) : null;
-    return {
-      hasWindowA: typeof window.A !== 'undefined',
-      containerHtml: container ? container.innerHTML.slice(0, 500) : null,
-      canvasExists: !!canvas,
-      canvasWidth: canvas ? canvas.width : 0,
-      canvasHeight: canvas ? canvas.height : 0,
-      canvasClientWidth: canvas ? canvas.clientWidth : 0,
-      canvasClientHeight: canvas ? canvas.clientHeight : 0,
-      hasGL: !!gl,
-      glVendor: gl ? gl.getParameter(gl.VENDOR) : null,
-      glRenderer: gl ? gl.getParameter(gl.RENDERER) : null,
-      bodyTextSnippet: document.body.innerText.slice(0, 600)
-    };
+  const failedRequests = [];
+  page.on('requestfailed', req => {
+    failedRequests.push({ url: req.url(), error: req.failure()?.errorText });
+  });
+  page.on('response', res => {
+    if (res.status() >= 400) {
+      failedRequests.push({ url: res.url(), status: res.status() });
+    }
   });
 
-  console.log('=== ALADIN INSPECTION ===');
-  console.log(JSON.stringify(inspection, null, 2));
-  console.log('=== BROWSER LOGS (last 20) ===');
-  console.log(logs.slice(-20).join('\n'));
+  await page.goto(`http://127.0.0.1:${PORT}/experience?tab=sky&target=barnards-star`, { waitUntil: 'domcontentloaded' });
+  await new Promise((r) => setTimeout(r, 3500));
+
+  console.log('=== FAILED / 404 REQUESTS ===');
+  console.log(JSON.stringify(failedRequests, null, 2));
 
   await browser.close();
   server.close();
@@ -59,4 +44,3 @@ async function diagnoseAladin() {
 }
 
 diagnoseAladin();
-
