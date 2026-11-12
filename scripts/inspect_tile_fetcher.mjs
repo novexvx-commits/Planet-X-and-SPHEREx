@@ -11,3 +11,4 @@ if (fetchMatches) {
 console.log('Worker count:', (content.match(/new Worker/g) || []).length);
 console.log('Image count:', (content.match(/new Image/g) || []).length);
 console.log('createImageBitmap:', (content.match(/createImageBitmap/g) || []).length);
+

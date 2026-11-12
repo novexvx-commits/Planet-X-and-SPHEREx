@@ -59,3 +59,4 @@ async function testAladinRendersStars() {
 }
 
 testAladinRendersStars().catch(console.error);
+

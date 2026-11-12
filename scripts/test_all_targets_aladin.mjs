@@ -43,3 +43,4 @@ async function testAllTargetsAladin() {
 }
 
 testAllTargetsAladin().catch(console.error);
+

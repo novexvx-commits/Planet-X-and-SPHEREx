@@ -113,15 +113,18 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
 
     const bootAladin = async () => {
       try {
-        let A = window.A;
+        let A = (window as any).A;
         if (!A || typeof A.aladin !== "function") {
           let mod: any;
+          const runtimeImport = new Function("u", "return import(u)");
           try {
-            const localModuleUrl = "/vendor/aladin.js";
-            mod = await import(/* @vite-ignore */ localModuleUrl);
+            mod = await runtimeImport("/vendor/aladin.js");
           } catch {
-            const cdnModuleUrl = "https://cdn.jsdelivr.net/npm/aladin-lite@3/dist/aladin.js";
-            mod = await import(/* @vite-ignore */ cdnModuleUrl);
+            try {
+              mod = await runtimeImport("https://cdn.jsdelivr.net/npm/aladin-lite@3/dist/aladin.js");
+            } catch (cdnErr) {
+              console.warn("Failed to load Aladin Lite module from local and CDN:", cdnErr);
+            }
           }
           A = mod?.default || mod;
           if (!A || typeof A.aladin !== "function") {
