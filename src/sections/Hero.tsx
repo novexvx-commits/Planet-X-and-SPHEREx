@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { band, clamp, isCoarse, scrollToTarget, smoothstep, subscribe } from "../lib/engine";
 import { useRouter } from "../lib/router";
 import { cn } from "../utils/cn";
-import { Arrow, Magnetic, dv } from "../components/ui";
+import { Arrow, LogoMark, Magnetic, dv } from "../components/ui";
 
 const TAU = Math.PI * 2;
 const STAR_RGB = ["255,255,255", "186,214,255", "255,216,176"];
@@ -434,7 +434,14 @@ export default function Hero({ ready }: { ready: boolean }) {
 
         {/* Title */}
         <div ref={titleRef} className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 pb-8 pt-10 text-center will-change-transform">
-          <h1 className="mt-5 font-serif text-[clamp(3rem,8.6vw,9.4rem)] leading-[0.88] tracking-[-0.02em]">
+          <div className="hero-fade mb-3 inline-flex items-center gap-2.5 rounded-full border border-sky-400/25 bg-black/50 px-3.5 py-1.5 backdrop-blur-md shadow-[0_0_25px_rgba(56,189,248,0.25)]" style={dv({ "--d": "150ms" })}>
+            <LogoMark className="h-6 w-6" />
+            <span className="font-mono text-[10.5px] uppercase tracking-[0.24em] text-cyan-200 font-medium">
+              MARSAD · Detecting Moving Objects in Space
+            </span>
+          </div>
+
+          <h1 className="mt-2 font-serif text-[clamp(3rem,8.6vw,9.4rem)] leading-[0.88] tracking-[-0.02em]">
             <span className="hero-line">
               <span style={{ transitionDelay: "200ms" }}>The Infrared</span>
             </span>

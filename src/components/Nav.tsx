@@ -76,8 +76,8 @@ export default function Nav({ ready }: { ready: boolean }) {
             className="flex items-center gap-3"
             aria-label="MARSAD SPHEREx — home"
           >
-            <LogoMark className="h-7 w-7 text-ember" />
-            <span className="font-mono text-[11px] uppercase tracking-[0.42em] text-bone">
+            <LogoMark className="h-8 w-8" />
+            <span className="font-mono text-[11px] uppercase tracking-[0.42em] text-bone font-medium">
               MARSAD
             </span>
           </a>

@@ -1,6 +1,8 @@
 import { useEffect, useId, useRef, type CSSProperties, type ElementType, type ReactNode } from "react";
 import { isCoarse } from "../lib/engine";
 import { cn } from "../utils/cn";
+import marsadEmblem from "../assets/marsad-emblem.png";
+import marsadBadge from "../assets/marsad-badge.png";
 
 /** Typed helper for inline CSS custom properties */
 export const dv = (vars: Record<string, string | number>) => vars as CSSProperties;
@@ -220,26 +222,25 @@ export function Magnetic({
   );
 }
 
-export function LogoMark({ className }: { className?: string }) {
-  const id = "lm" + useId().replace(/[^a-zA-Z0-9_-]/g, "");
+export function LogoMark({ className, alt = "MARSAD Logo" }: { className?: string; alt?: string }) {
   return (
-    <svg viewBox="0 0 32 32" className={className} fill="none" aria-hidden="true">
-      <defs>
-        <linearGradient id={id} x1="2" y1="4" x2="30" y2="28" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#ffe2c2" />
-          <stop offset="0.5" stopColor="#ff8a3d" />
-          <stop offset="1" stopColor="#9b7bff" />
-        </linearGradient>
-      </defs>
-      <ellipse cx="16" cy="16" rx="14.5" ry="4.6" stroke={`url(#${id})`} strokeWidth="1.2" transform="rotate(-16 16 16)" />
-      <circle cx="16" cy="16" r="6.3" fill="#05060a" stroke={`url(#${id})`} strokeWidth="1.2" />
-      <path
-        d="M1.5 16 A14.5 4.6 0 0 0 30.5 16"
-        stroke={`url(#${id})`}
-        strokeWidth="1.2"
-        transform="rotate(-16 16 16)"
-      />
-    </svg>
+    <img
+      src={marsadEmblem}
+      alt={alt}
+      className={cn("inline-block object-contain rounded-md shadow-[0_0_12px_rgba(56,189,248,0.2)] select-none shrink-0 pointer-events-none", className)}
+      loading="eager"
+    />
+  );
+}
+
+export function LogoBadge({ className, alt = "MARSAD — Detecting Moving Objects in Space" }: { className?: string; alt?: string }) {
+  return (
+    <img
+      src={marsadBadge}
+      alt={alt}
+      className={cn("inline-block object-contain select-none", className)}
+      loading="lazy"
+    />
   );
 }
 

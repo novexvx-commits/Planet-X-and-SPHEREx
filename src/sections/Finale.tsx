@@ -196,8 +196,11 @@ function Footer() {
       <div className="shell grid gap-12 pb-14 md:grid-cols-12">
         <div className="md:col-span-5">
           <div className="flex items-center gap-3">
-            <LogoMark className="h-8 w-8" />
-            <span className="font-mono text-xs uppercase tracking-[0.42em]">MARSAD</span>
+            <LogoMark className="h-9 w-9" />
+            <div>
+              <span className="font-mono text-xs uppercase tracking-[0.42em] text-bone font-bold block">MARSAD</span>
+              <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-400/80 block mt-0.5">Detecting Moving Objects in Space</span>
+            </div>
           </div>
           <p className="mt-6 max-w-sm text-sm leading-relaxed text-bone/50">
             Interactive Scientific Observatory for NASA SPHEREx. Developed for the 2026 NASA Space Apps Challenge, combining authentic IRSA data, slitless spectroscopy, and time-domain astronomical analysis.

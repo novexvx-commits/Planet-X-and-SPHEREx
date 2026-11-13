@@ -240,13 +240,18 @@ export default function SpherexHub() {
           {/* Top Row: Brand Identity, Active Target Quick Summary & Back to Home */}
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3 shrink-0">
-              <LogoMark className="h-7 w-7 text-amber-500" />
+              <LogoMark className="h-8 w-8" />
               <div>
-                <span className="font-mono text-sm uppercase tracking-[0.22em] text-slate-100 font-bold">
-                  MARSAD <span className="text-amber-400 font-normal">Observatory</span>
-                </span>
-                <span className="hidden md:inline-block ml-3 text-xs font-mono text-slate-400 border-l border-slate-800 pl-3">
-                  NASA SPHEREx All-Sky Spectral Survey Analysis Station
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-sm uppercase tracking-[0.22em] text-slate-100 font-bold">
+                    MARSAD <span className="text-amber-400 font-normal">Observatory</span>
+                  </span>
+                  <span className="hidden md:inline-block text-xs font-mono text-slate-400 border-l border-slate-800 pl-2">
+                    NASA SPHEREx Survey Station
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono text-cyan-400/80 uppercase tracking-widest block">
+                  Detecting Moving Objects in Space
                 </span>
               </div>
             </div>

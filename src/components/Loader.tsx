@@ -91,7 +91,7 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
       <div className="pointer-events-none absolute left-1/2 top-1/2 h-[70vmin] w-[70vmin] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,138,61,0.12),rgba(107,70,255,0.06)_45%,transparent_70%)]" />
       <div className="shell relative flex h-[72px] items-center justify-between md:h-20">
         <div className="flex items-center gap-3">
-          <LogoMark className="spin-slow h-7 w-7" />
+          <LogoMark className="h-8 w-8 drop-shadow-[0_0_10px_rgba(56,189,248,0.6)]" />
           <span className="font-mono text-[11px] uppercase tracking-[0.42em]">MARSAD</span>
         </div>
         <span className="hidden font-mono text-[10px] uppercase tracking-[0.2em] text-bone/40 sm:block">NASA SPHEREx Mission · Calibration</span>
