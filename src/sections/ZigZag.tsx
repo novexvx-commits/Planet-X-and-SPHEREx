@@ -28,7 +28,7 @@ const ROWS: Row[] = [
     emClass: "em",
     img: verdance,
     alt: "SPHEREx Linear Variable Filter array dissecting incoming near-infrared starlight into 102 continuous bands",
-    fig: "Fig. 05 — Linear Variable Filter Array Dispersion",
+    fig: "Linear Variable Filter Array Dispersion",
     body: [
       "Unlike classical slit spectrographs that observe one target at a time, SPHEREx mounts Linear Variable Filters directly above its six focal plane detector arrays (D1–D6). As the spacecraft scans, every point in the sky is observed across 102 nominal wavelength channels from 0.75 to 5.00 µm.",
       "Spectral resolving power varies across the six arrays: R ~ 41 in D1–D3 (0.75–2.42 µm), R ~ 35 in D4 (2.42–3.82 µm), R ~ 110 in D5 (3.82–4.42 µm), and R ~ 130 in D6 (4.42–5.00 µm).",
@@ -48,7 +48,7 @@ const ROWS: Row[] = [
     emClass: "em-ion",
     img: longwatch,
     alt: "Multi-epoch time-domain comparison detecting proper motion and variable stellar brightness",
-    fig: "Fig. 06 — Time-Domain Astrometric Centroid Registration",
+    fig: "Time-Domain Astrometric Centroid Registration",
     body: [
       "Over its mission, SPHEREx completes four full-sky surveys at six-month intervals. This systematic cadence provides an ideal baseline for detecting celestial changes that develop on human timescales.",
       "From high-proper-motion brown dwarfs shifting against background stars to sudden accretion events in young stars and pulsating red giants, difference imaging isolates real cosmic transients.",

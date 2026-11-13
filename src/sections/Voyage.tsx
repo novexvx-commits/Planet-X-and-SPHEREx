@@ -170,7 +170,6 @@ export default function Voyage() {
                 <div className="relative flex flex-col p-6 md:p-12 lg:p-14">
                   <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-bone/50">
                     <span style={{ color: `rgb(${a.rgb})` }}>{a.act}</span>
-                    <span>{a.n} / 03</span>
                   </div>
                   <span aria-hidden="true" className="text-outline pointer-events-none absolute right-8 top-12 hidden font-serif text-[12rem] leading-none md:block lg:text-[14rem]">
                     {a.n}
@@ -196,8 +195,7 @@ export default function Voyage() {
                   <img src={a.img} alt={a.alt} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
                   <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-black/15" />
                   <div className="absolute inset-0" style={{ boxShadow: `inset 0 0 120px -20px rgba(${a.rgb},0.35)` }} />
-                  <div className="absolute inset-x-5 bottom-5 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-bone/75">
-                    <span>Fig. 0{i + 2}</span>
+                  <div className="absolute inset-x-5 bottom-5 flex items-center justify-end font-mono text-[10px] uppercase tracking-[0.2em] text-bone/75">
                     <span className="flex items-center gap-2">
                       <span className="h-1.5 w-1.5 rounded-full" style={{ background: `rgb(${a.rgb})` }} />
                       {a.title}

@@ -418,6 +418,7 @@ export default function Hero({ ready }: { ready: boolean }) {
             <span className="hud-corner bottom-5 left-5 border-b border-l md:bottom-8 md:left-8" />
             <span className="hud-corner bottom-5 right-5 border-b border-r md:bottom-8 md:right-8" />
 
+            {/* Center Timeline Bar */}
             <div className="absolute left-8 top-1/2 hidden h-[38vh] -translate-y-1/2 md:block lg:left-12">
               <span className="absolute -top-7 left-0 font-mono text-[9px] tracking-[0.2em] text-bone/40">2025</span>
               <div className="relative h-full w-px bg-white/15">
@@ -428,35 +429,11 @@ export default function Hero({ ready }: { ready: boolean }) {
               </div>
               <span className="absolute -bottom-7 left-0 font-mono text-[9px] tracking-[0.2em] text-bone/40">2027</span>
             </div>
-
-            <div className="absolute bottom-9 left-9 hidden font-mono text-[10px] uppercase leading-5 tracking-[0.16em] text-bone/45 sm:block md:bottom-12 md:left-14">
-              <div className="flex items-center gap-2 text-bone/70">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-ember" />
-                Active · SPHEREx All-Sky Survey
-              </div>
-              <div>102 Spectral Channels · 0.75 – 5.00 µm</div>
-              <div>Sun-Synchronous Low Earth Orbit · 700 km</div>
-            </div>
-
-            <div className="absolute bottom-9 right-9 hidden text-right font-mono text-[10px] uppercase leading-5 tracking-[0.16em] text-bone/45 sm:block md:bottom-12 md:right-14">
-              <div>
-                Array <span ref={velRef} className="tabular-nums text-bone/85">D1–D6</span>
-              </div>
-              <div>
-                FOV <span ref={distRef} className="tabular-nums text-bone/85">3.5° × 11.3°</span>
-              </div>
-              <div>
-                <span ref={clockRef} className="tabular-nums text-bone/85">QR2 Release</span>
-              </div>
-            </div>
           </div>
         </div>
 
         {/* Title */}
         <div ref={titleRef} className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 pb-8 pt-10 text-center will-change-transform">
-          <p className="hero-fade kicker text-bone/60" style={dv({ "--d": "250ms" })}>
-            NASA SPHEREx Mission · 2026 Space Apps Challenge
-          </p>
           <h1 className="mt-5 font-serif text-[clamp(3rem,8.6vw,9.4rem)] leading-[0.88] tracking-[-0.02em]">
             <span className="hero-line">
               <span style={{ transitionDelay: "200ms" }}>The Infrared</span>
@@ -494,7 +471,6 @@ export default function Hero({ ready }: { ready: boolean }) {
         {/* Scroll cue */}
         <div className="hero-fade pointer-events-none absolute inset-x-0 bottom-8 flex justify-center md:bottom-10" style={dv({ "--d": "1300ms" })}>
           <div ref={cueRef} className="flex flex-col items-center gap-4">
-            <span className="kicker text-bone/50">Scroll to explore the cosmic survey</span>
             <span className="scroll-line" />
           </div>
         </div>

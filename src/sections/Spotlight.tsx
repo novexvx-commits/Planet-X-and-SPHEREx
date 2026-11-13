@@ -78,7 +78,7 @@ export default function Spotlight() {
               ))}
 
               <div className="absolute bottom-5 left-5 font-mono text-[10px] uppercase tracking-[0.2em] text-bone/65 md:bottom-7 md:left-8">
-                Fig. 04 — SPHEREx Focal Plane Array & Optical Bench
+                SPHEREx Focal Plane Array & Optical Bench
               </div>
               <div className="absolute right-5 top-5 flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-bone/80 backdrop-blur-md md:right-8 md:top-7">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-ion" />

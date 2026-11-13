@@ -82,28 +82,6 @@ export default function FirstLight() {
             </div>
           </div>
 
-          {/* HUD */}
-          <div ref={hudRef} aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-[14%] top-[14%] opacity-0">
-            <div className="shell flex h-full flex-col justify-between py-4 font-mono text-[10px] uppercase leading-5 tracking-[0.18em] text-bone/60">
-              <div className="flex justify-between">
-                <div>
-                  <div className="text-bone/85">SPHEREx · Detector Array D1–D6</div>
-                  <div>
-                    Frame <span ref={frameRef} className="tabular-nums">00001</span>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-bone/85">NASA/IPAC IRSA QR2</div>
-                  <div>All-Sky Release</div>
-                </div>
-              </div>
-              <div className="flex justify-between">
-                <div className="hidden sm:block">λ 0.75 – 5.00 µm · R = 35–130 (D1–D6)</div>
-                <div className="text-right sm:ml-auto">FOV 3.5° × 11.3° · 20 cm Aperture</div>
-              </div>
-            </div>
-          </div>
-
           {/* Headline */}
           <div ref={headRef} className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 text-center opacity-0">
             <p className="kicker flex items-center gap-3 text-ember-soft">

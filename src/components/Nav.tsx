@@ -78,7 +78,7 @@ export default function Nav({ ready }: { ready: boolean }) {
           >
             <LogoMark className="h-7 w-7 text-ember" />
             <span className="font-mono text-[11px] uppercase tracking-[0.42em] text-bone">
-              MARSAD <span className="text-ember font-semibold">SPHEREx</span>
+              MARSAD
             </span>
           </a>
 
