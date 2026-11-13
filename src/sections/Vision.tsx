@@ -63,9 +63,17 @@ export default function Vision() {
           <Kicker>Chapter X — Scientific Horizons</Kicker>
           <SplitText text="Three questions. | One *all-sky answer.*" className="mt-6 font-serif text-[clamp(3rem,7.6vw,8rem)] leading-[0.9] tracking-[-0.015em]" />
         </div>
-        <p data-reveal="up" style={dv({ "--d": "200ms" })} className="text-[16px] leading-[1.75] text-bone/60 md:col-span-4">
-          SPHEREx answers three foundational questions of modern astrophysics: how the universe expanded during inflation, how the first stars lit up the cosmos, and where the chemical ingredients of life originated.
-        </p>
+        <div data-reveal="up" style={dv({ "--d": "200ms" })} className="space-y-3 md:col-span-4">
+          <p className="text-[16px] leading-[1.75] text-bone/60">
+            SPHEREx answers three foundational questions of modern astrophysics: how the universe expanded during inflation, how the first stars lit up the cosmos, and where the chemical ingredients of life originated.
+          </p>
+          <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3 text-xs font-mono text-bone/70 space-y-1">
+            <span className="text-sky-300 font-semibold block uppercase tracking-wider text-[10px]">Official NASA SPHEREx Mission Objectives:</span>
+            <p>1. Cosmic Inflation (Galaxy Clustering & Primordial Non-Gaussianity)</p>
+            <p>2. Galactic Light (Extragalactic Background Light & Reionization)</p>
+            <p>3. Origins of Water (Interstellar Biogenic Ices in Protoplanetary Disks)</p>
+          </div>
+        </div>
       </div>
 
       <div className="relative">

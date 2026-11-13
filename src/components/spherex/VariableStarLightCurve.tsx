@@ -368,15 +368,30 @@ export default function VariableStarLightCurve({ targetId }: VariableStarProps) 
               Across Selected Detector Array(s)
             </p>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-4 font-mono">
-            <p className="text-xs uppercase text-slate-400">Variability Amplitude Ratio</p>
-            <p className="text-lg sm:text-xl text-amber-400 font-bold mt-1.5">
-              {data.statistics.variabilityRatio ? `×${data.statistics.variabilityRatio}` : "1.00×"}
-            </p>
-            <p className="text-xs text-slate-400 mt-1">
-              Max / Min Flux Ratio
-            </p>
-          </div>
+          {(() => {
+            const isVariableTarget = Boolean(
+              data?.variabilityMetadata?.isVariable ||
+              data?.variabilityMetadata?.periodDays ||
+              data?.target?.periodDays ||
+              targetId === "rw-aurigae" ||
+              targetId === "r-draconis"
+            );
+            return (
+              <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-4 font-mono">
+                <p className="text-xs uppercase text-slate-400">
+                  {isVariableTarget ? "Variability Amplitude Ratio" : "Spectral Band Color Ratio"}
+                </p>
+                <p className="text-lg sm:text-xl text-amber-400 font-bold mt-1.5">
+                  {data.statistics.variabilityRatio ? `×${data.statistics.variabilityRatio}` : "1.00×"}
+                </p>
+                <p className="text-xs text-slate-400 mt-1">
+                  {isVariableTarget
+                    ? "Max / Min Flux Ratio"
+                    : "D6 / D1 SED Color Index · Temporal Flux Constant"}
+                </p>
+              </div>
+            );
+          })()}
           <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-4 font-mono">
             <p className="text-xs uppercase text-slate-400">Catalog Period & Reference</p>
             <p className="text-lg sm:text-xl text-purple-300 font-bold mt-1.5">

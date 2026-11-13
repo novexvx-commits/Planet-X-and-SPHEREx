@@ -241,7 +241,7 @@ function parseHorizonsObserverTable(resultText) {
       geocentricDistanceAU: parseFloat(deltaGeo.toFixed(3)),
       solarElongationDeg: elong,
       predictedVisualMag: !isNaN(vMag) ? parseFloat(vMag.toFixed(2)) : null,
-      ephemerisType: 'REAL OBSERVATION / LIVE JPL HORIZONS EPHEMERIS',
+      ephemerisType: 'COMPUTED EPHEMERIS — JPL HORIZONS',
       measurementType: 'Live JPL Horizons Observer Ephemeris (Geocentric ICRS)',
       inSolarElongationWindow: inZone,
       spherexScanIntersection: inZone
@@ -321,11 +321,11 @@ export function computeLocalMovingObjectEphemeris(
 
   return {
     unavailable: false,
-    dataClassification: liveHorizonsVerified ? 'REAL OBSERVATION' : 'DERIVED FROM REAL DATA',
-    dataClassificationBadge: liveHorizonsVerified ? 'REAL OBSERVATION' : 'DERIVED FROM REAL DATA',
+    dataClassification: liveHorizonsVerified ? 'COMPUTED EPHEMERIS — JPL HORIZONS' : 'DERIVED FROM AUTHORITATIVE EPHEMERIS',
+    dataClassificationBadge: liveHorizonsVerified ? 'COMPUTED EPHEMERIS — JPL HORIZONS' : 'DERIVED FROM AUTHORITATIVE EPHEMERIS',
     dataClassificationDetail: liveHorizonsVerified
-      ? 'REAL OBSERVATION (Live NASA JPL Horizons Observer Ephemeris)'
-      : 'DERIVED FROM REAL DATA (3D Keplerian Ephemeris Propagated from Cached JPL SBDB J2000 Osculating Elements)',
+      ? 'COMPUTED EPHEMERIS — JPL HORIZONS (Live NASA JPL Horizons High-Precision Observer Ephemeris)'
+      : 'DERIVED FROM AUTHORITATIVE EPHEMERIS (3D Keplerian Ephemeris Propagated from Cached JPL SBDB J2000 Osculating Elements)',
     provenance: {
       service: liveHorizonsVerified
         ? 'NASA JPL Solar System Dynamics — Horizons API (Live Observer Ephemerides)'

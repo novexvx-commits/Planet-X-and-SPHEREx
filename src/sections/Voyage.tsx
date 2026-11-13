@@ -131,9 +131,16 @@ export default function Voyage() {
         <header className="shell relative flex min-h-[92vh] flex-col justify-end pb-[12vh]">
           <Kicker>Mission Architecture — 3 Scientific Pillars</Kicker>
           <SplitText text="The Full Spectrum. | *Three Pillars.*" className="mt-6 font-serif text-[clamp(3.2rem,9vw,9.4rem)] leading-[0.88] tracking-[-0.015em]" />
-          <p data-reveal="up" style={dv({ "--d": "300ms" })} className="mt-8 max-w-md text-[16px] leading-[1.75] text-bone/65">
-            SPHEREx unites extragalactic cosmology, interstellar astrochemistry, and time-domain stellar astrophysics into one continuous survey.
-          </p>
+          <div data-reveal="up" style={dv({ "--d": "300ms" })} className="mt-8 max-w-xl text-[16px] leading-[1.75] text-bone/65 space-y-3">
+            <p>
+              SPHEREx unites extragalactic cosmology, interstellar astrochemistry, and time-domain stellar astrophysics into one continuous survey.
+            </p>
+            <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3 text-xs font-mono text-bone/70 space-y-1">
+              <span className="text-sky-300 font-semibold block uppercase tracking-wider text-[10px]">Scientific Scope & NASA Mission Objectives:</span>
+              <p>• Official NASA Objectives: Inflation & Large-Scale Structure · Galactic Light (EBL) · Interstellar Water & Biogenic Ices.</p>
+              <p>• MARSAD Exploration: Extends these 3 core science pillars into interactive time-domain astrometry and Solar System moving object analysis.</p>
+            </div>
+          </div>
         </header>
 
         <div className="shell relative pb-[24vh]">

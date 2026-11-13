@@ -196,6 +196,10 @@ export function analyzeTargetMotion(targetId) {
       totalBaselineDisplacementArcsec: parseFloat(totalBaselineDisplacementArcsec.toFixed(3)),
       totalBaselinePositionAngleDeg: parseFloat(totalBaselinePositionAngleDeg.toFixed(1)),
       totalBaselinePixels: parseFloat((totalBaselineDisplacementArcsec / SPHEREX_PIXEL_SCALE_ARCSEC).toFixed(3)),
+      displacementPixelsCalibrated: parseFloat((totalBaselineDisplacementArcsec / 6.15).toFixed(3)),
+      displacementPixelsNominal: parseFloat((totalBaselineDisplacementArcsec / 6.20).toFixed(3)),
+      calibratedPixelScaleArcsec: 6.15,
+      nominalPixelScaleArcsec: 6.20,
       totalBaselineSpherexSigma: parseFloat(totalBaselineSpherexSigma.toFixed(1)),
       statusLabel: isResolvableOverFullBaseline
         ? `High Proper Motion (${target.totalProperMotionArcsecYr}"/yr) — Resolvable Across QR2 Baseline (${totalBaselineDisplacementArcsec.toFixed(3)}", ${totalBaselineSpherexSigma.toFixed(1)}σ)`
@@ -203,7 +207,7 @@ export function analyzeTargetMotion(targetId) {
       primaryMotionDriver: target.totalProperMotionArcsecYr > 1.0
         ? 'Nearby High-Proper-Motion Star / Brown Dwarf (Catalog Trajectory + SPHEREx Multi-Epoch Baseline)'
         : 'Distant Variable Star — Negligible Proper Motion in SPHEREx (Astrometry from Gaia DR3)',
-      instrumentResolutionConstraint: `SPHEREx native detector pixel scale is 6.15"/pix. Over the ${totalBaselineDays.toFixed(1)}-day (${totalBaselineYears.toFixed(2)}-yr) QR2 baseline, ${target.name} (${target.totalProperMotionArcsecYr}"/yr in ${target.astrometricCatalog || 'Gaia DR3'}) shifts by ${totalBaselineDisplacementArcsec.toFixed(3)}" (${(totalBaselineDisplacementArcsec / SPHEREX_PIXEL_SCALE_ARCSEC).toFixed(3)} SPHEREx pixels).`
+      instrumentResolutionConstraint: `SPHEREx detector plate scale: calibrated 6.15″/px (nominal optical design 6.20″/px). Over the ${totalBaselineDays.toFixed(1)}-day (${totalBaselineYears.toFixed(2)}-yr) QR2 baseline, ${target.name} (${target.totalProperMotionArcsecYr}"/yr in ${target.astrometricCatalog || 'Gaia DR3'}) shifts by ${totalBaselineDisplacementArcsec.toFixed(3)}" (${(totalBaselineDisplacementArcsec / 6.15).toFixed(3)} px at 6.15″/px; ${(totalBaselineDisplacementArcsec / 6.20).toFixed(3)} px at 6.20″/px).`
     }
   };
 }

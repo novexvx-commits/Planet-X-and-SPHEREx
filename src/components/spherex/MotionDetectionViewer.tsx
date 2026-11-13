@@ -297,7 +297,7 @@ export default function MotionDetectionViewer({ targetId }: MotionViewerProps) {
             {netShiftArcsec}″
           </p>
           <p className="mt-1 font-mono text-xs text-slate-300">
-            {(netShiftArcsec / 6.15).toFixed(3)} SPHEREx px over {totalBaselineYears} yr
+            {(netShiftArcsec / 6.15).toFixed(3)} px (at 6.15″/px) · {(netShiftArcsec / 6.20).toFixed(3)} px (at 6.20″/px)
           </p>
         </div>
       </div>
@@ -352,7 +352,7 @@ export default function MotionDetectionViewer({ targetId }: MotionViewerProps) {
               </div>
               <div className="flex justify-between text-slate-300">
                 <span>SPHEREx Detector Scale:</span>
-                <span className="text-amber-300">6.15″ / pixel</span>
+                <span className="text-amber-300">6.15″/px (calibrated) · 6.20″/px (nominal)</span>
               </div>
             </div>
           </div>

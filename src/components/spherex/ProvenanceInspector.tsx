@@ -32,6 +32,7 @@ export default function ProvenanceInspector({ target, observations }: Provenance
     const payload = {
       retrievalTimestamp: new Date().toISOString(),
       platform: "MARSAD — NASA SPHEREx Interactive Scientific Observatory",
+      activeDataRelease: "SPHEREx Quick Release 2 (QR2 · October 2025; baseline catalog utilized for exposures and pointing WCS)",
       missionSpecifications: {
         nominalSpectralChannels: 102,
         wavelengthCoverageUm: "0.75 - 5.00",
@@ -161,8 +162,8 @@ export default function ProvenanceInspector({ target, observations }: Provenance
     {
       layer: "4. Solar System Moving Object Ephemerides (MOST / JPL Horizons)",
       badges: [
-        { label: "REAL OBSERVATION", color: "text-sky-300 border-sky-500/40 bg-sky-500/15" },
-        { label: "DERIVED FROM REAL DATA", color: "text-amber-300 border-amber-500/40 bg-amber-500/15" }
+        { label: "COMPUTED EPHEMERIS — JPL HORIZONS", color: "text-cyan-300 border-cyan-500/40 bg-cyan-500/15" },
+        { label: "DERIVED FROM AUTHORITATIVE EPHEMERIS", color: "text-amber-300 border-amber-500/40 bg-amber-500/15" }
       ],
       sourceArchive: "NASA JPL Horizons / Small-Body Database (SBDB) / IRSA MOST",
       datasetId: "JPL Osculating Orbital Elements (1 Ceres, 4 Vesta, 12 Victoria, 433 Eros)",
@@ -174,7 +175,7 @@ export default function ProvenanceInspector({ target, observations }: Provenance
       retrievalTimestamp,
       sourceLink: "https://ssd.jpl.nasa.gov/horizons/",
       transformation:
-        "REAL OBSERVATION: Verified JPL osculating orbital elements (a, e, i, Ω, ω, M0, H). DERIVED FROM REAL DATA: Newton-Raphson solution of Kepler's equation (M = E - e sin E), 3D ecliptic-to-equatorial ICRS transformation, and SPHEREx 80°–105° solar-elongation window evaluation."
+        "AUTHORITATIVE ORBITAL ELEMENTS: Verified NASA JPL SBDB osculating elements (a, e, i, Ω, ω, M0, H). COMPUTED EPHEMERIS: Dynamic geocentric ICRS coordinates from live NASA JPL Horizons numerical integration or local Keplerian orbital propagation (M = E - e sin E) with SPHEREx 80°–105° solar-elongation constraint evaluation."
     }
   ];
 

@@ -243,18 +243,19 @@ export default function MostSolarSystemExplorer({
               <span className="rounded-md bg-rose-500/15 border border-rose-500/40 px-2.5 py-0.5 text-rose-300 font-bold">
                 UNAVAILABLE
               </span>
-            ) : data?.dataClassificationBadge === "REAL OBSERVATION" ? (
-              <span className="rounded-md bg-sky-500/15 border border-sky-500/40 px-2.5 py-0.5 text-sky-300 font-bold">
-                REAL OBSERVATION
+            ) : data?.dataClassificationBadge?.includes("HORIZONS") || data?.dataClassificationBadge === "COMPUTED EPHEMERIS — JPL HORIZONS" ? (
+              <span className="rounded-md bg-cyan-500/15 border border-cyan-500/40 px-2.5 py-0.5 text-cyan-300 font-bold">
+                COMPUTED EPHEMERIS — JPL HORIZONS
               </span>
             ) : (
               <span className="rounded-md bg-amber-500/15 border border-amber-500/40 px-2.5 py-0.5 text-amber-300 font-bold">
-                DERIVED FROM REAL DATA
+                DERIVED FROM AUTHORITATIVE EPHEMERIS
               </span>
             )}
             <span>
-              {data?.dataClassification ||
-                "DERIVED FROM REAL DATA — Computed Orbital Ephemerides (JPL Horizons / SBDB Osculating Elements — Not Direct SPHEREx Image Detections)"}
+              {data?.dataClassificationDetail ||
+                data?.dataClassification ||
+                "DERIVED FROM AUTHORITATIVE EPHEMERIS — Computed Orbital Ephemerides (JPL Horizons / SBDB Osculating Elements — Not Direct SPHEREx Image Detections)"}
             </span>
           </div>
           <span className="text-sky-300 font-semibold shrink-0">
@@ -478,7 +479,7 @@ export default function MostSolarSystemExplorer({
                             {ep.spherexScanIntersection}
                           </span>
                           <span className="text-xs text-slate-400">
-                            {ep.measurementType || "DERIVED FROM REAL DATA — Computed Orbital Ephemeris"}
+                            {ep.measurementType || "DERIVED FROM AUTHORITATIVE EPHEMERIS — Computed Orbital Ephemeris"}
                           </span>
                         </div>
                       </td>

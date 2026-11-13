@@ -291,6 +291,9 @@ export default function MissionLog() {
         <div>
           <Kicker>Chapter VII — Mission Chronology</Kicker>
           <SplitText text="Survey Cadence, | *logged across epochs.*" className="mt-6 font-serif text-[clamp(2.9rem,7vw,7.2rem)] leading-[0.9] tracking-[-0.015em]" />
+          <p className="mt-3 font-mono text-xs text-bone/60 max-w-xl">
+            NASA Mission Lifecycle & Operations Roadmap (Feb 2019 – Nov 2026): Encompasses mission formulation, Phase C/D instrument testing, March 2025 launch, and the two-year baseline on-sky prime survey (four 6-month all-sky maps) leading to DR1.
+          </p>
         </div>
         <div data-reveal="fade" style={dv({ "--d": "300ms" })} className="flex items-center gap-5">
           <span className="mr-2 font-mono text-xs tabular-nums text-bone/45">
