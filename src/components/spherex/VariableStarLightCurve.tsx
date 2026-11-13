@@ -317,31 +317,31 @@ export default function VariableStarLightCurve({ targetId }: VariableStarProps) 
       </div>
 
       {/* Canonical Data Classification & Period Status Banner */}
-      <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-4 font-mono text-xs flex flex-wrap items-center justify-between gap-3">
+      <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-3.5 font-mono text-xs flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2 text-slate-300">
-          <span className="rounded-md bg-purple-500/15 border border-purple-500/40 px-2.5 py-0.5 text-purple-300 font-bold">
+          <span className="rounded-md bg-purple-500/15 border border-purple-500/40 px-2 py-0.5 text-purple-300 font-bold">
             MODEL / SIMULATION
           </span>
-          <span>Synthetic multi-band light curve evaluated at</span>
-          <span className="rounded-md bg-sky-500/15 border border-sky-500/40 px-2.5 py-0.5 text-sky-300 font-bold">
+          <span>Synthetic light curve evaluated at</span>
+          <span className="rounded-md bg-sky-500/15 border border-sky-500/40 px-2 py-0.5 text-sky-300 font-bold">
             REAL OBSERVATION
           </span>
-          <span>IRSA QR2 timestamps & anchored to verified 2MASS/AllWISE/Spitzer fluxes (not extracted from SPHEREx FITS pixel cutouts).</span>
+          <span>IRSA QR2 timestamps & anchored to archival 2MASS/AllWISE/Spitzer fluxes.</span>
         </div>
 
         <div className="flex items-center gap-2 text-xs shrink-0">
-          <span className="text-slate-400">Period Analysis:</span>
+          <span className="text-slate-400">Variability:</span>
           {(data?.variabilityMetadata?.periodDays ?? data?.target?.periodDays) ? (
             <span className="rounded-lg bg-amber-500/15 border border-amber-500/40 px-3 py-1 text-amber-300 font-bold">
-              Verified GCVS/AAVSO Period: {data?.variabilityMetadata?.periodDays ?? data?.target?.periodDays} days
+              GCVS/AAVSO Period: {data?.variabilityMetadata?.periodDays ?? data?.target?.periodDays} days
             </span>
           ) : (data?.variabilityMetadata?.isVariable ?? (targetId === "rw-aurigae")) ? (
             <span className="rounded-lg bg-purple-500/15 border border-purple-500/40 px-3 py-1 text-purple-300 font-bold">
-              Irregular / Aperiodic (CTTS dust occultation)
+              Irregular (CTTS dust occultation)
             </span>
           ) : (
             <span className="rounded-lg bg-slate-800 border border-slate-700 px-3 py-1 text-slate-200 font-medium">
-              Non-Variable Photometric Baseline (Constant Flux)
+              Constant Baseline Flux
             </span>
           )}
         </div>

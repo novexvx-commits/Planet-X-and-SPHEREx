@@ -297,7 +297,7 @@ export default function MotionDetectionViewer({ targetId }: MotionViewerProps) {
             {netShiftArcsec}″
           </p>
           <p className="mt-1 font-mono text-xs text-slate-300">
-            {(netShiftArcsec / 6.15).toFixed(3)} px (at 6.15″/px) · {(netShiftArcsec / 6.20).toFixed(3)} px (at 6.20″/px)
+            {(netShiftArcsec / 6.15).toFixed(3)} px (at calibrated 6.15″/px)
           </p>
         </div>
       </div>

@@ -349,20 +349,20 @@ export default function ObservationTimelineComparator({
         </div>
 
         {/* CANONICAL SCIENTIFIC DATA CLASSIFICATION & EPOCH PROVENANCE BANNER */}
-        <div className="mt-4 rounded-xl border border-slate-800 bg-[#090e1a] p-3.5 space-y-2">
+        <div className="mt-4 rounded-xl border border-slate-800 bg-[#090e1a] p-3 space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
-              <span className="rounded-md bg-purple-500/15 border border-purple-500/40 px-2.5 py-0.5 text-purple-300 font-bold">
+              <span className="rounded-md bg-purple-500/15 border border-purple-500/40 px-2 py-0.5 text-purple-300 font-bold">
                 MODEL / SIMULATION
               </span>
-              <span className="text-slate-300">32×32 WCS PSF Cutout Reconstruction</span>
-              <span className="text-slate-600">+</span>
-              <span className="rounded-md bg-sky-500/15 border border-sky-500/40 px-2.5 py-0.5 text-sky-300 font-bold">
+              <span className="text-slate-300">32×32 PSF Reconstruction</span>
+              <span className="text-slate-600">·</span>
+              <span className="rounded-md bg-sky-500/15 border border-sky-500/40 px-2 py-0.5 text-sky-300 font-bold">
                 REAL OBSERVATION
               </span>
               <span className="text-slate-300">IRSA QR2 Timestamps</span>
-              <span className="text-slate-600">+</span>
-              <span className="rounded-md bg-amber-500/15 border border-amber-500/40 px-2.5 py-0.5 text-amber-300 font-bold">
+              <span className="text-slate-600">·</span>
+              <span className="rounded-md bg-amber-500/15 border border-amber-500/40 px-2 py-0.5 text-amber-300 font-bold">
                 DERIVED FROM REAL DATA
               </span>
               <span className="text-slate-300">Proper Motion Shift</span>
@@ -371,10 +371,10 @@ export default function ObservationTimelineComparator({
 
           {obs1 && obs2 && (
             <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80 text-xs font-mono text-slate-300">
-              <div>
-                Epoch 1: <strong className="text-sky-300">{obs1Id}</strong> ({(obs1.utcDate || "").slice(0, 10)} · MJD {formattedMjd1})
-                <span className="mx-2 text-slate-500">→</span>
-                Epoch 2: <strong className="text-amber-300">{obs2Id}</strong> ({(obs2.utcDate || "").slice(0, 10)} · MJD {formattedMjd2})
+              <div className="flex items-center gap-2 flex-wrap">
+                <span>Epoch 1: <strong className="text-sky-300">{obs1Id}</strong> ({(obs1.utcDate || "").slice(0, 10)})</span>
+                <span className="text-slate-500">→</span>
+                <span>Epoch 2: <strong className="text-amber-300">{obs2Id}</strong> ({(obs2.utcDate || "").slice(0, 10)})</span>
               </div>
               <div className="rounded-md bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 text-amber-300 font-semibold">
                 Baseline Δt = {formattedDeltaDays} days
