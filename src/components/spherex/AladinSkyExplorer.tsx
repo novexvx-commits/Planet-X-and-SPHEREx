@@ -620,7 +620,7 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
 
         {/* Pan-STARRS1 (PS1) DR1 Color Overlay & Coverage Handler */}
         {activeSurvey === "panstarrs" && (
-          <div className="absolute inset-0 z-15 flex items-center justify-center bg-[#05060a]">
+          <div className="absolute inset-0 z-5 flex items-center justify-center bg-[#05060a]">
             {panstarrsMeta && !panstarrsMeta.available ? (
               /* Pan-STARRS Coverage Unavailable Banner (e.g. Epsilon Indi B at Dec < -30°) */
               <div className="p-6 max-w-lg w-full text-center space-y-4">
@@ -822,7 +822,7 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
         )}
 
         {/* Clean Target & Coordinate HUD (Bottom-Left) */}
-        <div className="absolute bottom-4 left-4 z-10 rounded-xl border border-slate-700/80 bg-[#090e1a]/90 px-4 py-3 backdrop-blur-md shadow-xl font-mono text-xs space-y-1">
+        <div className="absolute bottom-4 left-4 z-25 rounded-xl border border-slate-700/80 bg-[#090e1a]/90 px-4 py-3 backdrop-blur-md shadow-xl font-mono text-xs space-y-1">
           <div className="flex items-center gap-2 text-white font-semibold">
             <span className="h-2 w-2 rounded-full bg-ion" />
             <span>
@@ -846,7 +846,7 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
         </div>
 
         {/* Quick Target Switcher Pills (Top-Right) */}
-        <div className="absolute top-4 right-4 z-10 flex flex-col gap-1.5">
+        <div className="absolute top-4 right-4 z-25 flex flex-col gap-1.5">
           {[
             { id: "barnards-star", name: "Barnard's Star" },
             { id: "epsilon-indi-b", name: "Epsilon Indi B" },
