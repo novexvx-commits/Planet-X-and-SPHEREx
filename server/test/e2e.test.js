@@ -102,7 +102,19 @@ async function runE2ETests() {
       const jsonMost = await resMost.json();
       assert(jsonMost.ephemerides && jsonMost.ephemerides.length > 0, `MOST returns orbital ephemerides`);
 
-      // 12. Static Frontend Single-Page Application Serving (both / and /experience)
+      // 12. Pan-STARRS1 (PS1) Coverage Verification & Cutout
+      const resPsBarnard = await fetch(`http://localhost:${PORT}/api/panstarrs?targetId=barnards-star`);
+      assert(resPsBarnard.status === 200, `GET /api/panstarrs?targetId=barnards-star returned 200`);
+      const jsonPsBarnard = await resPsBarnard.json();
+      assert(jsonPsBarnard.available === true, `Pan-STARRS available for Barnard's Star`);
+      assert(jsonPsBarnard.imageUrl && jsonPsBarnard.imageUrl.includes('fitscut.cgi'), `Pan-STARRS returns MAST cutout URL`);
+
+      const resPsEpsilon = await fetch(`http://localhost:${PORT}/api/panstarrs?targetId=epsilon-indi-b`);
+      assert(resPsEpsilon.status === 200, `GET /api/panstarrs?targetId=epsilon-indi-b returned 200`);
+      const jsonPsEpsilon = await resPsEpsilon.json();
+      assert(jsonPsEpsilon.available === false, `Pan-STARRS correctly reports UNAVAILABLE for southern target Epsilon Indi B (Dec < -30°)`);
+
+      // 13. Static Frontend Single-Page Application Serving (both / and /experience)
       const resFrontend = await fetch(`http://localhost:${PORT}/`);
       assert(resFrontend.status === 200, `GET / (frontend bundle) returned 200`);
       const frontendHtml = await resFrontend.text();

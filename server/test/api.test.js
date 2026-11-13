@@ -23,6 +23,7 @@ import { getTargetLightCurve } from '../services/photometryService.js';
 import { getTargetSpectra } from '../services/spectralService.js';
 import { compareObservations } from '../services/imageComparisonService.js';
 import { queryMovingObjectSearch, computeLocalMovingObjectEphemeris } from '../services/mostMovingObjectService.js';
+import { getPanstarrsCutout } from '../services/panstarrsService.js';
 
 let passed = 0;
 let failed = 0;
@@ -125,6 +126,24 @@ const mostUnknown = computeLocalMovingObjectEphemeris('NonExistentObject99999');
 assert(mostUnknown && mostUnknown.unavailable === true && mostUnknown.dataClassificationBadge === 'UNAVAILABLE' && mostUnknown.ephemerides.length === 0, `Uncataloged object returns explicit UNAVAILABLE state without fabricating orbital elements`);
 const mostResult = await queryMovingObjectSearch('Ceres', '2026-11-12');
 assert(mostResult && mostResult.ephemerides.length > 0 && mostResult.ephemerides[0].utcDate.startsWith('2026-11-12'), `MOST query for asteroid Ceres returns multi-epoch orbital ephemerides for current 2026 window`);
+
+console.log(`\n=== TESTING PAN-STARRS1 (PS1) DR1 COVERAGE ACROSS ALL 5 TARGETS ===`);
+const psBarnard = await getPanstarrsCutout('barnards-star');
+assert(psBarnard && psBarnard.available === true, `Pan-STARRS available for Barnard's Star (Dec +4.69° >= -30°)`);
+assert(psBarnard && psBarnard.imageUrl && psBarnard.imageUrl.includes('fitscut.cgi'), `Barnard's Star has verified MAST STScI Pan-STARRS cutout`);
+
+const psEpsilon = await getPanstarrsCutout('epsilon-indi-b');
+assert(psEpsilon && psEpsilon.available === false, `Epsilon Indi B correctly flagged as UNAVAILABLE in Pan-STARRS (Dec -56.78° < -30°)`);
+assert(psEpsilon && psEpsilon.coverageStatus === 'UNAVAILABLE', `Epsilon Indi B coverageStatus is UNAVAILABLE`);
+
+const psWise = await getPanstarrsCutout('wise-0855');
+assert(psWise && psWise.available === true, `Pan-STARRS available for WISE 0855 (Dec -7.24° >= -30°)`);
+
+const psRw = await getPanstarrsCutout('rw-aurigae');
+assert(psRw && psRw.available === true, `Pan-STARRS available for RW Aurigae (Dec +30.40° >= -30°)`);
+
+const psRdrac = await getPanstarrsCutout('r-draconis');
+assert(psRdrac && psRdrac.available === true, `Pan-STARRS available for R Draconis (Dec +66.75° >= -30°)`);
 
 console.log(`\n========================================`);
 console.log(`TEST SUMMARY: ${passed} PASSED, ${failed} FAILED`);

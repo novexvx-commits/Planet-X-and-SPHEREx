@@ -12,6 +12,7 @@ import { getTargetLightCurve, generateLightCurveCsv } from '../services/photomet
 import { getSpectralBandsCatalog, getTargetSpectra } from '../services/spectralService.js';
 import { queryMovingObjectSearch } from '../services/mostMovingObjectService.js';
 import { resolveAstronomicalTarget } from '../services/simbadService.js';
+import { getPanstarrsCutout } from '../services/panstarrsService.js';
 import { CACHED_SPHEREX_OBSERVATIONS } from '../data/cachedObservations.js';
 import { mjdToUtc } from '../utils/astronomy.js';
 
@@ -37,7 +38,8 @@ router.get('/health', (req, res) => {
       '/api/lightcurve/:targetId/csv',
       '/api/spectra/catalog',
       '/api/spectra/:targetId',
-      '/api/most'
+      '/api/most',
+      '/api/panstarrs'
     ]
   });
 });
@@ -289,6 +291,19 @@ router.get('/most', async (req, res) => {
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// Pan-STARRS1 (PS1) Cutout & Coverage Verification
+router.get('/panstarrs', async (req, res) => {
+  const { targetId, ra, dec } = req.query;
+  try {
+    const customRa = ra !== undefined ? parseFloat(ra) : null;
+    const customDec = dec !== undefined ? parseFloat(dec) : null;
+    const result = await getPanstarrsCutout(targetId, customRa, customDec);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 });
 

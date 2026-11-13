@@ -54,14 +54,59 @@ const SURVEYS = [
     desc: "Wide-field Infrared Survey Explorer mid-infrared atlas matching SPHEREx D4–D6."
   },
   {
-    id: "https://skies.esac.esa.int/SDSS9Color",
+    id: "panstarrs",
     legacyId: "P/PanSTARRS/DR1/color-z-zg-g",
     shortName: "Pan-STARRS",
-    name: "Pan-STARRS / SDSS DR9",
-    band: "Optical/NIR g–y",
-    desc: "High-resolution multi-band optical sky survey."
+    name: "Pan-STARRS1 (PS1) DR1 Color",
+    band: "Optical/NIR g–y (0.4–1.0 µm)",
+    desc: "Panoramic Survey Telescope and Rapid Response System 3π Survey (δ ≥ -30°)."
   }
 ];
+
+const PANSTARRS_TARGET_MAP: Record<
+  string,
+  {
+    available: boolean;
+    skycell?: string;
+    imageUrl?: string;
+    directFitsUrl?: string;
+    reason?: string;
+  }
+> = {
+  "barnards-star": {
+    available: true,
+    skycell: "1479.018",
+    imageUrl:
+      "https://ps1images.stsci.edu/cgi-bin/fitscut.cgi?ra=269.452083&dec=4.693389&size=480&format=jpeg&red=%2Frings.v3.skycell%2F1479%2F018%2Frings.v3.skycell.1479.018.stk.y.unconv.fits&green=%2Frings.v3.skycell%2F1479%2F018%2Frings.v3.skycell.1479.018.stk.r.unconv.fits&blue=%2Frings.v3.skycell%2F1479%2F018%2Frings.v3.skycell.1479.018.stk.g.unconv.fits",
+    directFitsUrl: "https://ps1images.stsci.edu/rings.v3.skycell/1479/018/rings.v3.skycell.1479.018.stk.r.unconv.fits"
+  },
+  "epsilon-indi-b": {
+    available: false,
+    reason:
+      "Declination δ = -56.78° is outside the Pan-STARRS1 3π survey observational footprint (southern horizon limit δ ≥ -30°)."
+  },
+  "wise-0855": {
+    available: true,
+    skycell: "1176.014",
+    imageUrl:
+      "https://ps1images.stsci.edu/cgi-bin/fitscut.cgi?ra=133.795125&dec=-7.245222&size=480&format=jpeg&red=%2Frings.v3.skycell%2F1176%2F014%2Frings.v3.skycell.1176.014.stk.y.unconv.fits&green=%2Frings.v3.skycell%2F1176%2F014%2Frings.v3.skycell.1176.014.stk.r.unconv.fits&blue=%2Frings.v3.skycell%2F1176%2F014%2Frings.v3.skycell.1176.014.stk.g.unconv.fits",
+    directFitsUrl: "https://ps1images.stsci.edu/rings.v3.skycell/1176/014/rings.v3.skycell.1176.014.stk.r.unconv.fits"
+  },
+  "rw-aurigae": {
+    available: true,
+    skycell: "1947.066",
+    imageUrl:
+      "https://ps1images.stsci.edu/cgi-bin/fitscut.cgi?ra=76.95653&dec=30.40167&size=480&format=jpeg&red=%2Frings.v3.skycell%2F1947%2F066%2Frings.v3.skycell.1947.066.stk.y.unconv.fits&green=%2Frings.v3.skycell%2F1947%2F066%2Frings.v3.skycell.1947.066.stk.r.unconv.fits&blue=%2Frings.v3.skycell%2F1947%2F066%2Frings.v3.skycell.1947.066.stk.g.unconv.fits",
+    directFitsUrl: "https://ps1images.stsci.edu/rings.v3.skycell/1947/066/rings.v3.skycell.1947.066.stk.r.unconv.fits"
+  },
+  "r-draconis": {
+    available: true,
+    skycell: "2526.066",
+    imageUrl:
+      "https://ps1images.stsci.edu/cgi-bin/fitscut.cgi?ra=248.16762&dec=66.75548&size=480&format=jpeg&red=%2Frings.v3.skycell%2F2526%2F066%2Frings.v3.skycell.2526.066.stk.y.unconv.fits&green=%2Frings.v3.skycell%2F2526%2F066%2Frings.v3.skycell.2526.066.stk.r.unconv.fits&blue=%2Frings.v3.skycell%2F2526%2F066%2Frings.v3.skycell.2526.066.stk.g.unconv.fits",
+    directFitsUrl: "https://ps1images.stsci.edu/rings.v3.skycell/2526/066/rings.v3.skycell.2526.066.stk.r.unconv.fits"
+  }
+};
 
 export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplorerProps) {
   const fullTarget = { ...getLocalTargetById(target.id), ...target };
@@ -84,6 +129,50 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
     dec: fullTarget.decSexagesimal
   });
   const [fovDegrees, setFovDegrees] = useState(0.25); // 15 arcminutes
+  const [panstarrsZoom, setPanstarrsZoom] = useState(1.0);
+  const [panstarrsMeta, setPanstarrsMeta] = useState<any>(
+    PANSTARRS_TARGET_MAP[fullTarget.id] || {
+      available: fullTarget.decDeg >= -30.0,
+      reason: fullTarget.decDeg < -30.0
+        ? `Declination δ = ${fullTarget.decDeg.toFixed(2)}° is outside the Pan-STARRS1 3π survey footprint (southern limit δ ≥ -30°).`
+        : undefined
+    }
+  );
+  const [panstarrsLoading, setPanstarrsLoading] = useState(false);
+
+  // Sync Pan-STARRS coverage & imagery whenever target or survey changes
+  useEffect(() => {
+    const mapped = PANSTARRS_TARGET_MAP[fullTarget.id];
+    if (mapped) {
+      setPanstarrsMeta(mapped);
+      setPanstarrsLoading(false);
+      return;
+    }
+    if (fullTarget.decDeg < -30.0) {
+      setPanstarrsMeta({
+        available: false,
+        reason: `Declination δ = ${fullTarget.decDeg.toFixed(2)}° is outside the Pan-STARRS1 3π survey footprint (southern horizon limit δ ≥ -30°).`
+      });
+      setPanstarrsLoading(false);
+      return;
+    }
+    setPanstarrsLoading(true);
+    fetch(`/api/panstarrs?targetId=${fullTarget.id}&ra=${fullTarget.raDeg}&dec=${fullTarget.decDeg}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setPanstarrsMeta(data);
+        setPanstarrsLoading(false);
+      })
+      .catch(() => {
+        setPanstarrsMeta({
+          available: fullTarget.decDeg >= -30.0,
+          reason: fullTarget.decDeg < -30.0
+            ? "Outside Pan-STARRS1 footprint (Dec < -30°)"
+            : "Pan-STARRS cutout temporarily unreachable"
+        });
+        setPanstarrsLoading(false);
+      });
+  }, [fullTarget.id, fullTarget.raDeg, fullTarget.decDeg, activeSurvey]);
 
   // Keep coordinate display synced when target changes
   useEffect(() => {
@@ -314,8 +403,12 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
   // Switch active HiPS survey
   const switchSurvey = (surveyId: string) => {
     setActiveSurvey(surveyId);
-    setSurveyLoading(true);
     setSurveyNotice(null);
+    if (surveyId === "panstarrs") {
+      setSurveyLoading(false);
+      return;
+    }
+    setSurveyLoading(true);
     if (!aladinInstanceRef.current) return;
     try {
       const aladin = aladinInstanceRef.current;
@@ -354,6 +447,10 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
 
   // Zoom controls
   const handleZoom = (factor: number) => {
+    if (activeSurvey === "panstarrs") {
+      setPanstarrsZoom((prev) => Math.max(0.6, Math.min(3.5, factor > 1 ? prev * 1.3 : prev / 1.3)));
+      return;
+    }
     const nextFov = Math.max(0.02, Math.min(15, factor > 1 ? fovDegrees * 0.68 : fovDegrees * 1.45));
     setFovDegrees(nextFov);
     if (!aladinInstanceRef.current) return;
@@ -375,6 +472,7 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
 
   // Recenter on current target
   const handleRecenter = () => {
+    setPanstarrsZoom(1.0);
     setFovDegrees(0.25);
     setCurrentCoords({
       ra: fullTarget.raSexagesimal,
@@ -519,6 +617,124 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
           className="h-full w-full"
           style={{ width: "100%", height: "100%" }}
         />
+
+        {/* Pan-STARRS1 (PS1) DR1 Color Overlay & Coverage Handler */}
+        {activeSurvey === "panstarrs" && (
+          <div className="absolute inset-0 z-15 flex items-center justify-center bg-[#05060a]">
+            {panstarrsMeta && !panstarrsMeta.available ? (
+              /* Pan-STARRS Coverage Unavailable Banner (e.g. Epsilon Indi B at Dec < -30°) */
+              <div className="p-6 max-w-lg w-full text-center space-y-4">
+                <div className="rounded-2xl border border-amber-500/50 bg-[#0d1424] p-6 shadow-2xl space-y-4">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 font-mono text-xs font-semibold text-amber-300 uppercase">
+                    <span className="h-2 w-2 rounded-full bg-amber-400" />
+                    Pan-STARRS1 Coverage Unavailable
+                  </div>
+                  <h3 className="font-serif text-2xl text-bone">
+                    {fullTarget.name}
+                  </h3>
+                  <p className="text-xs text-slate-300 font-mono leading-relaxed">
+                    Target declination <strong className="text-amber-300">δ = {fullTarget.decDeg >= 0 ? `+${fullTarget.decDeg.toFixed(2)}` : fullTarget.decDeg.toFixed(2)}°</strong> is outside the Pan-STARRS1 3π survey footprint. Pan-STARRS1 operated from Haleakala Observatory, Hawaii (+20° 42′ N) with an observational horizon cutoff at <strong className="text-white">δ ≥ -30°</strong>. Deep southern celestial objects were physically below the observatory horizon.
+                  </p>
+                  <div className="rounded-lg border border-slate-800 bg-[#070b14] p-3 text-left font-mono text-xs text-slate-300 space-y-1">
+                    <div>Target ICRS: <strong className="text-white">{fullTarget.raSexagesimal} · {fullTarget.decSexagesimal}</strong></div>
+                    <div>Survey Limit: <strong className="text-amber-400">δ ≥ -30.0° (Haleakala, Hawaii)</strong></div>
+                    <div className="text-emerald-400">Available All-Sky: DSS2 (Optical), 2MASS (Near-IR), AllWISE (Mid-IR)</div>
+                  </div>
+                  <div className="pt-2 text-xs text-slate-400 font-mono">
+                    Select a survey with full all-sky southern coverage:
+                  </div>
+                  <div className="flex flex-wrap items-center justify-center gap-2 pt-1 font-mono text-xs">
+                    <button
+                      onClick={() => switchSurvey("https://skies.esac.esa.int/DSSColor")}
+                      className="rounded-xl bg-ember px-4 py-2 font-bold text-ink hover:bg-ember-soft transition-colors cursor-pointer"
+                    >
+                      Switch to DSS2 Optical
+                    </button>
+                    <button
+                      onClick={() => switchSurvey("https://skies.esac.esa.int/2MASSColor")}
+                      className="rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-slate-200 hover:bg-slate-700 cursor-pointer"
+                    >
+                      Switch to 2MASS Near-IR
+                    </button>
+                    <button
+                      onClick={() => switchSurvey("https://skies.esac.esa.int/AllWISEColor")}
+                      className="rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-slate-200 hover:bg-slate-700 cursor-pointer"
+                    >
+                      Switch to AllWISE Mid-IR
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : panstarrsMeta?.imageUrl ? (
+              /* Real Authentic Pan-STARRS1 Color Image Display */
+              <div className="relative w-full h-full flex items-center justify-center overflow-hidden select-none">
+                <img
+                  src={panstarrsMeta.imageUrl}
+                  alt={`Pan-STARRS1 DR1 color cutout for ${fullTarget.name}`}
+                  className="max-h-[88%] max-w-[88%] object-contain rounded-xl shadow-2xl transition-transform duration-200"
+                  style={{ transform: `scale(${panstarrsZoom})` }}
+                  loading="eager"
+                />
+
+                {/* SPHEREx Sub-Array Reticle Overlay */}
+                {showFootprint && (
+                  <div className="absolute pointer-events-none w-36 h-36 border-2 border-ember/70 rounded-xs flex items-center justify-center">
+                    <div className="w-2.5 h-2.5 rounded-full bg-ember/80" />
+                    <span className="absolute -top-5 left-1 font-mono text-[9px] text-ember tracking-wider uppercase bg-black/60 px-1 py-0.5 rounded-xs">
+                      SPHEREx Sub-Array
+                    </span>
+                  </div>
+                )}
+
+                {/* Catalog Marker */}
+                {showCatalogMarkers && (
+                  <div className="absolute pointer-events-none flex flex-col items-center">
+                    <div className="w-4 h-4 rounded-full border border-ion/80 flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 rounded-full bg-ion" />
+                    </div>
+                    <span className="font-mono text-[10px] text-ion bg-black/75 px-1.5 py-0.5 rounded-sm mt-1 border border-ion/40">
+                      {fullTarget.name}
+                    </span>
+                  </div>
+                )}
+
+                {/* Top-left Info Badge */}
+                <div className="absolute top-4 left-4 font-mono text-xs bg-[#090e1a]/95 border border-slate-700/80 rounded-xl px-4 py-2.5 backdrop-blur-md shadow-2xl text-slate-300 space-y-1 max-w-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                    <span className="text-white font-semibold">Pan-STARRS1 (PS1) DR1 Color</span>
+                  </div>
+                  <div className="text-[11px] text-slate-300">
+                    Skycell: <strong className="text-sky-300">{panstarrsMeta.skycell || "PS1"}</strong> · Filters: <strong className="text-amber-300">y (red), r (green), g (blue)</strong>
+                  </div>
+                  <div className="text-[11px] text-slate-400">
+                    Scale: ~0.25″/px · Archive: NASA STScI MAST
+                  </div>
+                  {panstarrsMeta.directFitsUrl && (
+                    <div className="pt-1">
+                      <a
+                        href={panstarrsMeta.directFitsUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-ember hover:underline text-[11px] flex items-center gap-1"
+                      >
+                        Download Raw PS1 FITS from STScI ↗
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              /* Loading cutout state */
+              <div className="flex items-center justify-center p-6">
+                <div className="rounded-xl border border-slate-700 bg-[#0d1424] px-6 py-4 font-mono text-sm text-amber-300 shadow-2xl flex items-center gap-3">
+                  <span className="h-3 w-3 rounded-full bg-amber-400 animate-ping" />
+                  <span>Loading Pan-STARRS1 DR1 Cutout from NASA STScI MAST...</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Loading State Overlay */}
         {initializing && !loadError && (
