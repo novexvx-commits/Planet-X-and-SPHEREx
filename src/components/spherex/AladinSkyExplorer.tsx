@@ -845,29 +845,7 @@ export default function AladinSkyExplorer({ target, onSelectTarget }: SkyExplore
           </div>
         </div>
 
-        {/* Quick Target Switcher Pills (Top-Right) */}
-        <div className="absolute top-4 right-4 z-25 flex flex-col gap-1.5">
-          {[
-            { id: "barnards-star", name: "Barnard's Star" },
-            { id: "epsilon-indi-b", name: "Epsilon Indi B" },
-            { id: "wise-0855", name: "WISE 0855" },
-            { id: "rw-aurigae", name: "RW Aurigae" },
-            { id: "r-draconis", name: "R Draconis" }
-          ].map((t) => (
-            <button
-              key={t.id}
-              onClick={() => onSelectTarget && onSelectTarget(t.id)}
-              className={cn(
-                "rounded-lg px-3 py-1.5 text-left font-mono text-xs backdrop-blur-md transition-all shadow-md cursor-pointer",
-                fullTarget.id === t.id
-                  ? "bg-ember text-ink font-bold border border-ember"
-                  : "bg-[#090e1a]/85 text-slate-200 hover:bg-[#0d1424] border border-slate-700/80"
-              )}
-            >
-              {t.name}
-            </button>
-          ))}
-        </div>
+
       </div>
 
       {/* Concise 3-Item Scientific Footer */}
