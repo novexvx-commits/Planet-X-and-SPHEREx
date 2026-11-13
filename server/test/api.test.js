@@ -19,7 +19,7 @@ import {
 } from '../utils/astronomy.js';
 import { AUTHORITATIVE_TARGETS } from '../data/authoritativeTargets.js';
 import { analyzeTargetMotion } from '../services/motionService.js';
-import { getTargetLightCurve } from '../services/photometryService.js';
+import { getTargetLightCurve, generateLightCurveCsv } from '../services/photometryService.js';
 import { getTargetSpectra } from '../services/spectralService.js';
 import { compareObservations } from '../services/imageComparisonService.js';
 import { queryMovingObjectSearch, computeLocalMovingObjectEphemeris } from '../services/mostMovingObjectService.js';
@@ -100,6 +100,13 @@ for (const id of targetIds) {
   const lc = getTargetLightCurve(id, 'all');
   assert(lc && lc.measurements.length > 0, `Target '${target.name}' has calibrated light curve (${lc.measurements.length} points)`);
   assert(lc.dataClassification.includes('MODEL / SIMULATION'), `Target '${target.name}' light curve service includes canonical 'MODEL / SIMULATION' classification`);
+  assert(lc.target.distancePc === target.distancePc, `Target '${target.name}' light curve has verified distancePc = ${target.distancePc} pc`);
+  assert(lc.target.totalProperMotionArcsecYr === target.totalProperMotionArcsecYr, `Target '${target.name}' light curve has verified totalProperMotionArcsecYr = ${target.totalProperMotionArcsecYr}″/yr`);
+
+  // Verify CSV export includes astrometry
+  const csvText = generateLightCurveCsv(id, 'all');
+  assert(csvText.includes(`Distance ${target.distancePc} pc`), `Target '${target.name}' CSV export includes verified distance header`);
+  assert(csvText.includes(`Total Proper Motion ${target.totalProperMotionArcsecYr} arcsec/yr`), `Target '${target.name}' CSV export includes verified proper motion header`);
 
   // Test spectra
   const spec = getTargetSpectra(id);
@@ -124,6 +131,13 @@ assert(mostSync.ephemerides[0].utcDate === '2026-11-12', `Dynamic asteroid ephem
 assert(mostSync.provenance.orbitalElementsEpoch.includes('60800.0'), `MOST provenance explicitly distinguishes cached orbital elements epoch (MJD 60800.0) from computation window`);
 const mostUnknown = computeLocalMovingObjectEphemeris('NonExistentObject99999');
 assert(mostUnknown && mostUnknown.unavailable === true && mostUnknown.dataClassificationBadge === 'UNAVAILABLE' && mostUnknown.ephemerides.length === 0, `Uncataloged object returns explicit UNAVAILABLE state without fabricating orbital elements`);
+
+// Test that all 5 authoritative targets handle MOST lookup safely without throwing exceptions
+for (const id of targetIds) {
+  const mostTarget = computeLocalMovingObjectEphemeris(id, '2026-11-12');
+  assert(mostTarget && mostTarget.unavailable === true && Array.isArray(mostTarget.ephemerides), `Target '${id}' safely handled by MOST without uncaught exceptions`);
+}
+
 const mostResult = await queryMovingObjectSearch('Ceres', '2026-11-12');
 assert(mostResult && mostResult.ephemerides.length > 0 && mostResult.ephemerides[0].utcDate.startsWith('2026-11-12'), `MOST query for asteroid Ceres returns multi-epoch orbital ephemerides for current 2026 window`);
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Arrow, LogoMark } from "../ui";
+import ErrorBoundary from "../ErrorBoundary";
 import { useRouter } from "../../lib/router";
 import { cn } from "../../utils/cn";
 import {
@@ -252,17 +253,17 @@ export default function SpherexHub() {
 
             {/* Active Target / Asteroid Concise Summary Strip */}
             {activeTab === "most" ? (
-              <div className="hidden xl:flex items-center gap-4 rounded-xl bg-[#070b14] border border-amber-500/30 px-4 py-1.5 text-xs font-mono">
-                <span className="text-amber-400 font-semibold">
-                  Active Asteroid: <strong className="text-slate-100">{selectedAsteroid}</strong>
+              <div className="hidden lg:flex items-center gap-3 rounded-xl bg-[#070b14] border border-amber-500/30 px-3.5 py-1.5 text-xs font-mono">
+                <span className="text-slate-300">
+                  Target: <strong className="text-slate-100">{currentTarget.name}</strong>
                 </span>
                 <span className="text-slate-700">|</span>
-                <span className="text-amber-300">
-                  {BENCHMARK_ASTEROIDS.find((a) => a.name === selectedAsteroid)?.type || "Solar System Minor Planet"}
+                <span className="text-amber-400 font-semibold">
+                  Asteroid: <strong className="text-slate-100">{selectedAsteroid}</strong>
                 </span>
                 <span className="text-slate-700">|</span>
                 <span className="text-sky-300">
-                  Semi-Major Axis a = {BENCHMARK_ASTEROIDS.find((a) => a.name === selectedAsteroid)?.a || "2.767 AU"}
+                  a = {BENCHMARK_ASTEROIDS.find((a) => a.name === selectedAsteroid)?.a || "2.767 AU"}
                 </span>
                 <span className="text-slate-700">|</span>
                 <span className="text-emerald-300">
@@ -270,7 +271,7 @@ export default function SpherexHub() {
                 </span>
               </div>
             ) : (
-              <div className="hidden xl:flex items-center gap-4 rounded-xl bg-[#070b14] border border-slate-800/90 px-4 py-1.5 text-xs font-mono">
+              <div className="hidden lg:flex items-center gap-4 rounded-xl bg-[#070b14] border border-slate-800/90 px-4 py-1.5 text-xs font-mono">
                 <span className="text-slate-400">
                   Active Target: <strong className="text-slate-100">{currentTarget.name}</strong>
                 </span>
@@ -303,60 +304,60 @@ export default function SpherexHub() {
 
           {/* Second Row: Well-Spaced Target Selector & Scientific Workflow Tabs */}
           <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/60">
-            {/* Target / Asteroid Selector Group with generous right padding to prevent R Draconis clipping */}
-            {activeTab === "most" ? (
-              <div className="w-full xl:w-auto flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 pr-6">
-                <span className="text-xs font-mono uppercase tracking-wider text-amber-400 font-semibold mr-1.5 shrink-0">
-                  Asteroid:
-                </span>
-                <div className="flex items-center gap-1 rounded-xl bg-[#070b14] p-1 border border-amber-500/40 shrink-0">
-                  {BENCHMARK_ASTEROIDS.map((a) => (
-                    <button
-                      key={a.id}
-                      data-asteroid-id={a.id}
-                      onClick={() => setSelectedAsteroid(a.name)}
-                      className={cn(
-                        "px-3 py-1.5 rounded-lg font-mono text-xs transition-all cursor-pointer whitespace-nowrap",
-                        selectedAsteroid === a.name
-                          ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
-                          : "text-slate-300 hover:text-white hover:bg-slate-800/70"
-                      )}
-                    >
-                      {a.name}
-                    </button>
-                  ))}
-                </div>
+            {/* Target Selector Group (Always visible for all 5 authoritative targets across all tabs) */}
+            <div className="w-full xl:w-auto flex items-center gap-2 overflow-x-auto scrollbar-none pb-1 pr-4">
+              <span className="text-xs font-mono uppercase tracking-wider text-slate-400 mr-1 shrink-0">
+                Target:
+              </span>
+              <div className="flex items-center gap-1 rounded-xl bg-[#070b14] p-1 border border-slate-800 shrink-0">
+                {[
+                  { id: "barnards-star", name: "Barnard's Star" },
+                  { id: "epsilon-indi-b", name: "Epsilon Indi B" },
+                  { id: "wise-0855", name: "WISE 0855" },
+                  { id: "rw-aurigae", name: "RW Aurigae" },
+                  { id: "r-draconis", name: "R Draconis" }
+                ].map((t) => (
+                  <button
+                    key={t.id}
+                    data-target-id={t.id}
+                    onClick={() => setSelectedTargetId(t.id)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg font-mono text-xs transition-all cursor-pointer whitespace-nowrap",
+                      selectedTargetId === t.id
+                        ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                        : "text-slate-300 hover:text-white hover:bg-slate-800/70"
+                    )}
+                  >
+                    {t.name}
+                  </button>
+                ))}
               </div>
-            ) : (
-              <div className="w-full xl:w-auto flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 pr-6">
-                <span className="text-xs font-mono uppercase tracking-wider text-slate-400 mr-1.5 shrink-0">
-                  Target:
-                </span>
-                <div className="flex items-center gap-1 rounded-xl bg-[#070b14] p-1 border border-slate-800 shrink-0">
-                  {[
-                    { id: "barnards-star", name: "Barnard's Star" },
-                    { id: "epsilon-indi-b", name: "Epsilon Indi B" },
-                    { id: "wise-0855", name: "WISE 0855" },
-                    { id: "rw-aurigae", name: "RW Aurigae" },
-                    { id: "r-draconis", name: "R Draconis" }
-                  ].map((t) => (
-                    <button
-                      key={t.id}
-                      data-target-id={t.id}
-                      onClick={() => setSelectedTargetId(t.id)}
-                      className={cn(
-                        "px-3 py-1.5 rounded-lg font-mono text-xs transition-all cursor-pointer whitespace-nowrap",
-                        selectedTargetId === t.id
-                          ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
-                          : "text-slate-300 hover:text-white hover:bg-slate-800/70"
-                      )}
-                    >
-                      {t.name}
-                    </button>
-                  ))}
+
+              {activeTab === "most" && (
+                <div className="flex items-center gap-1.5 pl-3 border-l border-slate-800 shrink-0">
+                  <span className="text-xs font-mono uppercase tracking-wider text-amber-400 font-semibold mr-1 shrink-0">
+                    Asteroid:
+                  </span>
+                  <div className="flex items-center gap-1 rounded-xl bg-[#070b14] p-1 border border-amber-500/40 shrink-0">
+                    {BENCHMARK_ASTEROIDS.map((a) => (
+                      <button
+                        key={a.id}
+                        data-asteroid-id={a.id}
+                        onClick={() => setSelectedAsteroid(a.name)}
+                        className={cn(
+                          "px-2.5 py-1.5 rounded-lg font-mono text-xs transition-all cursor-pointer whitespace-nowrap",
+                          selectedAsteroid === a.name
+                            ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                            : "text-slate-300 hover:text-white hover:bg-slate-800/70"
+                        )}
+                      >
+                        {a.name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Workflow Tabs — With clear icons and full text labels for Motion and Light Curve */}
             <div className="w-full xl:w-auto flex items-center gap-1 rounded-xl bg-[#070b14] p-1 border border-slate-800 overflow-x-auto scrollbar-none shrink-0 pb-1 pr-4">
@@ -495,44 +496,51 @@ export default function SpherexHub() {
         className="flex-1 max-w-[1600px] w-full mx-auto p-4 sm:p-6 relative"
         data-loading={loading ? "true" : "false"}
       >
-        {activeTab === "timeline" && (
-          <ObservationTimelineComparator
-            targetId={selectedTargetId}
-            targetName={currentTarget.name}
-            target={currentTarget}
-            observations={observations}
-          />
-        )}
+        <ErrorBoundary fallbackTitle="Scientific Workflow Module">
+          {activeTab === "timeline" && (
+            <ObservationTimelineComparator
+              targetId={selectedTargetId}
+              targetName={currentTarget.name}
+              target={currentTarget}
+              observations={observations}
+            />
+          )}
 
-        {activeTab === "sky" && (
-          <AladinSkyExplorer
-            target={currentTarget}
-            onSelectTarget={(id) => setSelectedTargetId(id)}
-          />
-        )}
+          {activeTab === "sky" && (
+            <AladinSkyExplorer
+              target={currentTarget}
+              onSelectTarget={(id) => setSelectedTargetId(id)}
+            />
+          )}
 
-        {activeTab === "motion" && (
-          <MotionDetectionViewer targetId={selectedTargetId} />
-        )}
+          {activeTab === "motion" && (
+            <MotionDetectionViewer targetId={selectedTargetId} />
+          )}
 
-        {activeTab === "variable" && (
-          <VariableStarLightCurve targetId={selectedTargetId} />
-        )}
+          {activeTab === "variable" && (
+            <VariableStarLightCurve
+              targetId={selectedTargetId}
+              target={currentTarget}
+            />
+          )}
 
-        {activeTab === "spectra" && (
-          <SpectralBandExplorer targetId={selectedTargetId} />
-        )}
+          {activeTab === "spectra" && (
+            <SpectralBandExplorer targetId={selectedTargetId} />
+          )}
 
-        {activeTab === "most" && (
-          <MostSolarSystemExplorer
-            selectedAsteroid={selectedAsteroid}
-            onSelectAsteroid={setSelectedAsteroid}
-          />
-        )}
+          {activeTab === "most" && (
+            <MostSolarSystemExplorer
+              selectedAsteroid={selectedAsteroid}
+              onSelectAsteroid={setSelectedAsteroid}
+              target={currentTarget}
+              targetId={selectedTargetId}
+            />
+          )}
 
-        {activeTab === "provenance" && (
-          <ProvenanceInspector target={currentTarget} observations={observations} />
-        )}
+          {activeTab === "provenance" && (
+            <ProvenanceInspector target={currentTarget} observations={observations} />
+          )}
+        </ErrorBoundary>
       </main>
     </section>
   );

@@ -176,6 +176,15 @@ export function getTargetLightCurve(targetId, bandFilter = 'all') {
       name: target.name,
       type: target.type,
       spectralType: target.spectralType,
+      distancePc: target.distancePc,
+      distanceLy: target.distanceLy,
+      totalProperMotionArcsecYr: target.totalProperMotionArcsecYr,
+      parallaxMas: target.parallaxMas,
+      parallaxErrorMas: target.parallaxErrorMas,
+      properMotionRaMasYr: target.properMotionRaMasYr,
+      properMotionDecMasYr: target.properMotionDecMasYr,
+      astrometricCatalog: target.astrometricCatalog,
+      astrometricCatalogId: target.astrometricCatalogId,
       periodDays: target.periodDays || null,
       variabilityType: target.variabilityType || 'Non-variable baseline',
       isPeriodicVariable: target.periodDays !== null && target.periodDays !== undefined,
@@ -210,6 +219,7 @@ export function generateLightCurveCsv(targetId, bandFilter = 'all') {
   const metaComments = [
     `# MARSAD — NASA SPHEREx Scientific Photometric Time-Series Export`,
     `# Target: ${data.target.name} (${data.target.id}) | Spectral Type: ${data.target.spectralType}`,
+    `# Astrometry: Distance ${data.target.distancePc} pc (${data.target.distanceLy} ly) | Total Proper Motion ${data.target.totalProperMotionArcsecYr} arcsec/yr | Parallax ${data.target.parallaxMas} mas (${data.target.astrometricCatalog})`,
     `# Coordinates (ICRS J2000): RA ${data.target.coordinates.raSexagesimal} (${data.target.coordinates.raDeg} deg), Dec ${data.target.coordinates.decSexagesimal} (${data.target.coordinates.decDeg} deg)`,
     `# Variability Classification: ${data.target.variabilityType}`,
     `# Verified Period: ${data.target.periodDays ? `${data.target.periodDays} days (${data.target.periodSource})` : 'None (Aperiodic or Non-Variable)'}`,
@@ -220,6 +230,8 @@ export function generateLightCurveCsv(targetId, bandFilter = 'all') {
 
   const headers = [
     'target_name',
+    'distance_pc',
+    'proper_motion_arcsec_yr',
     'obs_id',
     'detector',
     'bandpass',
@@ -243,6 +255,8 @@ export function generateLightCurveCsv(targetId, bandFilter = 'all') {
 
   const rows = data.measurements.map(m => [
     `"${data.target.name}"`,
+    data.target.distancePc,
+    data.target.totalProperMotionArcsecYr,
     `"${m.obsId}"`,
     `"${m.detector}"`,
     `"${m.bandpass}"`,

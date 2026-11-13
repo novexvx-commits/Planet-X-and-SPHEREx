@@ -5,13 +5,17 @@ import { computeLocalMovingObjectEphemeris } from "../../lib/scientificFallback"
 interface MostSolarSystemExplorerProps {
   selectedAsteroid?: string;
   onSelectAsteroid?: (name: string) => void;
+  target?: any;
+  targetId?: string;
 }
 
 const BENCHMARK_ASTEROIDS = ["1 Ceres", "4 Vesta", "12 Victoria", "433 Eros"];
 
 export default function MostSolarSystemExplorer({
   selectedAsteroid = "1 Ceres",
-  onSelectAsteroid
+  onSelectAsteroid,
+  target,
+  targetId
 }: MostSolarSystemExplorerProps) {
   const [targetName, setTargetName] = useState(selectedAsteroid);
   const [startDate, setStartDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
@@ -78,7 +82,16 @@ export default function MostSolarSystemExplorer({
     ctx.fillStyle = "#05060a";
     ctx.fillRect(0, 0, width, height);
 
-    const ephem = data.ephemerides;
+    const ephem = (data.ephemerides || []).filter(
+      (e: any) =>
+        e &&
+        typeof e.predictedRaDeg === "number" &&
+        !isNaN(e.predictedRaDeg) &&
+        typeof e.predictedDecDeg === "number" &&
+        !isNaN(e.predictedDecDeg)
+    );
+    if (ephem.length === 0) return;
+
     const ras = ephem.map((e: any) => e.predictedRaDeg);
     const decs = ephem.map((e: any) => e.predictedDecDeg);
 
@@ -201,6 +214,32 @@ export default function MostSolarSystemExplorer({
 
   return (
     <div className="rounded-2xl border border-slate-800 bg-[#0d1322] p-5 sm:p-6 shadow-2xl space-y-6">
+      {/* Target & Solar System Context Header */}
+      {target && (
+        <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-3.5 font-mono text-xs flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2 text-slate-300">
+            <span className="text-slate-400">Active SPHEREx Benchmark:</span>
+            <strong className="text-slate-100 font-bold">{target.name}</strong>
+            <span className="text-slate-600">·</span>
+            <span className="text-amber-300 font-semibold">{target.spectralType}</span>
+            <span className="text-slate-600">·</span>
+            <span className="text-sky-300">
+              d = {target.distancePc} pc ({target.distanceLy} ly)
+            </span>
+            <span className="text-slate-600">·</span>
+            <span className="text-slate-300">
+              μ = {target.totalProperMotionArcsecYr}″/yr
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-slate-400">SPHEREx Survey Window:</span>
+            <span className="rounded-lg bg-sky-500/15 border border-sky-500/40 px-2.5 py-0.5 text-sky-300 font-bold">
+              Solar Elongation 80° – 105°
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
@@ -214,7 +253,7 @@ export default function MostSolarSystemExplorer({
 
         {/* Preset Asteroid Buttons */}
         <div className="flex flex-wrap items-center gap-2">
-          {["1 Ceres", "4 Vesta", "12 Victoria", "433 Eros"].map((name) => (
+          {BENCHMARK_ASTEROIDS.map((name) => (
             <button
               key={name}
               onClick={() => {
@@ -332,11 +371,30 @@ export default function MostSolarSystemExplorer({
 
       {/* Unavailable State if uncataloged minor planet queried */}
       {!loading && data?.unavailable && (
-        <div className="rounded-xl border border-rose-500/40 bg-[#090e1a] p-6 text-center font-mono text-xs space-y-2">
-          <span className="inline-block rounded-md bg-rose-500/15 border border-rose-500/40 px-2.5 py-1 text-rose-300 font-bold uppercase">
-            UNAVAILABLE — Target Not in Verified Orbital Elements Catalog
-          </span>
-          <p className="text-slate-300 text-sm">{data.message}</p>
+        <div className="rounded-xl border border-rose-500/40 bg-[#090e1a] p-6 text-center font-mono text-xs space-y-4">
+          <div>
+            <span className="inline-block rounded-md bg-rose-500/15 border border-rose-500/40 px-2.5 py-1 text-rose-300 font-bold uppercase">
+              Notice: Minor Planet Target Not Found
+            </span>
+          </div>
+          <p className="text-slate-300 text-sm max-w-xl mx-auto leading-relaxed">{data.message}</p>
+          <div className="pt-2 flex flex-wrap justify-center items-center gap-2">
+            <span className="text-xs text-slate-400 mr-2">Select Benchmark Solar System Asteroid:</span>
+            {BENCHMARK_ASTEROIDS.map((name) => (
+              <button
+                key={name}
+                type="button"
+                onClick={() => {
+                  setTargetName(name);
+                  fetchMost(name, startDate);
+                  onSelectAsteroid?.(name);
+                }}
+                className="rounded-lg bg-amber-500/10 border border-amber-500/40 px-3 py-1.5 text-xs text-amber-300 hover:bg-amber-500/20 transition-colors cursor-pointer"
+              >
+                {name}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -351,7 +409,7 @@ export default function MostSolarSystemExplorer({
                   <h4 className="font-serif text-2xl text-slate-100">
                     {data.target.name}{" "}
                     <span className="font-mono text-sm text-amber-300">
-                      (MPC #{data.target.mpcNumber ?? data.target.jplId?.replace(";", "")} ·{" "}
+                      (MPC #{data.target.mpcNumber ?? (typeof data.target.jplId === "string" ? data.target.jplId.replace(";", "") : data.target.jplId)} ·{" "}
                       {data.target.spectralClass || "Minor Planet"}-type)
                     </span>
                   </h4>

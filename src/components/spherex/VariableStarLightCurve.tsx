@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Arrow } from "../ui";
 import { cn } from "../../utils/cn";
-import { getTargetLightCurve, generateLightCurveCsv, formatMjd } from "../../lib/scientificFallback";
+import { getTargetLightCurve, generateLightCurveCsv, formatMjd, getLocalTargetById } from "../../lib/scientificFallback";
 
 interface VariableStarProps {
   targetId: string;
+  target?: any;
 }
 
 const BAND_COLORS: Record<string, string> = {
@@ -16,7 +17,7 @@ const BAND_COLORS: Record<string, string> = {
   D6: "#e2552e"  // Deep ember
 };
 
-export default function VariableStarLightCurve({ targetId }: VariableStarProps) {
+export default function VariableStarLightCurve({ targetId, target }: VariableStarProps) {
   const [selectedBand, setSelectedBand] = useState<string>("all");
   const [data, setData] = useState<any>(() => getTargetLightCurve(targetId, "all"));
   const [loading, setLoading] = useState(false);
@@ -315,6 +316,42 @@ export default function VariableStarLightCurve({ targetId }: VariableStarProps) 
           </button>
         </div>
       </div>
+
+      {/* Active Target Astrometric & Physical Benchmark Strip */}
+      {(() => {
+        const activeTarget = {
+          ...getLocalTargetById(targetId),
+          ...(target || {}),
+          ...(data?.target || {})
+        };
+        return (
+          <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-3.5 font-mono text-xs flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2 text-slate-300">
+              <span className="text-slate-400">Active Target:</span>
+              <strong className="text-slate-100 font-bold">{activeTarget.name}</strong>
+              <span className="text-slate-600">·</span>
+              <span className="text-amber-300 font-semibold">{activeTarget.spectralType}</span>
+              <span className="text-slate-600">·</span>
+              <span className="text-sky-300">
+                d = {activeTarget.distancePc} pc ({activeTarget.distanceLy} ly)
+              </span>
+              <span className="text-slate-600">·</span>
+              <span className="text-slate-300">
+                μ = {activeTarget.totalProperMotionArcsecYr}″/yr
+              </span>
+              {activeTarget.parallaxMas && (
+                <>
+                  <span className="text-slate-600">·</span>
+                  <span className="text-slate-400">π = {activeTarget.parallaxMas} mas</span>
+                </>
+              )}
+            </div>
+            <span className="text-slate-400 text-xs">
+              ICRS J2000: {activeTarget.raSexagesimal} · {activeTarget.decSexagesimal}
+            </span>
+          </div>
+        );
+      })()}
 
       {/* Canonical Data Classification & Period Status Banner */}
       <div className="rounded-xl border border-slate-800 bg-[#090e1a] p-3.5 font-mono text-xs flex flex-wrap items-center justify-between gap-3">
