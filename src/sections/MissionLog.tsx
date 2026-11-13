@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { cn } from "../utils/cn";
 import { Arrow, Kicker, Magnetic, SplitText, dv } from "../components/ui";
+import { clamp, subscribe, scrollToTarget, refreshEngine } from "../lib/engine";
 
 type Kind = "lens" | "star" | "ship" | "planet" | "hole" | "signal";
 
@@ -91,128 +92,99 @@ function Orbit({ i, rgb, kind }: { i: number; rgb: string; kind: Kind }) {
   );
 }
 
-/** Scene 7 — Interactive horizontal timeline: drag inertia, touch swipe, wheel, keys & arrows */
+/**
+ * Scene 7 — Pinned Horizontal Scrollytelling Timeline:
+ * As the user scrolls vertically down the page, the section stays pinned and
+ * the 10 milestone cards smoothly glide horizontally along the X-axis.
+ * Also supports manual pointer dragging, swipe gestures, arrow buttons, and keyboard navigation.
+ */
 export default function MissionLog() {
+  const sectionRef = useRef<HTMLElement>(null);
   const vpRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
-  const api = useRef<{ go: (dir: number) => void }>({ go: () => {} });
   const [idx, setIdx] = useState(0);
   const [edges, setEdges] = useState({ start: true, end: false });
 
+  // Sync horizontal translation with vertical scroll progress
+  useEffect(() => {
+    refreshEngine();
+
+    let lastP = -1;
+    const unsubscribe = subscribe(({ vh }) => {
+      const sec = sectionRef.current;
+      const track = trackRef.current;
+      const vp = vpRef.current;
+      if (!sec || !track || !vp) return;
+
+      const rect = sec.getBoundingClientRect();
+      const scrollDist = rect.height - vh;
+      if (scrollDist <= 0) return;
+
+      // Calculate scroll progress p [0, 1] through the pinned section
+      const p = clamp(-rect.top / scrollDist);
+      if (Math.abs(p - lastP) < 0.0001) return;
+      lastP = p;
+
+      // Translate track horizontally along X-axis
+      const maxTranslate = Math.max(0, track.scrollWidth - vp.clientWidth);
+      const currentX = -p * maxTranslate;
+
+      track.style.transform = `translate3d(${currentX.toFixed(2)}px, 0, 0)`;
+
+      if (barRef.current) {
+        barRef.current.style.transform = `scaleX(${Math.max(0.06, p).toFixed(4)})`;
+      }
+
+      const activeIdx = Math.min(LOG.length - 1, Math.round(p * (LOG.length - 1)));
+      setIdx(activeIdx);
+      setEdges({ start: p <= 0.02, end: p >= 0.98 });
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // Pointer drag to scroll interaction
   useEffect(() => {
     const vp = vpRef.current;
-    const track = trackRef.current;
-    if (!vp || !track) return;
+    if (!vp) return;
 
-    let x = 0;
-    let v = 0;
-    let target = 0;
-    let min = 0;
-    let raf = 0;
     let dragging = false;
     let startX = 0;
-    let startPos = 0;
-    let lastX = 0;
-    let lastT = 0;
-    let snaps: number[] = [0];
-    let curIdx = -1;
-    let curStart = true;
-    let curEnd = false;
-    let wheelTimer = 0;
+    let startScrollY = 0;
 
-    const render = () => {
-      track.style.transform = `translate3d(${x.toFixed(2)}px,0,0)`;
-      const prog = min < 0 ? Math.min(1, Math.max(0, x / min)) : 0;
-      if (barRef.current) barRef.current.style.transform = `scaleX(${Math.max(0.06, prog).toFixed(4)})`;
-      const di = Math.round(prog * (LOG.length - 1));
-      if (di !== curIdx) {
-        curIdx = di;
-        setIdx(di);
-      }
-      const s = x > -2;
-      const e = x < min + 2;
-      if (s !== curStart || e !== curEnd) {
-        curStart = s;
-        curEnd = e;
-        setEdges({ start: s, end: e });
-      }
-    };
-
-    const measure = () => {
-      const cards = Array.from(track.children) as HTMLElement[];
-      const pad = cards[0] ? cards[0].offsetLeft : 0;
-      min = Math.min(0, vp.clientWidth - track.offsetWidth);
-      snaps = cards.map((c) => Math.max(min, Math.min(0, -(c.offsetLeft - pad))));
-      x = Math.max(min, Math.min(0, x));
-      target = Math.max(min, Math.min(0, target));
-      render();
-    };
-
-    const nearest = (pos: number) => {
-      let best = 0;
-      let bd = Infinity;
-      snaps.forEach((s, i) => {
-        const d = Math.abs(s - pos);
-        if (d < bd - 0.5) {
-          bd = d;
-          best = i;
-        }
-      });
-      return best;
-    };
-
-    const tick = () => {
-      if (!dragging) {
-        v += (target - x) * 0.07;
-        v *= 0.76;
-        x += v;
-        if (Math.abs(v) < 0.02 && Math.abs(target - x) < 0.3) {
-          x = target;
-          v = 0;
-          render();
-          raf = 0;
-          return;
-        }
-      }
-      render();
-      raf = requestAnimationFrame(tick);
-    };
-    const kick = () => {
-      if (!raf) raf = requestAnimationFrame(tick);
-    };
-
-    const down = (e: PointerEvent) => {
+    const onPointerDown = (e: PointerEvent) => {
       if (e.pointerType === "mouse" && e.button !== 0) return;
       dragging = true;
-      startX = lastX = e.clientX;
-      startPos = x;
-      lastT = performance.now();
-      v = 0;
+      startX = e.clientX;
+      startScrollY = window.scrollY;
       try {
         vp.setPointerCapture(e.pointerId);
       } catch {
         /* noop */
       }
       vp.classList.add("is-dragging");
-      cancelAnimationFrame(raf);
-      raf = 0;
     };
-    const move = (e: PointerEvent) => {
+
+    const onPointerMove = (e: PointerEvent) => {
       if (!dragging) return;
-      const now = performance.now();
-      let nx = startPos + (e.clientX - startX);
-      if (nx > 0) nx *= 0.35;
-      else if (nx < min) nx = min + (nx - min) * 0.35;
-      const dt = Math.max(1, now - lastT);
-      const inst = ((e.clientX - lastX) / dt) * 16.67;
-      v = v * 0.55 + inst * 0.45;
-      lastX = e.clientX;
-      lastT = now;
-      x = nx;
-      render();
+      const sec = sectionRef.current;
+      const track = trackRef.current;
+      if (!sec || !track) return;
+
+      const dx = e.clientX - startX;
+      const maxTranslate = Math.max(1, track.scrollWidth - vp.clientWidth);
+      const totalScrollable = sec.getBoundingClientRect().height - window.innerHeight;
+      const deltaScrollY = -(dx / maxTranslate) * totalScrollable;
+      window.scrollTo({
+        top: startScrollY + deltaScrollY,
+        behavior: "auto"
+      });
     };
-    const up = (e: PointerEvent) => {
+
+    const onPointerUp = (e: PointerEvent) => {
       if (!dragging) return;
       dragging = false;
       vp.classList.remove("is-dragging");
@@ -221,137 +193,134 @@ export default function MissionLog() {
       } catch {
         /* noop */
       }
-      if (performance.now() - lastT > 90) v = 0;
-      const projected = Math.max(min, Math.min(0, x + v * 14));
-      target = snaps[nearest(projected)];
-      kick();
-    };
-    const wheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
-      e.preventDefault();
-      x = Math.max(min, Math.min(0, x - e.deltaX));
-      target = x;
-      v = 0;
-      render();
-      window.clearTimeout(wheelTimer);
-      wheelTimer = window.setTimeout(() => {
-        target = snaps[nearest(x)];
-        kick();
-      }, 160);
     };
 
-    api.current.go = (dir: number) => {
-      const i = nearest(x);
-      let ni = Math.max(0, Math.min(snaps.length - 1, i + dir));
-      while (dir > 0 && ni < snaps.length - 1 && snaps[ni] === snaps[i]) ni++;
-      target = snaps[ni];
-      kick();
-    };
-
-    vp.addEventListener("pointerdown", down);
-    vp.addEventListener("pointermove", move);
-    vp.addEventListener("pointerup", up);
-    vp.addEventListener("pointercancel", up);
-    vp.addEventListener("wheel", wheel, { passive: false });
-    const ro = new ResizeObserver(measure);
-    ro.observe(vp);
-    ro.observe(track);
-    measure();
+    vp.addEventListener("pointerdown", onPointerDown);
+    vp.addEventListener("pointermove", onPointerMove);
+    vp.addEventListener("pointerup", onPointerUp);
+    vp.addEventListener("pointercancel", onPointerUp);
 
     return () => {
-      cancelAnimationFrame(raf);
-      window.clearTimeout(wheelTimer);
-      ro.disconnect();
-      vp.removeEventListener("pointerdown", down);
-      vp.removeEventListener("pointermove", move);
-      vp.removeEventListener("pointerup", up);
-      vp.removeEventListener("pointercancel", up);
-      vp.removeEventListener("wheel", wheel);
+      vp.removeEventListener("pointerdown", onPointerDown);
+      vp.removeEventListener("pointermove", onPointerMove);
+      vp.removeEventListener("pointerup", onPointerUp);
+      vp.removeEventListener("pointercancel", onPointerUp);
     };
   }, []);
+
+  const go = (direction: number) => {
+    if (!sectionRef.current) return;
+    const nextIdx = Math.max(0, Math.min(LOG.length - 1, idx + direction));
+    const targetP = nextIdx / (LOG.length - 1);
+    const rect = sectionRef.current.getBoundingClientRect();
+    const secTop = window.scrollY + rect.top;
+    const totalScrollable = rect.height - window.innerHeight;
+    const targetY = secTop + targetP * totalScrollable;
+    scrollToTarget(targetY, { duration: 0.8 });
+  };
 
   const onKey = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "ArrowRight") {
       e.preventDefault();
-      api.current.go(1);
+      go(1);
     } else if (e.key === "ArrowLeft") {
       e.preventDefault();
-      api.current.go(-1);
+      go(-1);
     }
   };
 
   const pad = (n: number) => String(n).padStart(2, "0");
 
   return (
-    <section id="log" className="relative overflow-hidden py-28 md:py-40">
-      <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-0 h-px w-[80%] -translate-x-1/2 bg-linear-to-r from-transparent via-white/15 to-transparent" />
-      <div aria-hidden="true" className="pointer-events-none absolute -top-[20vw] left-1/2 h-[50vw] w-[80vw] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(107,70,255,0.1),transparent_65%)]" />
+    <section ref={sectionRef} id="log" className="relative h-[360vh] bg-ink">
+      {/* Sticky Fullscreen Stage */}
+      <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between py-8 md:py-12 select-none">
+        {/* Ambient Top Glow */}
+        <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-0 h-px w-[80%] -translate-x-1/2 bg-linear-to-r from-transparent via-white/15 to-transparent" />
+        <div aria-hidden="true" className="pointer-events-none absolute -top-[12vw] left-1/2 h-[45vw] w-[75vw] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(107,70,255,0.12),transparent_65%)]" />
 
-      <div className="shell relative flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
-        <div>
-          <Kicker>Chapter VII — Mission Chronology</Kicker>
-          <SplitText text="Survey Cadence, | *logged across epochs.*" className="mt-6 font-serif text-[clamp(2.9rem,7vw,7.2rem)] leading-[0.9] tracking-[-0.015em]" />
-          <p className="mt-3 font-mono text-xs text-bone/60 max-w-xl">
-            NASA Mission Lifecycle & Operations Roadmap (Feb 2019 – Nov 2026): Encompasses mission formulation, Phase C/D instrument testing, March 2025 launch, and the two-year baseline on-sky prime survey (four 6-month all-sky maps) leading to DR1.
-          </p>
+        {/* Header Bar */}
+        <div className="shell relative flex flex-col gap-4 sm:gap-6 md:flex-row md:items-end md:justify-between shrink-0">
+          <div>
+            <Kicker>Chapter VII — Mission Chronology</Kicker>
+            <SplitText text="Survey Cadence, | *logged across epochs.*" className="mt-3 font-serif text-[clamp(2.4rem,5.6vw,5.2rem)] leading-[0.9] tracking-[-0.015em]" />
+            <p className="mt-2 font-mono text-xs text-bone/60 max-w-xl hidden sm:block">
+              NASA Mission Lifecycle & Operations Roadmap (Feb 2019 – Nov 2026): Formulation, instrument qualification, March 2025 launch, and prime survey leading to DR1.
+            </p>
+          </div>
+          <div className="flex items-center gap-5">
+            <span className="mr-2 font-mono text-xs tabular-nums text-bone/60">
+              <span className="text-amber-400 font-bold">{pad(idx + 1)}</span> / {pad(LOG.length)}
+            </span>
+            <Magnetic>
+              <button type="button" aria-label="Previous milestone" disabled={edges.start} onClick={() => go(-1)} className="arrow-btn cursor-pointer">
+                <Arrow className="h-5 w-5" dir="left" />
+              </button>
+            </Magnetic>
+            <Magnetic>
+              <button type="button" aria-label="Next milestone" disabled={edges.end} onClick={() => go(1)} className="arrow-btn cursor-pointer">
+                <Arrow className="h-5 w-5" />
+              </button>
+            </Magnetic>
+          </div>
         </div>
-        <div data-reveal="fade" style={dv({ "--d": "300ms" })} className="flex items-center gap-5">
-          <span className="mr-2 font-mono text-xs tabular-nums text-bone/45">
-            <span className="text-bone">{pad(idx + 1)}</span> / {pad(LOG.length)}
-          </span>
-          <Magnetic>
-            <button type="button" aria-label="Previous milestone" disabled={edges.start} onClick={() => api.current.go(-1)} className="arrow-btn">
-              <Arrow className="h-5 w-5" dir="left" />
-            </button>
-          </Magnetic>
-          <Magnetic>
-            <button type="button" aria-label="Next milestone" disabled={edges.end} onClick={() => api.current.go(1)} className="arrow-btn">
-              <Arrow className="h-5 w-5" />
-            </button>
-          </Magnetic>
-        </div>
-      </div>
 
-      <div
-        ref={vpRef}
-        data-cursor="drag"
-        tabIndex={0}
-        role="region"
-        aria-roledescription="carousel"
-        aria-label="Mission log timeline. Use arrow keys to navigate."
-        onKeyDown={onKey}
-        className="log-vp relative mt-14 cursor-grab touch-pan-y select-none overflow-hidden outline-none focus-visible:ring-1 focus-visible:ring-white/25 md:mt-20"
-      >
-        <div ref={trackRef} className="log-track flex w-max gap-4 py-4 will-change-transform md:gap-6">
-          {LOG.map((m, i) => (
-            <article
-              key={m.year}
-              className="log-card group relative w-[80vw] shrink-0 overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.025] p-6 sm:w-[380px] md:p-8 lg:w-[410px]"
-            >
-              <div className="shine" />
-              <div className="flex items-start justify-between">
-                <span className="font-mono text-[10px] uppercase tracking-[0.22em]" style={{ color: `rgb(${m.rgb})` }}>
-                  {m.tag}
-                </span>
-                <span className="font-mono text-[10px] tracking-[0.22em] text-bone/35">M-{pad(i + 1)}</span>
-              </div>
-              <div className="relative mt-6 h-32 overflow-hidden rounded-2xl border border-white/[0.06] bg-black/30 md:h-36">
-                <Orbit i={i} rgb={m.rgb} kind={m.kind} />
-              </div>
-              <p className="mt-7 font-serif text-6xl leading-none tracking-tight md:text-7xl">{m.year}</p>
-              <h3 className="mt-4 text-lg font-medium tracking-tight md:text-xl">{m.title}</h3>
-              <p className="mt-3 text-[14px] leading-relaxed text-bone/55">{m.text}</p>
-              <div className={cn("mt-7 h-px w-full", i === 7 || i === 8 ? "bg-linear-to-r from-ember/60 to-transparent" : "bg-white/[0.07]")} />
-            </article>
-          ))}
+        {/* Horizontal Track Viewport */}
+        <div
+          ref={vpRef}
+          data-cursor="drag"
+          tabIndex={0}
+          role="region"
+          aria-roledescription="carousel"
+          aria-label="Mission log timeline. Scroll vertically to explore along the X-axis."
+          onKeyDown={onKey}
+          className="log-vp relative flex-1 flex items-center overflow-hidden outline-none cursor-grab active:cursor-grabbing my-auto py-2"
+        >
+          <div
+            ref={trackRef}
+            className="log-track flex w-max gap-4 sm:gap-6 px-6 sm:px-12 md:px-20 will-change-transform"
+            style={{ transform: "translate3d(0, 0, 0)", transition: "none" }}
+          >
+            {LOG.map((m, i) => (
+              <article
+                key={m.year}
+                className="log-card group relative w-[82vw] shrink-0 overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.03] backdrop-blur-md p-5 sm:w-[350px] md:p-6 lg:w-[390px] flex flex-col justify-between transition-colors hover:border-white/20"
+              >
+                <div className="shine" />
+                <div>
+                  <div className="flex items-start justify-between">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.22em] font-semibold" style={{ color: `rgb(${m.rgb})` }}>
+                      {m.tag}
+                    </span>
+                    <span className="font-mono text-[10px] tracking-[0.22em] text-bone/40">M-{pad(i + 1)}</span>
+                  </div>
+                  <div className="relative mt-4 h-24 sm:h-28 md:h-32 overflow-hidden rounded-2xl border border-white/[0.06] bg-black/40">
+                    <Orbit i={i} rgb={m.rgb} kind={m.kind} />
+                  </div>
+                  <p className="mt-4 font-serif text-4xl sm:text-5xl md:text-6xl leading-none tracking-tight text-slate-100">{m.year}</p>
+                  <h3 className="mt-3 text-base sm:text-lg font-medium tracking-tight text-white">{m.title}</h3>
+                  <p className="mt-2 text-xs sm:text-[13px] leading-relaxed text-bone/60">{m.text}</p>
+                </div>
+                <div className={cn("mt-4 h-px w-full", i === 7 || i === 8 ? "bg-linear-to-r from-ember/60 to-transparent" : "bg-white/[0.08]")} />
+              </article>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className="shell mt-10 flex items-center gap-6">
-        <div className="h-px flex-1 bg-white/10">
-          <div ref={barRef} className="h-full origin-left bg-linear-to-r from-ion via-nebula to-ember" style={{ transform: "scaleX(0.06)" }} />
+        {/* Footer Progress Bar & Interaction Hint */}
+        <div className="shell flex items-center justify-between gap-6 shrink-0 pt-2">
+          <div className="h-1 flex-1 rounded-full bg-white/10 overflow-hidden">
+            <div
+              ref={barRef}
+              className="h-full origin-left rounded-full bg-linear-to-r from-ion via-nebula to-ember transition-transform duration-75"
+              style={{ transform: "scaleX(0.06)" }}
+            />
+          </div>
+          <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.2em] text-bone/50 shrink-0">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+            <span>Scroll to navigate timeline · Drag · ← →</span>
+          </div>
         </div>
-        <span className="hidden font-mono text-[10px] uppercase tracking-[0.2em] text-bone/40 sm:block">Drag · Swipe · ← →</span>
       </div>
     </section>
   );
