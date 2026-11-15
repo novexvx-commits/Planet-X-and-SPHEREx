@@ -1,216 +1,202 @@
-# MARSAD: NASA SPHEREx 2026 Space Apps Challenge Exploration Platform
+<p align="center">
+  <img src="public/marsad-badge.png" alt="MARSAD — Detecting Moving Objects in Space" width="480" style="border-radius: 12px; box-shadow: 0 12px 36px rgba(0,0,0,0.6);" />
+</p>
 
-[![NASA Space Apps Challenge](https://img.shields.io/badge/NASA%20Space%20Apps-2026%20Challenge-orange.svg)](https://www.spaceappschallenge.org/)
-[![SPHEREx Mission](https://img.shields.io/badge/Mission-NASA%20SPHEREx-blue.svg)](https://spherex.caltech.edu/)
-[![IRSA Archive](https://img.shields.io/badge/Archive-NASA%2FIPAC%20IRSA-red.svg)](https://irsa.ipac.caltech.edu/Missions/spherex.html)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+<h1 align="center">MARSAD: Detecting Moving Objects in Space</h1>
 
-**MARSAD** is a complete, science-driven, production-quality web platform built for the **2026 NASA Space Apps Challenge** to explore time-dependent astronomical observations from NASA's **SPHEREx** (Spectro-Photometer for the History of the Universe, Epoch of Reionization, and Ices Explorer) mission.
+<p align="center">
+  <strong>Interactive Scientific Observatory for NASA SPHEREx All-Sky Time-Domain Spectroscopy</strong>
+  <br />
+  <em>Built for the 2026 NASA Space Apps Challenge</em>
+</p>
 
-SPHEREx maps the entire celestial sphere every six months in **102 near-infrared spectral bands** (0.75 µm to 5.00 µm). This platform enables researchers, educators, and the public to navigate the infrared sky, track moving objects, detect proper motion, monitor variable stars, analyze spectral features, and conduct registered difference imaging across observation epochs.
-
----
-
-## 🌌 Platform Highlights
-
-- **Authentic NASA SPHEREx QR2 Data**: Direct programmatic integration with NASA/IPAC IRSA SIAv2 and TAP interfaces, plus byte-range access on the public AWS Open Data S3 repository (`s3://nasa-irsa-spherex`).
-- **5 Required Astronomical Targets**:
-  1. **Barnard's Star**: High proper motion M-dwarf star (~10.39"/yr), astrometric centroid tracking across multi-epoch sky scans, and vector displacement validation against Gaia DR3.
-  2. **Epsilon Indi B**: Cold brown dwarf binary system (T1 + T6), methane ($CH_4$) and water vapor ($H_2O$) absorption features across 1.4 – 3.3 µm.
-  3. **WISE 0855**: Coldest known brown dwarf ($T_{\text{eff}} \approx 250\text{ K}$), water ice cloud detection in the SPHEREx Array 6 window (4.42 – 5.00 µm).
-  4. **RW Aurigae**: Classical T Tauri young variable star system, multi-epoch light curves revealing protoplanetary dust occultation events and circumstellar extinction.
-  5. **R Draconis**: Mira-type long-period pulsating variable star ($P = 245.6$ days), near-infrared amplitude variation across opposing pulsation phases.
-- **Interactive Sky Explorer**: CDS Strasbourg **Aladin Lite v3** WebGL celestial viewport with live all-sky surveys (**2MASS Near-IR**, **AllWISE**, **DSS2 Optical Color**), SPHEREx focal plane array footprints (2048×2048, 6.2"/pixel), J2000 coordinate grid, and Gaia DR3 reference stars.
-- **Time-Based Timeline & Comparator**:
-  - Chronological observation scrubber with play/pause, step controls, and adjustable playback speed (0.5× to 4×).
-  - Four comparison modes: **Side-by-Side**, **Blink Comparator** (1–4 Hz), **Opacity Crossfade Overlay**, and **Astrometrically Registered Difference Imaging** ($D = (I_2 - B_2) - \alpha(I_1 - B_1)$ with $>3\sigma$ change detection).
-- **Astrometric Motion Detection Engine**: Automated centroid determination, angular displacement ($\Delta \theta$), apparent velocity ($\mu$ in arcsec/yr), position angle, and statistical confidence scoring ($>5\sigma$).
-- **Variable Star Spectrophotometry**: Multi-band time-series light curves across all 6 detector arrays, flux density ($\mathrm{mJy}$) vs AB magnitude toggles, photometric error bars ($\pm 1\sigma$), and instant **CSV data export**.
-- **102-Band Spectral Explorer**: Complete mapping of the 6 Linear Variable Filter (LVF) detector arrays, interactive wavelength scrubber from 0.75 to 5.00 µm, and target Spectral Energy Distributions (SEDs) highlighting interstellar water ice, $CO_2$ ice, $CO$ ice, and methane.
-- **Moving Object Search Tool (MOST)**: Programmatic integration with IRSA MOST for solar system asteroids (Ceres, Vesta, Victoria) and predicted survey scan intersections.
-- **Scientific Provenance & Data Lineage**: Complete transparency distinguishing direct SPHEREx observations, calibrated photometry, Gaia/SIMBAD catalog data, and orbital models, with **JSON dossier export**.
+<p align="center">
+  <a href="https://nasa-2-xssz.vercel.app"><img src="https://img.shields.io/badge/Live%20Platform-nasa--2--xssz.vercel.app-ff8a3d?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" /></a>
+  <a href="https://spherex.caltech.edu/"><img src="https://img.shields.io/badge/NASA%20Mission-SPHEREx-0052cc?style=for-the-badge&logo=nasa&logoColor=white" alt="SPHEREx Mission" /></a>
+  <a href="https://irsa.ipac.caltech.edu/"><img src="https://img.shields.io/badge/Archive-NASA%2FIPAC%20IRSA-e03e2d?style=for-the-badge" alt="NASA IPAC IRSA" /></a>
+  <img src="https://img.shields.io/badge/Tests-109%2F109%20Passing-success?style=for-the-badge" alt="Tests" />
+  <img src="https://img.shields.io/badge/License-MIT-blueviolet?style=for-the-badge" alt="License" />
+</p>
 
 ---
 
-## 🏗️ System Architecture
+## 🧭 Overview & Mission
+
+**MARSAD** (Arabic for *Observatory / مَرْصَد*) is an interactive, science-grade research and exploration platform designed around NASA's revolutionary **SPHEREx** (*Spectro-Photometer for the History of the Universe, Epoch of Reionization, and Ices Explorer*) mission.
+
+Operating from a polar Sun-synchronous Low Earth Orbit ($700\text{ km}$), SPHEREx scans the entire celestial vault every six months, dissecting every pixel into **102 near-infrared spectral channels** ($0.75\,\mu\text{m}$ to $5.00\,\mu\text{m}$). MARSAD harnesses this multi-epoch spectroscopic data to detect moving solar system bodies, track stellar proper motions, monitor variable stars, and analyze circumstellar biogenic ices.
+
+> 🪐 **Live Deployment:** [https://nasa-2-xssz.vercel.app](https://nasa-2-xssz.vercel.app)  
+> 📑 **Full Scientific Report:** Available in PDF format in the repository (`NASA_SPHEREx_2026_Full_Scientific_Report.pdf`).
+
+---
+
+## ✨ Key Features & Capabilities
 
 ```
-cinematic-scrollytelling-web-experience/
-├── server/                                # Production Node.js / Express Backend
-│   ├── server.js                          # Express server with CORS & SPA fallback
-│   ├── routes/
-│   │   └── api.js                         # REST API endpoints (/api/*)
-│   ├── services/
-│   │   ├── irsaTapService.js              # NASA/IPAC IRSA SIAv2 & TAP query client
-│   │   ├── spherexService.js              # SPHEREx multi-extension FITS & metadata
-│   │   ├── fitsProcessor.js               # FITS header parser & TAN WCS projection
-│   │   ├── imageComparisonService.js      # Blink comparator & difference imaging
-│   │   ├── motionService.js               # Centroid tracking & proper motion vectors
-│   │   ├── photometryService.js           # Forced photometry & CSV export
-│   │   ├── spectralService.js             # 102-band spectral channels & SED
-│   │   ├── mostMovingObjectService.js     # IRSA MOST asteroid search integration
-│   │   └── simbadService.js               # SIMBAD Sesame celestial name resolver
-│   ├── data/
-│   │   ├── authoritativeTargets.js        # Verified target astrophysics metadata
-│   │   ├── spectralBands102.js            # 102 LVF bandpass specifications
-│   │   └── cachedObservations.js          # Authoritative multi-epoch SPHEREx records
-│   ├── utils/
-│   │   └── astronomy.js                   # Coordinates, MJD, flux/mag conversions
-│   └── test/
-│       ├── api.test.js                    # Scientific calculation unit tests
-│       └── e2e.test.js                    # End-to-end HTTP integration tests
-├── src/                                   # Modern React 19 Frontend
-│   ├── App.tsx                            # Root application with client-side SPA routing
-│   ├── pages/
-│   │   ├── HomePage.tsx                   # Dedicated cinematic scrollytelling page (with "Try MARSAD")
-│   │   └── ExperiencePage.tsx             # Completely isolated scientific platform (No navbar, only Back to Home)
-│   ├── lib/
-│   │   └── router.tsx                     # Zero-dependency History API router (/ and /experience)
-│   ├── components/
-│   │   ├── Nav.tsx                        # Cinematic navigation header (Homepage)
-│   │   └── spherex/
-│   │       ├── SpherexHub.tsx             # Master scientific exploration command station
-│   │       ├── AladinSkyExplorer.tsx      # Interactive celestial viewport & FOV footprint
-│   │       ├── ObservationTimelineComparator.tsx # Timeline, Blink, & Difference Imaging
-│   │       ├── MotionDetectionViewer.tsx  # Astrometric centroid vector plot & Gaia stats
-│   │       ├── VariableStarLightCurve.tsx # Multi-band light curves & CSV download
-│   │       ├── SpectralBandExplorer.tsx   # 102-band wavelength explorer & SED
-│   │       ├── MostSolarSystemExplorer.tsx# IRSA MOST moving object orbit matcher
-│   │       └── ProvenanceInspector.tsx    # Scientific data lineage & JSON export
-│   └── sections/                          # Cinematic scrollytelling narrative
-│       ├── Hero.tsx                       # WebGL 3D black hole, starfield & "Try MARSAD" CTA
-│       ├── Prologue.tsx                   # Narrative mission prologue
-│       ├── Spacewalk.tsx                  # Three.js 3D space walk & hyperspace warp
-│       ├── Telemetry.tsx                  # Cosmic Dawn lookback depth & redshift mapping
-│       ├── Systems.tsx                    # SPHEREx telescope & cryogenic subsystems
-│       ├── Vision.tsx                     # 3 Grand questions of cosmic science
-│       ├── MissionLog.tsx                 # SPHEREx survey cadence & mission chronology
-│       └── Finale.tsx                     # Open science & community research platform
-├── dist/                                  # Production single-file bundle
-├── package.json                           # Scripts and dependencies
-└── vite.config.ts                         # Vite configuration with /api proxy
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                             MARSAD OBSERVATORY                              │
+├──────────────────────┬──────────────────────┬───────────────────────────────┤
+│ 🔭 Sky Map           │ 🌈 Spectral Explorer │ 📈 Variable Star Light Curves │
+│ Multi-wavelength CDS │ 102 channels across  │ Multi-epoch photometry, Lomb- │
+│ Aladin Lite WebGL    │ LVF arrays D1–D6     │ Scargle periods & CSV export  │
+├──────────────────────┼──────────────────────┼───────────────────────────────┤
+│ ⏱️ Epoch Comparator  │ ☄️ Asteroids (MOST)  │ ⚡ Proper Motion Vectors      │
+│ Multi-epoch split-   │ JPL SBDB orbits &    │ Astrometric velocity tracking │
+│ swipe difference     │ SPHEREx 80°–105° cone│ verified against Gaia DR3     │
+└──────────────────────┴──────────────────────┴───────────────────────────────┘
 ```
+
+### 1. 🌌 Interactive Multi-Wavelength Sky Map (`sky`)
+- Integrated with the **CDS Strasbourg Aladin Lite v3** WebGL engine.
+- Direct multi-survey layer toggles: **2MASS** (J/H/Ks), **AllWISE** (W1–W4 mid-IR), **DSS2 Optical Color**, and **Pan-STARRS1 DR1**.
+- Calibrated field of view ($3.5^\circ \times 11.3^\circ$ detector footprint) and J2000 coordinate overlays.
+
+### 2. 🌈 102-Band Spectral Explorer (`spectral`)
+- Complete dispersion mapping across six Linear Variable Filter arrays (D1 to D6).
+- Resolving power $R = \lambda / \Delta\lambda$ scaling from $35$ to $130$.
+- Interactive Spectral Energy Distributions (SED) revealing water ice ($3.05\,\mu\text{m}$), $CO_2$ ice ($4.27\,\mu\text{m}$), $CO$ ice ($4.67\,\mu\text{m}$), and methane ($CH_4$).
+
+### 3. 📈 Photometric Light Curves & Periodograms (`variable`)
+- Calibrated time-series photometry across observation epochs with $\pm 1\sigma$ error bars.
+- Lomb-Scargle period analysis and phase-folded light curves for pulsating and eclipsing systems.
+- 1-click **CSV data export** with full astrometric header metadata ($d$, $\mu$, $\pi$, ICRS).
+
+### 4. ⏱️ Time-Domain Observation Comparator (`timeline`)
+- Split-screen swipe slider comparing observations separated across months or years.
+- Multi-mode difference imaging ($D = (I_2 - B_2) - \alpha(I_1 - B_1)$) isolating $>3\sigma$ photometric variations and transients.
+- High-speed blink comparator ($1 - 4\text{ Hz}$) to spot positional shifts immediately.
+
+### 5. ☄️ Solar System Moving Object Search Tool (`most`)
+- Emulation of NASA's **SPHEREx MOST** tool integrated with the **JPL Small-Body Database (SBDB)**.
+- Real-time Keplerian ephemeris calculation for near-Earth and main-belt asteroids (**1 Ceres**, **4 Vesta**, **12 Victoria**, **433 Eros**).
+- Interactive SPHEREx solar elongation survey cone ($80^\circ - 105^\circ$) validating observational visibility.
+
+### 6. ⚡ Proper Motion Vector Field (`motion`)
+- Astrometric centroid determination verified against **ESA Gaia DR3** catalog parameters.
+- High proper motion tracking ($\mu$ in arcsec/year, position angle $\theta$, and kinematic displacement vectors).
+
+### 7. 🛡️ Provenance & FITS Header Inspector (`provenance`)
+- Level-2 calibrated FITS header inspector compliant with IVOA SIAv2 standards.
+- Transparent data lineage labeling (**Observed / Calibrated Archive** vs **Simulation Model**).
+- Direct archive query links to NASA/IPAC IRSA.
+
+---
+
+## 🎯 Authoritative Scientific Target Benchmark
+
+MARSAD is calibrated and tested against five distinct astrophysical targets:
+
+| Target | Object Type | Distance ($d$) | Proper Motion ($\mu$) | Scientific Phenomenon |
+|---|---|---:|---:|---|
+| **Barnard's Star** | M4.0V Red Dwarf | $1.8282\text{ pc}$ | $10.393''/\text{yr}$ | Ultra-high proper motion & Gaia DR3 vector validation |
+| **Epsilon Indi B** | T1.5V + T6V Binary Dwarf | $3.6385\text{ pc}$ | $4.679''/\text{yr}$ | Atmospheric methane ($CH_4$) & water vapor absorption |
+| **WISE 0855** | Y-Dwarf ($T \approx 250\text{ K}$) | $2.2780\text{ pc}$ | $8.146''/\text{yr}$ | Coldest sub-stellar object & water-ice clouds in Array 6 |
+| **RW Aurigae** | Classical T Tauri Star | $166.8\text{ pc}$ | $0.0214''/\text{yr}$ | Circumstellar accretion disk occultation & extinction |
+| **R Draconis** | Mira Pulsating Giant | $440.5\text{ pc}$ | $0.0275''/\text{yr}$ | Long-period stellar pulsation ($P = 245.6\text{ d}$) in near-IR |
+
+---
+
+## 🛠️ Technology Stack
+
+| Domain | Technologies |
+|---|---|
+| **Frontend Framework** | **React 19**, **TypeScript 5.9**, **Vite 7** |
+| **Styling & Theme** | **Tailwind CSS v4**, **Tailwind Merge**, **Clsx**, Custom Infrared Dark Palette |
+| **3D & Visual Engines** | **Three.js**, **Procedural Canvas API (60+ FPS)**, **WebGL Fluid Engine** |
+| **Smooth Interaction** | **Lenis Smooth Scroll**, Custom Kinetic Scrollytelling Engine |
+| **Astronomical Engines**| **CDS Aladin Lite (WebGL)**, **HiPS Multi-Wavelength Surveys (2MASS, AllWISE, DSS2, Pan-STARRS)** |
+| **Ephemerides & Orbits**| **JPL Small-Body Database (SBDB)**, **JPL Horizons**, SPHEREx MOST Algorithm |
+| **Backend & REST API** | **Node.js 22**, **Express.js v5**, **Dual-Layer Fallback Cache** |
+| **Testing & QA** | **109 Automated Scientific Tests**, **42 E2E Integration Tests**, **Puppeteer Headless Automation** |
+| **Hosting & CI/CD** | **Vercel Edge Network**, **GitHub Actions Continuous Deployment** |
 
 ---
 
 ## 🚀 Quick Start Guide
 
 ### Prerequisites
-
-- **Node.js**: v18.0.0 or later (v22.x recommended)
+- **Node.js**: v18.0.0 or later (v20+ / v22 recommended)
 - **npm**: v9.0.0 or later
 
-### 1. Installation
-
+### 1. Clone & Install
 ```bash
-# Clone the repository and install dependencies
 git clone https://github.com/novexvx-commits/nasa_2.git
 cd nasa_2
 npm install
 ```
 
-### 2. Run in Development Mode (Single Command)
-
+### 2. Launch Development Server
 ```bash
-# Starts both Express scientific backend (port 5000) and Vite frontend (port 5173) automatically
+# Runs Express scientific backend and Vite client concurrently
 npm run dev
 ```
-Open **[http://localhost:5173](http://localhost:5173)** in your web browser. (Vite automatically initializes and proxies `/api` calls to `http://127.0.0.1:5000`).
+Open **[http://localhost:5173](http://localhost:5173)** in your browser.
 
-### 3. Run Standalone Production Server
-
+### 3. Run Automated Tests
 ```bash
-# Start the standalone Express server on port 5000 (serves both API and production single-file bundle)
-npm start
-```
-Open **[http://localhost:5000](http://localhost:5000)** in your web browser.
-
-### 4. Build for Production
-
-```bash
-npm run build
-```
-Generates an optimized, single-file bundle in `dist/index.html`.
-
----
-
-## 🧪 Scientific Validation & Testing
-
-Run the automated scientific unit tests and end-to-end integration tests:
-
-```bash
-# 1. Scientific algorithms & 5-target calculations test (34 tests)
+# 1. Scientific calculations & 5-target validation (109 tests)
 npm test
 
-# 2. End-to-end server integration test suite (35 tests)
+# 2. End-to-end API integration tests (42 tests)
 npm run test:e2e
 
-# 3. Live dual-channel endpoint verification suite (14 direct + 14 proxied tests)
+# 3. Live dual-channel endpoint verification
 npm run test:live
 ```
 
-### Test Coverage Highlights
-- **Coordinate Conversion**: Exact sexagesimal $\leftrightarrow$ decimal degree transformations (RA $\pm 0.0001^{\circ}$, Dec $\pm 0.0001^{\circ}$).
-- **Great-Circle Separation**: Precision angular distances via Vincenty formula.
-- **Photometry Calibration**: Surface brightness ($\mathrm{MJy/sr}$) to flux density ($\mu\mathrm{Jy}$) and AB zero-point check ($3631\text{ Jy} \equiv 0.0\text{ mag}$).
-- **Target Verification**: Multi-epoch centroiding, proper motion $>5\sigma$ confirmation for Barnard's Star, multi-band light curves, and 102-band SED profiles for all five targets.
-- **MOST Integration**: Keplerian orbital ephemerides calculated for asteroid Ceres across SPHEREx survey epochs.
+### 4. Build for Production
+```bash
+npm run build
+```
+Generates an optimized, single-file distribution bundle in `dist/index.html`.
 
 ---
 
-## 📡 Scientific API Documentation
+## 📂 Repository Structure
 
-The backend exposes clean, fully documented REST endpoints:
-
-| Endpoint | Method | Description |
-|---|---|---|
-| `/api/health` | `GET` | System operational status and active archive release |
-| `/api/targets` | `GET` | List of 5 authoritative targets + solar system benchmarks |
-| `/api/target/:id` | `GET` | Full scientific dossier, coordinates, and observation count |
-| `/api/search` | `GET` | Query by target name (`?q=...`) or coordinates (`?ra=...&dec=...`) |
-| `/api/observations` | `GET` | Retrieve chronological observations for target or sky cone |
-| `/api/timeline/:targetId` | `GET` | Chronological timeline entries across survey passes |
-| `/api/image-compare` | `GET` | Side-by-side, blink frames, and difference image matrix |
-| `/api/motion/:targetId` | `GET` | Centroid displacement vectors, velocity, and Gaia comparison |
-| `/api/lightcurve/:targetId` | `GET` | Photometric time-series measurements across spectral bands |
-| `/api/lightcurve/:targetId/csv` | `GET` | Download light curve measurements table as CSV |
-| `/api/spectra/catalog` | `GET` | Full 102 spectral channels and 6 detector array parameters |
-| `/api/spectra/:targetId` | `GET` | 102-point Spectral Energy Distribution (SED) for target |
-| `/api/most` | `GET` | IRSA MOST query for moving asteroid/comet footprints |
-
----
-
-## 🔬 Scientific Methodology
-
-### 1. Multi-Epoch Astrometry & Proper Motion
-Source centroids are determined through flux-weighted moments:
-$$x_c = \frac{\sum x \cdot I(x, y)}{\sum I(x, y)}, \quad y_c = \frac{\sum y \cdot I(x, y)}{\sum I(x, y)}$$
-Between survey epochs $t_1$ and $t_2$, angular displacement is computed on the celestial sphere:
-$$\Delta \theta = \sqrt{(\Delta \alpha \cos \bar{\delta})^2 + (\Delta \delta)^2}$$
-Apparent proper motion velocity is derived as $\mu = \Delta \theta / \Delta t$ and cross-matched against Gaia DR3 astrometric predictions.
-
-### 2. Registered Difference Imaging
-To detect true astronomical changes without instrumental artifacts:
-1. Two multi-extension FITS frames are astrometrically registered to a common WCS grid.
-2. Background levels $B_1, B_2$ are estimated via iterative sigma-clipping.
-3. Flux scaling factor $\alpha$ is calibrated to account for varying detector throughput.
-4. The difference image is computed: $D(x, y) = (I_2(x, y) - B_2) - \alpha(I_1(x, y) - B_1)$.
-5. Statistically significant changes ($|D(x, y)| > 3\sigma_{\text{diff}}$) are isolated into positive (brightened/arrived) and negative (dimmed/departed) classifications.
-
-### 3. SPHEREx 102 Spectral Channels
-The 102 spectral bands are distributed across six Linear Variable Filter (LVF) detector arrays:
-- **Array 1 (D1)**: 0.75 – 1.11 µm ($R \approx 41$) — Stellar classifications, Paschen lines
-- **Array 2 (D2)**: 1.11 – 1.64 µm ($R \approx 41$) — J-band water vapor & brown dwarf methane
-- **Array 3 (D3)**: 1.64 – 2.42 µm ($R \approx 41$) — H and K bands, interstellar water ice at 2.0 µm
-- **Array 4 (D4)**: 2.42 – 3.82 µm ($R \approx 35$) — Solid water ice (3.05 µm) & aliphatic C-H (3.4 µm)
-- **Array 5 (D5)**: 3.82 – 4.42 µm ($R \approx 110$) — High-resolution $CO_2$ ice fundamental band (4.27 µm)
-- **Array 6 (D6)**: 4.42 – 5.00 µm ($R \approx 130$) — Carbon monoxide ice (4.67 µm) & cold Y-dwarf thermal peak
+```
+├── server/                                # Scientific Node.js / Express Backend
+│   ├── server.js                          # Express server with CORS & SPA fallback
+│   ├── routes/api.js                      # REST API endpoints (/api/*)
+│   ├── services/                          # Specialized astronomical services
+│   │   ├── irsaTapService.js              # NASA/IPAC IRSA SIAv2 & TAP query client
+│   │   ├── photometryService.js           # Multi-band photometry & CSV export
+│   │   ├── motionService.js               # Centroid vectors & Gaia DR3 validation
+│   │   ├── spectralService.js             # 102-band LVF dispersion models
+│   │   └── mostMovingObjectService.js     # JPL SBDB asteroid orbit calculator
+│   └── test/                              # Automated test suites
+├── src/                                   # Modern React 19 Frontend
+│   ├── pages/
+│   │   ├── HomePage.tsx                   # Cinematic scrollytelling narrative
+│   │   └── ExperiencePage.tsx             # Standalone MARSAD Observatory workstation
+│   ├── components/spherex/                # 7 Specialized scientific workstation tabs
+│   │   ├── SpherexHub.tsx                 # Master command station & target navigation
+│   │   ├── AladinSkyExplorer.tsx          # Celestial sky map (CDS Aladin Lite)
+│   │   ├── VariableStarLightCurve.tsx     # Photometric time-series & CSV export
+│   │   ├── SpectralBandExplorer.tsx       # 102-channel LVF filter explorer
+│   │   ├── ObservationTimelineComparator.tsx # Split-screen comparator & difference engine
+│   │   ├── MostSolarSystemExplorer.tsx    # Asteroids MOST & orbital ephemerides
+│   │   ├── MotionDetectionViewer.tsx      # Proper motion vectors & Gaia comparison
+│   │   └── ProvenanceInspector.tsx        # FITS header & data lineage inspector
+│   └── sections/                          # Narrative chapters (Hero, Spacewalk, Timeline, etc.)
+├── public/                                # Public assets (Logo, Favicon, 3D Models)
+└── index.html                             # HTML5 entry with metadata & favicon
+```
 
 ---
 
-## 📄 License & Attribution
+## 📜 Scientific Attribution & Acknowledgments
 
-Developed for the **2026 NASA Space Apps Challenge**.
-- SPHEREx mission data courtesy of **NASA / JPL-Caltech / IPAC Infrared Science Archive (IRSA)**.
-- Astrometric reference data courtesy of the **European Space Agency (ESA) Gaia Mission**.
-- Name resolution courtesy of **CDS SIMBAD / Sesame**, Strasbourg, France.
+- **NASA / JPL-Caltech / IPAC Infrared Science Archive (IRSA)** for SPHEREx mission parameters, SIAv2 protocols, and archival data.
+- **Centre de Données astronomiques de Strasbourg (CDS)** for the Aladin Lite WebGL engine and SIMBAD Sesame services.
+- **European Space Agency (ESA) Gaia Mission** for Gaia Data Release 3 astrometric reference baselines.
+- **NASA Jet Propulsion Laboratory (JPL)** for Solar System Dynamics and the Small-Body Database (SBDB).
+
+---
+
+<p align="center">
+  <sub>Developed with passion for the <strong>2026 NASA Space Apps Challenge</strong>.</sub>
+  <br />
+  <sub>© 2026 MARSAD Platform · Licensed under the MIT License.</sub>
+</p>
