@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://nasa-2-xssz.vercel.app"><img src="https://img.shields.io/badge/Live%20Platform-nasa--2--xssz.vercel.app-ff8a3d?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" /></a>
+  <a href="https://marsadx.vercel.app/"><img src="https://img.shields.io/badge/Live%20Platform-marsadx.vercel.app-ff8a3d?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" /></a>
   <a href="https://spherex.caltech.edu/"><img src="https://img.shields.io/badge/NASA%20Mission-SPHEREx-0052cc?style=for-the-badge&logo=nasa&logoColor=white" alt="SPHEREx Mission" /></a>
   <a href="https://irsa.ipac.caltech.edu/"><img src="https://img.shields.io/badge/Archive-NASA%2FIPAC%20IRSA-e03e2d?style=for-the-badge" alt="NASA IPAC IRSA" /></a>
   <img src="https://img.shields.io/badge/Tests-109%2F109%20Passing-success?style=for-the-badge" alt="Tests" />
@@ -26,7 +26,7 @@
 
 Operating from a polar Sun-synchronous Low Earth Orbit ($700\text{ km}$), SPHEREx scans the entire celestial vault every six months, dissecting every pixel into **102 near-infrared spectral channels** ($0.75\,\mu\text{m}$ to $5.00\,\mu\text{m}$). MARSAD harnesses this multi-epoch spectroscopic data to detect moving solar system bodies, track stellar proper motions, monitor variable stars, and analyze circumstellar biogenic ices.
 
-> 🪐 **Live Deployment:** [https://nasa-2-xssz.vercel.app](https://nasa-2-xssz.vercel.app)  
+> 🪐 **Official Live Platform:** [https://marsadx.vercel.app](https://marsadx.vercel.app/)  
 > 📑 **Full Scientific Report:** Available in PDF format in the repository (`NASA_SPHEREx_2026_Full_Scientific_Report.pdf`).
 
 ---
