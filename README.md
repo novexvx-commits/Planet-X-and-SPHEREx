@@ -121,8 +121,8 @@ MARSAD is calibrated and tested against five distinct astrophysical targets:
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/novexvx-commits/nasa_2.git
-cd nasa_2
+git clone https://github.com/novexvx-commits/Planet-X-and-SPHEREx.git
+cd Planet-X-and-SPHEREx
 npm install
 ```
 
